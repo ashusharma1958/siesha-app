@@ -1,0 +1,186 @@
+/* section */
+.section-title {
+  margin: 60px 0 30px;
+}
+
+.section-title h4 {
+  font-size: 28px;
+  font-weight: 300;
+  font-family: Montserrat, sans-serif;
+}
+
+.section-title span {
+  box-sizing: border-box;
+  font-style: italic;
+  font-family: Montserrat, sans-serif;
+  font-size: 1rem;
+}
+
+/* product card */
+.product-card {
+  text-align: left;
+}
+
+.product-img {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.product-img img {
+  width: 100%;
+}
+
+.sale {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.product-card h6 {
+  margin-top: 14px;
+  font-weight: 400;
+}
+
+.price del {
+  color: #999;
+}
+
+/* spacing */
+.carousel-item-wrap .col {
+  padding: 0 12px;
+}
+
+/* hide default arrows */
+.carousel-control-prev,
+.carousel-control-next {
+  display: none;
+}
+
+/* bottom controls */
+.bottom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 30px;
+  font-size: 14px;
+  color: #777;
+}
+
+.bottom-controls button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #999;
+  cursor: pointer;
+}
+
+.bottom-controls button:hover {
+  color: #000;
+}
+
+button:focus:not(:focus-visible) {
+  outline: 0;
+}
+
+.product-card button {
+  width: 100%;
+  background: transparent;
+  border: 1.5px solid #999;
+  margin-top: 10px;
+  padding: .8rem;
+  min-width: 100%;
+  box-sizing: border-box;
+  color: #797979;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font: inherit;
+  border-radius: 9px;
+}
+
+.product-card button:hover {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.product-swiper {
+  position: relative;
+  width: 100%;
+  padding: 20px 0;
+}
+
+/* Swiper container */
+.swiper {
+  width: 100%;
+  height: 100%;
+  padding-bottom: 80px; /* Space for bottom controls */
+}
+
+/* Swiper slide */
+.swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Custom navigation buttons (bottom controls style) */
+.custom-prev,
+.custom-next {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #999;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  transition: color 0.3s;
+}
+
+.custom-prev:hover,
+.custom-next:after,
+.custom-next:hover {
+  color: #000;
+}
+
+.custom-prev:before {
+  content: '‹';
+}
+
+.custom-next:after {
+  content: '›';
+}
+
+/* Hide default Swiper navigation */
+.swiper-button-next,
+.swiper-button-prev {
+  display: none !important;
+}
+
+/* Custom pagination */
+.bottom-controls .swiper-pagination {
+  position: static !important;
+  margin: 0 18px;
+}
+
+.bottom-controls .swiper-pagination-bullet {
+  width: 12px;
+  height: 12px;
+  background: #999;
+  opacity: 0.5;
+  margin: 0 4px;
+}
+
+.bottom-controls .swiper-pagination-bullet-active {
+  background: #000;
+  opacity: 1;
+}

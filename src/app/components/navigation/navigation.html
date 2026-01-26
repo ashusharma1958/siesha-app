@@ -1,0 +1,57 @@
+<nav class="navbar navbar-expand-lg header">
+  <div class="container nav-container">
+
+    <!-- LEFT: TOGGLER -->
+    <button class="navbar-toggler stylish-toggler collapsed" type="button" data-bs-toggle="collapse"
+      data-bs-target="#mainNavbar" aria-label="Toggle navigation">
+      <span class="toggler-line"></span>
+      <span class="toggler-line"></span>
+      <span class="toggler-line"></span>
+    </button>
+
+
+    <!-- CENTER: LOGO -->
+    <a routerLink="/home" class="  order-lg-2 order-sm-2 navbar-brand d-flex  justify-content-center">
+      <div class="header__heading-logo-wrapper">
+        <img src="/assets/image/siesha-logo-light-ivory.svg" alt="Siesha" class="img-fluid">
+      </div>
+    </a>
+
+
+
+
+    <!-- RIGHT ICONS -->
+    <div class="align-items-center d-flex header-icons-wrap justify-content-end order-lg-3">
+      <a href="#" class="header__icon header__icon--account link focus-inset small-hide">
+        <img src="/assets/image/search-icon.svg" class="img-fluid">
+      </a>
+
+      <a href="#" class="header__icon header__icon--account link focus-inset small-hide">
+        <img src="/assets/image/icon-account.svg" class="img-fluid">
+      </a>
+
+      <a href="#" class="header__icon header__icon--account link focus-inset small-hide">
+        <img src="/assets/image/icon-cart-empty.svg" class="img-fluid">
+      </a>
+    </div>
+
+    <!-- COLLAPSIBLE MENU -->
+    <div class="collapse justify-content-start navbar-collapse order-lg-1" id="mainNavbar">
+      <ul class="navbar-nav  mb-2 mb-lg-0 nav-left">
+        <li class="nav-item">
+          <a class="nav-link active" routerLink="/home">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/shop">Shop</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contact Us</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">About Us</a>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+</nav>

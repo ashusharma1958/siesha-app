@@ -1,0 +1,34 @@
+<div class="container">
+  <div class="section-title">
+    <h4>Barkat – where <em>plenty</em> lives</h4>
+    <span>festive edit ’25</span>
+  </div>
+
+  <div class="product-swiper">
+    <div #swiperContainer class="swiper">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide" *ngFor="let product of products; trackBy: trackByProduct">
+          <div class="product-card">
+            <div class="product-img">
+              <span class="sale">Sale</span>
+              <img [src]="product.image" [alt]="product.alt">
+            </div>
+            <h6>{{ product.name }}</h6>
+            <p class="price">
+              <del>Rs.{{ product.originalPrice }}</del>
+              Rs.{{ product.salePrice }}
+            </p>
+            <button>Add to cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Controls -->
+    <div class="bottom-controls">
+      <button class="custom-prev" (click)="prevSlide()">&lsaquo;</button>
+      <div class="swiper-pagination"></div>
+      <button class="custom-next" (click)="nextSlide()">&rsaquo;</button>
+    </div>
+  </div>
+</div>

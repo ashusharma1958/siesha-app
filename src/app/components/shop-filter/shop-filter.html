@@ -1,0 +1,259 @@
+<section class="shop-page container pb-3">
+
+  <!-- PAGE TITLE -->
+  <div class="shop-header">
+    <h1>Scented Candles</h1>
+  </div>
+
+  <!-- SORT + FILTER ROW -->
+  <div class="shop-toolbar">
+    <!-- MOBILE FILTER BUTTON -->
+    <button class="mobile-filter-btn" id="openMobileFilter">
+      <i class="fa-solid fa-sliders"></i> Filter
+    </button>
+
+
+    <!-- SORT -->
+    <div class="sort-box">
+      <label>Sort by:</label>
+      <select>
+        <option>Featured</option>
+        <option>Best Selling</option>
+        <option>Price: Low to High</option>
+        <option>Price: High to Low</option>
+      </select>
+      <span class="product-count">77 products</span>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-box">
+
+      <!-- PRICE FILTER -->
+      <!-- PRICE FILTER -->
+      <div class="price-filter">
+
+        <!-- BUTTON -->
+        <button class="price-btn" id="priceToggle">
+          Price
+          <i class="fa-solid fa-chevron-down arrow"></i>
+        </button>
+
+        <!-- DROPDOWN -->
+        <div class="price-dropdown" id="priceDropdown">
+
+          <!-- RANGE -->
+          <div class="range-wrapper">
+            <input type="range" id="minRange" min="0" max="11000" step="100" value="0">
+            <input type="range" id="maxRange" min="0" max="11000" step="100" value="11000">
+          </div>
+
+          <!-- INPUTS -->
+          <div class="price-inputs">
+            <div class="price-box">
+              ₹ <input type="number" id="minInput" value="0">
+            </div>
+
+            <span class="to">to</span>
+
+            <div class="price-box">
+              ₹ <input type="number" id="maxInput" value="11000">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+
+      <!-- FRAGRANCE FAMILY -->
+      <!-- FRAGRANCE FAMILY -->
+      <div class="filter-dropdown">
+
+        <button class="filter-btn">
+          Fragrance Family
+          <i class="fa-solid fa-chevron-down arrow"></i>
+        </button>
+
+        <div class="filter-panel">
+
+          <!-- Floral -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Floral
+            </label>
+            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+          </div>
+          <div class="sub-panel">
+            <span>Mogra</span>
+            <span>Rose</span>
+            <span>Rose & Vanilla</span>
+          </div>
+
+          <!-- Fresh & Herbal -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Fresh & Herbal
+            </label>
+            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+          </div>
+          <div class="sub-panel">
+            <span>Lavender</span>
+            <span>Lavender Rosemary Sage</span>
+          </div>
+
+          <!-- Warm & Woody -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Warm & Woody
+            </label>
+            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+          </div>
+          <div class="sub-panel">
+            <span>Sandalwood</span>
+            <span>Oud</span>
+          </div>
+
+          <!-- Gourmand -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Gourmand
+            </label>
+            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+          </div>
+          <div class="sub-panel">
+            <span>Coffee</span>
+            <span>Vanilla</span>
+          </div>
+
+          <!-- Aquatic & Clean -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Aquatic & Clean
+            </label>
+            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+          </div>
+          <div class="sub-panel">
+            <span>Aqua</span>
+            <span>Blue Sapphire</span>
+          </div>
+
+          <!-- Fruity -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Fruity
+            </label>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- RITUAL / MOOD -->
+      <!-- RITUAL / MOOD -->
+      <div class="filter-dropdown">
+
+        <button class="filter-btn">
+          Ritual / Mood
+          <i class="fa-solid fa-chevron-down arrow"></i>
+        </button>
+
+        <div class="filter-panel">
+
+          <!-- Calm & Wind Down -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Calm & Wind Down
+            </label>
+            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+          </div>
+          <div class="sub-panel">
+            <span>Lavender</span>
+            <span>Lavender Rosemary Sage</span>
+            <span>Sandalwood</span>
+          </div>
+
+          <!-- Fresh Start -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Fresh Start
+            </label>
+            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+          </div>
+          <div class="sub-panel">
+            <span>Aqua</span>
+            <span>Blue Sapphire</span>
+            <span>Mogra</span>
+          </div>
+
+          <!-- Romance & Softness -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Romance & Softness
+            </label>
+            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+          </div>
+          <div class="sub-panel">
+            <span>Rose</span>
+            <span>Rose & Vanilla</span>
+            <span>Vanilla</span>
+          </div>
+
+          <!-- Focus & Grounding -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Focus & Grounding
+            </label>
+            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+          </div>
+          <div class="sub-panel">
+            <span>Oud</span>
+            <span>Sandalwood</span>
+            <span>Coffee</span>
+          </div>
+
+          <!-- Cozy Evenings -->
+          <div class="filter-item">
+            <label>
+              <input type="checkbox">
+              Cozy Evenings
+            </label>
+            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+          </div>
+          <div class="sub-panel">
+            <span>Coffee</span>
+            <span>Vanilla</span>
+            <span>Rose & Vanilla</span>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- CUSTOMER LOVE -->
+      <div class="filter-dropdown">
+        <button class="filter-btn">
+          Customer Love <i class="fa-solid fa-chevron-down arrow"></i>
+        </button>
+
+
+        <div class="filter-panel">
+          <label><input type="checkbox"> ★★★★★ Most Loved</label>
+          <label><input type="checkbox"> ★★★★☆ & up</label>
+          <label><input type="checkbox"> ★★★☆☆ & up</label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
