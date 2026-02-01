@@ -1,0 +1,71 @@
+<!-- CART OFFCANVAS -->
+<div class="offcanvas offcanvas-end cart-offcanvas" tabindex="-1" id="cartOffcanvas">
+  <div class="offcanvas-header cart-header">
+    <h5>Your cart</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body cart-body">
+
+    <!-- TABLE HEAD -->
+    <div class="cart-table-head">
+      <span>PRODUCT</span>
+      <span>TOTAL</span>
+    </div>
+
+    <!-- PRODUCT ROW -->
+    <div class="cart-item-row">
+      <img src="assets/image/img-2.png" class="cart-product-img">
+
+      <div class="cart-product-info">
+        <h6>Shankh Candle</h6>
+        <p>Rs. 1,199.00</p>
+
+        <div class="cart-actions">
+          <div class="qty-wrapper">
+            <button class="qty-btn">−</button>
+            <span class="qty">1</span>
+            <button class="qty-btn">+</button>
+          </div>
+
+          <i class="bi bi-trash cart-delete"></i>
+        </div>
+      </div>
+
+      <div class="cart-price">
+        Rs. 1,199.00
+      </div>
+    </div>
+
+
+    <!-- INSTRUCTIONS -->
+    <button class="instruction-toggle mt-5"
+            data-bs-toggle="collapse"
+            data-bs-target="#instructionBox">
+      Order special instructions
+      <i class="bi bi-chevron-down"></i>
+    </button>
+
+    <div class="collapse mt-3" id="instructionBox">
+      <textarea class="form-control instruction-textarea"
+                placeholder="Add a note to your order"></textarea>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span>Estimated total</span>
+        <strong>Rs. 1,199.00</strong>
+      </div>
+
+      <p class="cart-tax-note">
+        Tax included. <u>Shipping</u> and discounts calculated at checkout.
+      </p>
+
+      <button class="checkout-btn">
+        Check out
+      </button>
+    </div>
+
+  </div>
+</div>

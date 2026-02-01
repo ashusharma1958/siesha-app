@@ -1,0 +1,169 @@
+.checkout-container{
+  max-width:1200px;
+  margin:auto;
+}
+
+input,select{
+  height:48px;
+  font-size:14px;
+  border-radius:6px;
+}
+
+.section-title{
+  font-size:16px;
+  font-weight:600;
+  margin-bottom:12px;
+}
+
+.order-summary{
+  background:#f7f7f7;
+  border-left:1px solid #e5e5e5;
+}
+
+.product-thumb {
+    width: 56px;
+    height: 68px;
+    border-radius: 6px;
+    object-fit: cover;
+    padding: 3px;
+    border: 1px solid #ddd;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.qty-badge{
+  position:absolute;
+  top:-6px;
+  right:-6px;
+  width:18px;
+  height:18px;
+  font-size:11px;
+  background:#000;
+  color:#fff;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.pay-btn{
+  background:#0d5bd8;
+  color:#fff;
+  border:none;
+  width:100%;
+  padding:14px;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:500;
+}
+
+.checkout-footer-links a {
+  font-size: 12px;
+  color: #0d5bd8;
+  text-decoration: none;
+  margin-right: 12px;
+  transition: color .2s ease, text-decoration .2s ease;
+}
+
+.checkout-footer-links a:hover,
+.checkout-footer-links a:focus {
+  color: #0846a3;
+  font-weight: 500; 
+  text-decoration: underline;
+}
+
+.payment-box{
+  border:1px solid #d9d9d9;
+  border-radius:8px;
+  padding:14px;
+}
+
+.radio-box{
+  border:1px solid #d9d9d9;
+  border-radius:8px;
+  padding:14px;
+}
+
+.billing-active {
+    background: #f5f7ff;
+    border-left: 4px solid #0d5bd8;
+}
+
+.billing-form {
+  animation: slideDown .25s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity:0;
+    transform:translateY(-6px);
+  }
+  to {
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* Payment CSS */
+.payment-wrapper {
+    border-radius: 10px;
+}
+
+.payment-header {
+    background: #f5f7ff;
+    padding: 19px 16px;
+    border: 1px solid #0d5bd8;
+    border-radius: 10px 10px 0 0;
+}
+
+.payment-title{
+  font-size:14px;
+  font-weight:500;
+}
+
+.more-badge{
+  display:inline-block;
+  margin-left:8px;
+  padding:2px 8px;
+  font-size:12px;
+  border:1px solid #d0d5ff;
+  border-radius:6px;
+  color:#0d5bd8;
+  background:#fff;
+}
+
+.payment-desc{
+  padding:16px;
+  background:#f7f7f7;
+  font-size:13px;
+  color:#444;
+  text-align:center;
+}
+
+.discount-wrapper {
+  margin-bottom: 20px;
+}
+
+.discount-input {
+  height: 48px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.discount-btn {
+  height: 48px;
+  padding: 0 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  border: 1px solid #e1e1e1;
+  background: #f6f6f6;
+  color: #9a9a9a;
+  cursor: not-allowed;
+}
+
+/* Optional: enable state (when code entered) */
+.discount-btn.active {
+  background: #0d5bd8;
+  color: #fff;
+  border-color: #0d5bd8;
+  cursor: pointer;
+}

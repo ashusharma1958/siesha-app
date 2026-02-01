@@ -30,7 +30,11 @@
         <img src="/assets/image/icon-account.svg" class="img-fluid">
       </a>
 
-      <a href="#" class="header__icon header__icon--account link focus-inset small-hide">
+      <a href="javascript:void(0)"
+        class="header__icon link focus-inset"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#cartOffcanvas"
+        aria-controls="cartOffcanvas">
         <img src="/assets/image/icon-cart-empty.svg" class="img-fluid">
       </a>
     </div>
@@ -55,3 +59,5 @@
 
   </div>
 </nav>
+
+<app-cart></app-cart>

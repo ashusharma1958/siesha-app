@@ -1,0 +1,192 @@
+<div class="checkout-container container-fluid">
+  <div class="row min-vh-100">
+
+    <!-- LEFT DETAIL FOR PAYMENT   -->
+    <div class="col-lg-7 px-4 px-lg-5 py-4">
+
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="section-title mb-0">Contact</h5>
+        <a href="#" class="small text-decoration-none">Sign in</a>
+      </div>
+
+      <input class="form-control mb-3" placeholder="Email">
+      <div class="form-check mb-4">
+        <input class="form-check-input" type="checkbox">
+        <label class="form-check-label small">Email me with news and offers</label>
+      </div>
+
+      <h5 class="section-title">Delivery</h5>
+
+      <select class="form-select mb-3">
+        <option>India</option>
+      </select>
+
+      <div class="row">
+        <div class="col-md-6 mb-3"><input class="form-control" placeholder="First name"></div>
+        <div class="col-md-6 mb-3"><input class="form-control" placeholder="Last name"></div>
+      </div>
+
+      <input class="form-control mb-3" placeholder="Address">
+      <input class="form-control mb-3" placeholder="Apartment, suite, etc. (optional)">
+
+      <div class="row">
+        <div class="col-md-4 mb-3"><input class="form-control" placeholder="City"></div>
+        <div class="col-md-4 mb-3">
+          <select class="form-select"><option>Delhi</option></select>
+        </div>
+        <div class="col-md-4 mb-3"><input class="form-control" placeholder="PIN code"></div>
+      </div>
+
+      <input class="form-control mb-3" placeholder="Phone">
+
+      <div class="form-check mb-4">
+        <input class="form-check-input" type="checkbox">
+        <label class="form-check-label small">Save this information for next time</label>
+      </div>
+
+      <h5 class="section-title">Shipping method</h5>
+      <div class="bg-light p-3 rounded text-muted small mb-4">
+        Enter your shipping address to view available shipping methods.
+      </div>
+
+      <h5 class="section-title">Payment</h5>
+      <p class="text-muted small mb-3">All transactions are secure and encrypted.</p>
+
+      <div class="payment-wrapper">
+
+        <!-- SELECTED PAYMENT METHOD -->
+        <div class="payment-header d-flex justify-content-between align-items-center">
+          <div class="payment-title">
+            PhonePe Payment Gateway (UPI, Cards & NetBanking)
+          </div>
+
+          <div class="payment-icons">
+            <img src="assets/image/upi.CmgCfll8.svg">
+            <img src="assets/image/visa.sxIq5Dot.svg">
+            <img src="assets/image/master.CzeoQWmc.svg">
+            <span class="more-badge">+3</span>
+          </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="payment-desc">
+          You'll be redirected to PhonePe Payment Gateway (UPI, Cards & NetBanking)
+          to complete your purchase.
+        </div>
+
+      </div>
+
+
+      <h5 class="section-title">Billing address</h5>
+
+      <div class="border rounded-3 mb-3 overflow-hidden">
+
+        <!-- SAME AS SHIPPING -->
+        <label class="d-flex align-items-center gap-2 p-3 border-bottom">
+          <input type="radio" name="billingAddress" checked
+                 (click)="toggleBilling(false)">
+          <span>Same as shipping address</span>
+        </label>
+
+        <!-- DIFFERENT BILLING -->
+        <label class="d-flex align-items-center gap-2 p-3 billing-active">
+          <input type="radio" name="billingAddress"
+                 (click)="toggleBilling(true)">
+          <span>Use a different billing address</span>
+        </label>
+
+        <!-- BILLING FORM (HIDDEN BY DEFAULT) -->
+        <div id="billingForm" class="billing-form px-3 pb-3 pt-3 d-none" >
+
+          <select class="form-select mb-3">
+            <option>India</option>
+          </select>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <input class="form-control" placeholder="First name">
+            </div>
+            <div class="col-md-6 mb-3">
+              <input class="form-control" placeholder="Last name">
+            </div>
+          </div>
+
+          <input class="form-control mb-3" placeholder="Address">
+          <input class="form-control mb-3" placeholder="Apartment, suite, etc. (optional)">
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <input class="form-control" placeholder="City">
+            </div>
+            <div class="col-md-4 mb-3">
+              <select class="form-select">
+                <option>Delhi</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <input class="form-control" placeholder="PIN code">
+            </div>
+          </div>
+
+          <input class="form-control" placeholder="Phone (optional)">
+        </div>
+
+      </div>
+
+
+      <button class="pay-btn mb-4">Pay now</button>
+
+      <div class="checkout-footer-links ">
+        <a href="#">Refund policy</a>
+        <a href="#">Shipping</a>
+        <a href="#">Privacy policy</a>
+        <a href="#">Terms of service</a>
+        <a href="#">Contact</a>
+      </div>
+
+    </div>
+
+    <!-- RIGHT  DETAILS OF PAYMENTS -->
+    <div class="col-lg-5 order-summary px-4 px-lg-5 py-4">
+
+      <div class="d-flex align-items-center mb-4">
+        <div class="position-relative me-3">
+          <img src="assets/image/cart-item.png" class="product-thumb">
+          <span class="qty-badge">1</span>
+        </div>
+        <div class="flex-grow-1 small">Ananas Candle</div>
+        <strong>₹1,199.00</strong>
+      </div>
+
+
+      <div class="discount-wrapper d-flex gap-2">
+        <input type="text"
+               class="form-control discount-input"
+               placeholder="Discount code or gift card">
+
+        <button class="discount-btn" disabled>
+          Apply
+        </button>
+      </div>
+
+ 
+
+      <div class="d-flex justify-content-between small mb-2">
+        <span>Subtotal</span><span>₹1,199.00</span>
+      </div>
+      <div class="d-flex justify-content-between small mb-2">
+        <span>Shipping</span><span class="text-muted">Enter shipping address</span>
+      </div>
+
+      <hr>
+
+      <div class="d-flex justify-content-between fw-semibold fs-6">
+        <span>Total</span><span>₹1,199.00</span>
+      </div>
+
+      <p class="small text-muted mt-1">Including ₹128.46 in taxes</p>
+
+    </div>
+
+  </div>
+</div>
