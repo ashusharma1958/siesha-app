@@ -4,9 +4,10 @@ import { CartComponent } from '../cart/cart';
 
 @Component({
   selector: 'app-navigation',
+  standalone: true,
   imports: [RouterLink, CartComponent],
   templateUrl: './navigation.html',
-  styleUrl: './navigation.css',
+  styleUrls: ['./navigation.css'],
 })
 export class Navigation {
 

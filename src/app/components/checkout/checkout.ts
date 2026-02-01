@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
+import { Navigation } from '../navigation/navigation';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
+  imports: [Navigation],
   templateUrl: './checkout.html',
   styleUrls: ['./checkout.css']
 })

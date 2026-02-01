@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-cart',
@@ -7,10 +8,10 @@ import { Component } from '@angular/core';
   styleUrls: ['./cart.css']
 })
 export class CartComponent {
-  constructor() {}
+  constructor(private router: Router) {}
 
   ngAfterViewInit() {
-    // Quantity button handler
+    // Quantity button handler and checkout navigation
     document.addEventListener("click", (e: Event) => {
       const target = e.target as HTMLElement;
       if (target.classList.contains("qty-btn")) {
@@ -23,6 +24,19 @@ export class CartComponent {
 
           qtyEl.innerText = qty.toString();
         }
+      }
+      // Navigate to checkout when user clicks the checkout button
+      if (target.classList.contains("checkout-btn")) {
+        // Close the cart offcanvas first so body scrolling isn't blocked
+        const closeBtn = document.querySelector('#cartOffcanvas .btn-close') as HTMLElement | null;
+        if (closeBtn) closeBtn.click();
+
+        // Wait briefly for the offcanvas to hide, then navigate
+        setTimeout(() => {
+          this.router.navigate(['/checkout']).then(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }, 250);
       }
     });
   }
