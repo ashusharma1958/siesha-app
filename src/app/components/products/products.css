@@ -19,6 +19,14 @@
 /* product card */
 .product-card {
   text-align: left;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.product-card * {
+  cursor: pointer;
 }
 
 .product-img {

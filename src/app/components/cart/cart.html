@@ -14,28 +14,32 @@
     </div>
 
     <!-- PRODUCT ROW -->
-    <div class="cart-item-row">
-      <img src="assets/image/img-2.png" class="cart-product-img">
+    <div class="cart-item-row" *ngFor="let item of cart.items$ | async; trackBy: trackByItem">
+      <img [src]="item.product.image" [alt]="item.product.alt" class="cart-product-img">
 
       <div class="cart-product-info">
-        <h6>Shankh Candle</h6>
-        <p>Rs. 1,199.00</p>
+        <h6>{{ item.product.name }}</h6>
+        <p>Rs. {{ item.product.salePrice ?? item.product.price }}</p>
 
         <div class="cart-actions">
           <div class="qty-wrapper">
-            <button class="qty-btn">−</button>
-            <span class="qty">1</span>
-            <button class="qty-btn">+</button>
+            <button class="qty-btn" type="button" (click)="decrease(item)">-</button>
+            <span class="qty">{{ item.quantity }}</span>
+            <button class="qty-btn" type="button" (click)="increase(item)">+</button>
           </div>
 
-          <i class="bi bi-trash cart-delete"></i>
+          <button class="cart-delete" type="button" (click)="remove(item)" aria-label="Remove item">
+            <i class="bi bi-trash"></i>
+          </button>
         </div>
       </div>
 
       <div class="cart-price">
-        Rs. 1,199.00
+        Rs. {{ (item.product.salePrice ?? item.product.price ?? 0) * item.quantity }}
       </div>
     </div>
+
+    <p class="cart-empty" *ngIf="(cart.items$ | async)?.length === 0">Your cart is empty.</p>
 
 
     <!-- INSTRUCTIONS -->
@@ -55,14 +59,14 @@
     <div class="cart-footer">
       <div class="cart-total-row">
         <span>Estimated total</span>
-        <strong>Rs. 1,199.00</strong>
+        <strong>Rs. {{ cart.getTotal() }}</strong>
       </div>
 
       <p class="cart-tax-note">
         Tax included. <u>Shipping</u> and discounts calculated at checkout.
       </p>
 
-      <button class="checkout-btn">
+      <button class="checkout-btn" type="button" (click)="checkout()" [disabled]="(cart.items$ | async)?.length === 0">
         Check out
       </button>
     </div>

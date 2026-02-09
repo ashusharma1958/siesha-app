@@ -8,18 +8,18 @@
     <div #swiperContainer class="swiper">
       <div class="swiper-wrapper">
         <div class="swiper-slide" *ngFor="let product of products; trackBy: trackByProduct">
-          <div class="product-card">
+          <a class="product-card" [routerLink]="['/product', product.id]">
             <div class="product-img">
-              <span class="sale">Sale</span>
-              <img [src]="product.image" [alt]="product.alt">
+              <span class="sale" *ngIf="product.salePrice">Sale</span>
+              <img [src]="product.image" [alt]="product.alt || product.name">
             </div>
             <h6>{{ product.name }}</h6>
-            <p class="price">
-              <del>Rs.{{ product.originalPrice }}</del>
-              Rs.{{ product.salePrice }}
+            <p class="price" *ngIf="getDisplayPrice(product) as price">
+              <del *ngIf="product.originalPrice">Rs.{{ product.originalPrice }}</del>
+              Rs.{{ price }}
             </p>
-            <button>Add to cart</button>
-          </div>
+            <button type="button" (click)="addToCart(product, $event)">Add to cart</button>
+          </a>
         </div>
       </div>
     </div>

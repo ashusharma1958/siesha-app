@@ -1,43 +1,45 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+
+import { CartService, CartItem } from '../../services/cart.service';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './cart.html',
   styleUrls: ['./cart.css']
 })
 export class CartComponent {
-  constructor(private router: Router) {}
+  constructor(private router: Router, public cart: CartService) {}
 
-  ngAfterViewInit() {
-    // Quantity button handler and checkout navigation
-    document.addEventListener("click", (e: Event) => {
-      const target = e.target as HTMLElement;
-      if (target.classList.contains("qty-btn")) {
-        const qtyEl = target.parentElement?.querySelector(".qty") as HTMLElement;
-        if (qtyEl) {
-          let qty = parseInt(qtyEl.innerText);
+  trackByItem(index: number, item: CartItem): number {
+    return item.product.id;
+  }
 
-          if (target.innerText === "+" && qty < 10) qty++;
-          if (target.innerText === "−" && qty > 1) qty--;
+  increase(item: CartItem) {
+    this.cart.updateQuantity(item.product.id, item.quantity + 1);
+  }
 
-          qtyEl.innerText = qty.toString();
-        }
-      }
-      // Navigate to checkout when user clicks the checkout button
-      if (target.classList.contains("checkout-btn")) {
-        // Close the cart offcanvas first so body scrolling isn't blocked
-        const closeBtn = document.querySelector('#cartOffcanvas .btn-close') as HTMLElement | null;
-        if (closeBtn) closeBtn.click();
+  decrease(item: CartItem) {
+    this.cart.updateQuantity(item.product.id, item.quantity - 1);
+  }
 
-        // Wait briefly for the offcanvas to hide, then navigate
-        setTimeout(() => {
-          this.router.navigate(['/checkout']).then(() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          });
-        }, 250);
-      }
-    });
+  remove(item: CartItem) {
+    this.cart.removeItem(item.product.id);
+  }
+
+  checkout() {
+    const closeBtn = document.querySelector('#cartOffcanvas .btn-close') as HTMLElement | null;
+    if (closeBtn) {
+      closeBtn.click();
+    }
+
+    setTimeout(() => {
+      this.router.navigate(['/checkout']).then(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }, 250);
   }
 }

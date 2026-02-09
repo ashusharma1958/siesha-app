@@ -1,4 +1,20 @@
 <app-navigation></app-navigation>
 <app-shop-filter></app-shop-filter>
-<app-product-grid></app-product-grid>
+<section class="product-card-wrap container pb-5">
+	<div class="row product-grid">
+		<div class="col-lg-3 col-md-6" *ngFor="let product of products; trackBy: trackByProduct">
+			<a class="product-card" [routerLink]="['/product', product.id]">
+				<div class="product-img">
+					<img [src]="product.image" [alt]="product.alt || product.name">
+				</div>
+				<h6>{{ product.name }}</h6>
+				<div class="rating" *ngIf="product.rating != null && product.reviewCount != null">
+					Rating: {{ product.rating }} <span>({{ product.reviewCount }})</span>
+				</div>
+				<p class="price" *ngIf="getDisplayPrice(product) as price">Rs. {{ price }}</p>
+				<button type="button" (click)="addToCart(product, $event)">Add to cart</button>
+			</a>
+		</div>
+	</div>
+</section>
 <app-footer></app-footer>

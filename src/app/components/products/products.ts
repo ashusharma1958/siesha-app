@@ -1,5 +1,6 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 // Import Swiper and modules
 import Swiper from 'swiper';
@@ -10,123 +11,63 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
+import { Product } from '../../data/products.data';
+import { CartService } from '../../services/cart.service';
+import { ProductService } from '../../services/product.service';
+
 @Component({
   selector: 'app-products',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './products.html',
   styleUrl: './products.css',
 })
 export class Products implements OnInit, AfterViewInit {
   @ViewChild('swiperContainer', { static: false }) swiperContainer: any;
 
-  products = [
-    {
-      id: 1,
-      name: 'Ananas Candle',
-      image: '/assets/image/img-1.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Ananas Candle'
-    },
-    {
-      id: 2,
-      name: 'Akhrot Candle',
-      image: '/assets/image/img-2.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Akhrot Candle'
-    },
-    {
-      id: 3,
-      name: 'Shankh Candle',
-      image: '/assets/image/img-3.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Shankh Candle'
-    },
-    {
-      id: 4,
-      name: 'Moongfali Candle',
-      image: '/assets/image/img-4.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Moongfali Candle'
-    }, {
-      id: 5,
-      name: 'Ananas Candle',
-      image: '/assets/image/img-1.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Ananas Candle'
-    },
-    {
-      id: 6,
-      name: 'Akhrot Candle',
-      image: '/assets/image/img-2.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Akhrot Candle'
-    },
-    {
-      id: 7,
-      name: 'Shankh Candle',
-      image: '/assets/image/img-3.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Shankh Candle'
-    },
-    {
-      id: 8,
-      name: 'Moongfali Candle',
-      image: '/assets/image/img-4.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Moongfali Candle'
-    },
-     {
-      id: 9,
-      name: 'Ananas Candle',
-      image: '/assets/image/img-1.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Ananas Candle'
-    },
-    {
-      id: 10,
-      name: 'Akhrot Candle',
-      image: '/assets/image/img-2.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Akhrot Candle'
-    },
-    {
-      id: 11,
-      name: 'Shankh Candle',
-      image: '/assets/image/img-3.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Shankh Candle'
-    },
-    {
-      id: 12,
-      name: 'Moongfali Candle',
-      image: '/assets/image/img-4.png',
-      originalPrice: 1399,
-      salePrice: 1199,
-      alt: 'Moongfali Candle'
-    }
-  ];
+  products: Product[] = [];
+  viewReady = false;
+
+  constructor(
+    private cart: CartService,
+    private productService: ProductService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   swiper: Swiper | undefined;
 
-  ngOnInit() {}
-
-  ngAfterViewInit() {
-    this.initSwiper();
+  ngOnInit() {
+    this.productService.getProducts().subscribe({
+      next: (items) => {
+        this.products = items.slice(0, 12);
+        this.cdr.detectChanges();
+        this.initSwiperIfReady();
+      },
+      error: (error) => {
+        console.error('Failed to load products', error);
+      }
+    });
   }
 
-  initSwiper() {
-    if (this.swiperContainer) {
+  ngAfterViewInit() {
+    this.viewReady = true;
+    this.initSwiperIfReady();
+  }
+
+  initSwiperIfReady() {
+    if (!this.viewReady || !this.swiperContainer || this.products.length === 0) {
+      return;
+    }
+
+    setTimeout(() => {
+      if (!this.swiperContainer) {
+        return;
+      }
+
+      if (this.swiper) {
+        this.swiper.destroy(true, true);
+        this.swiper = undefined;
+      }
+
       this.swiper = new Swiper(this.swiperContainer.nativeElement, {
         modules: [Navigation, Pagination, Autoplay],
         slidesPerView: 1,
@@ -155,14 +96,14 @@ export class Products implements OnInit, AfterViewInit {
           },
         }
       });
-    }
+    }, 0);
   }
 
   onSlideChange() {
     console.log('slide change');
   }
 
-  trackByProduct(index: number, product: any): number {
+  trackByProduct(index: number, product: Product): number {
     return product.id;
   }
 
@@ -176,5 +117,16 @@ export class Products implements OnInit, AfterViewInit {
     if (this.swiper) {
       this.swiper.slideNext();
     }
+  }
+
+  getDisplayPrice(product: Product): number | undefined {
+    return product.salePrice ?? product.price ?? product.originalPrice ?? undefined;
+  }
+
+  addToCart(product: Product, event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.cart.addItem(product, 1);
+    this.cart.openCart();
   }
 }

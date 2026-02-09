@@ -1,0 +1,57 @@
+<app-navigation></app-navigation>
+
+<section class="product-detail container" *ngIf="product; else notFound">
+  <a class="back-link" routerLink="/shop">Back to shop</a>
+
+  <div class="detail-grid">
+    <div class="media">
+      <img [src]="product.image" [alt]="product.alt || product.name">
+    </div>
+
+    <div class="info">
+      <h1>{{ product.name }}</h1>
+      <div class="rating" *ngIf="product.rating != null && product.reviewCount != null">
+        <span class="stars">
+          <span *ngFor="let _ of fullStars">&#9733;</span>
+          <span *ngFor="let _ of emptyStars">&#9734;</span>
+        </span>
+        <span class="rating-text">{{ product.rating }} ({{ product.reviewCount }} reviews)</span>
+      </div>
+
+      <p class="price">
+        <del *ngIf="product.originalPrice">Rs.{{ product.originalPrice }}</del>
+        <span>Rs.{{ displayPrice }}</span>
+      </p>
+
+      <p class="description">{{ product.description }}</p>
+
+      <div class="meta" *ngIf="product.size || product.burnTime || product.scentFamily">
+        <div *ngIf="product.size"><strong>Size:</strong> {{ product.size }}</div>
+        <div *ngIf="product.burnTime"><strong>Burn time:</strong> {{ product.burnTime }}</div>
+        <div *ngIf="product.scentFamily"><strong>Scent family:</strong> {{ product.scentFamily }}</div>
+      </div>
+
+      <div class="highlights" *ngIf="product.highlights?.length">
+        <h4>Highlights</h4>
+        <ul>
+          <li *ngFor="let item of product.highlights">{{ item }}</li>
+        </ul>
+      </div>
+
+      <div class="cart-cta">
+        <button type="button" class="qty-btn" (click)="decreaseQuantity()">-</button>
+        <button type="button" class="primary" (click)="addToCart()">Add to cart ({{ quantity }})</button>
+        <button type="button" class="qty-btn" (click)="increaseQuantity()">+</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<ng-template #notFound>
+  <section class="product-detail container">
+    <p class="not-found">Product not found. Try another item.</p>
+    <a class="back-link" routerLink="/shop">Back to shop</a>
+  </section>
+</ng-template>
+
+<app-footer></app-footer>

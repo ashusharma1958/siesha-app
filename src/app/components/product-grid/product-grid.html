@@ -3,52 +3,18 @@
   <div class="row product-grid">
 
     <!-- PRODUCT CARD -->
-    <div class="col-lg-3 col-md-6">
-      <div class="product-card">
+    <div class="col-lg-3 col-md-6" *ngFor="let product of products; trackBy: trackByProduct">
+      <a class="product-card" [routerLink]="['/product', product.id]">
         <div class="product-img">
-          <img src="/assets/image/shop-product-1.png" alt="">
+          <img [src]="product.image" [alt]="product.alt || product.name">
         </div>
-        <h6>Iced Mocha Candle</h6>
-        <div class="rating">★★★★★ <span>(21)</span></div>
-        <p class="price">Rs. 710.00</p>
-        <button>Add to cart</button>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6">
-      <div class="product-card">
-        <div class="product-img">
-          <img src="/assets/image/shop-product-2.png" alt="">
+        <h6>{{ product.name }}</h6>
+        <div class="rating" *ngIf="product.rating != null && product.reviewCount != null">
+          Rating: {{ product.rating }} <span>({{ product.reviewCount }})</span>
         </div>
-        <h6>Iced Matcha Latte Candle</h6>
-        <div class="rating">★★★★★ <span>(5)</span></div>
-        <p class="price">Rs. 710.00</p>
-        <button>Add to cart</button>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6">
-      <div class="product-card">
-        <div class="product-img">
-          <img src="/assets/image/shop-product-3.png" alt="">
-        </div>
-        <h6>Combo Pack</h6>
-        <div class="rating">★★★★★ <span>(15)</span></div>
-        <p class="price">Rs. 1,370.00</p>
-        <button>Add to cart</button>
-      </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6">
-      <div class="product-card">
-        <div class="product-img">
-          <img src="/assets/image/shop-product-4.png" alt="">
-        </div>
-        <h6>Head in the Clouds Candle</h6>
-        <div class="rating">★★★★★ <span>(5)</span></div>
-        <p class="price">Rs. 719.00</p>
-        <button>Add to cart</button>
-      </div>
+        <p class="price" *ngIf="getDisplayPrice(product) as price">Rs. {{ price }}</p>
+        <button type="button" (click)="addToCart(product, $event)">Add to cart</button>
+      </a>
     </div>
 
   </div>

@@ -4,6 +4,7 @@ import { Shop } from './components/shop/shop';
 import { Faq } from './components/faq/faq';
 import { CheckoutComponent } from './components/checkout/checkout';
 import { OrderTrackingComponent } from './components/order-tracking/order-tracking';
+import { ProductDetail } from './components/product-detail/product-detail';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -26,5 +27,9 @@ export const routes: Routes = [
   {
     path: 'order-tracking',
     component: OrderTrackingComponent
+  },
+  {
+    path: 'product/:id',
+    component: ProductDetail
   }
 ];

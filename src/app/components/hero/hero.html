@@ -1,4 +1,15 @@
 <section class="hero">
-  <img src="/assets/image/finallll_banner_today.png"
-    alt="Mood Minutes Banner" class="img-fluid w-100">
+  <div class="hero-swiper">
+    <div #swiperContainer class="swiper">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide" *ngFor="let slide of slides; trackBy: trackBySlide">
+          <img [src]="slide.image" [alt]="slide.alt" class="hero-image">
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-controls">
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
 </section>

@@ -1,0 +1,60 @@
+.hero {
+	width: 100%;
+}
+
+.hero-swiper {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 5 / 2;
+	overflow: hidden;
+}
+
+.swiper {
+	width: 100%;
+	height: 100%;
+}
+
+.swiper-slide {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.hero-image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.hero-controls {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 14px;
+	font-size: 14px;
+	color: #777;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+	display: none !important;
+}
+
+.hero-controls .swiper-pagination {
+	position: static !important;
+	margin: 0 18px;
+}
+
+.hero-controls .swiper-pagination-bullet {
+	width: 12px;
+	height: 12px;
+	background: #999;
+	opacity: 0.5;
+	margin: 0 4px;
+}
+
+.hero-controls .swiper-pagination-bullet-active {
+	background: #000;
+	opacity: 1;
+}
