@@ -1,7 +1,16 @@
+export type ProductImage = {
+  id: number;
+  imageUrl: string;
+  altText?: string | null;
+  displayOrder?: number | null;
+  isPrimary?: boolean | null;
+};
+
 export type Product = {
   id: number;
   name: string;
   image: string;
+  images?: ProductImage[];
   alt?: string | null;
   originalPrice?: number | null;
   salePrice?: number | null;

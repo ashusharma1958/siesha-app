@@ -1,0 +1,54 @@
+<app-navigation></app-navigation>
+
+<section class="signup-page">
+  <div class="container signup-wrap">
+    <div class="signup-card">
+      <h1>Sign Up</h1>
+      <p class="signup-subtitle">Create your account to get started.</p>
+
+      <form class="signup-form">
+        <label>
+          <span>Full name</span>
+          <input type="text" name="fullName" placeholder="Enter your full name" required>
+        </label>
+
+        <label>
+          <span>Email address</span>
+          <input type="email" name="email" placeholder="Enter your email" required>
+        </label>
+
+        <label>
+          <span>Contact number</span>
+          <input type="tel" name="contactNumber" placeholder="Enter your contact number" required>
+        </label>
+
+        <label>
+          <span>Password</span>
+          <input type="password" name="password" placeholder="Create password" required>
+        </label>
+
+        <label>
+          <span>Confirm password</span>
+          <input type="password" name="confirmPassword" placeholder="Confirm password" required>
+        </label>
+
+        <button type="submit">Create Account</button>
+      </form>
+
+      <div class="social-divider">or continue with</div>
+
+      <div class="social-signup">
+        <button type="button" class="social-btn" (click)="socialSignUp('google')">Continue with Google</button>
+        <button type="button" class="social-btn" (click)="socialSignUp('facebook')">Continue with Facebook</button>
+        <button type="button" class="social-btn" (click)="socialSignUp('apple')">Continue with Apple</button>
+      </div>
+
+      <p class="signin-copy">
+        Already have an account?
+        <a routerLink="/sign-in">Sign In</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<app-footer></app-footer>

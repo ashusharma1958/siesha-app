@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { Product } from '../data/products.data';
+import { Product, ProductImage } from '../data/products.data';
 
 type ApiResponse<T> = {
   statusCode: number;
@@ -15,8 +15,9 @@ type ApiResponse<T> = {
 type ProductDto = {
   id: number;
   name: string;
-  image: string;
-  alt: string | null;
+  image?: string | null;
+  alt?: string | null;
+  images?: ProductImageDto[] | null;
   originalPrice: number | null;
   salePrice: number | null;
   price: number | null;
@@ -28,6 +29,14 @@ type ProductDto = {
   burnTime: string | null;
   scentFamily: string | null;
   collection: 'home' | 'shop' | null;
+};
+
+type ProductImageDto = {
+  id: number;
+  imageUrl: string;
+  altText?: string | null;
+  displayOrder?: number | null;
+  isPrimary?: boolean | null;
 };
 
 @Injectable({
@@ -49,11 +58,15 @@ export class ProductService {
   }
 
   private normalizeProduct(dto: ProductDto): Product {
+    const normalizedImages = this.normalizeImages(dto.images);
+    const primaryImage = this.selectPrimaryImage(normalizedImages);
+
     return {
       id: dto.id,
       name: dto.name,
-      image: dto.image,
-      alt: dto.alt ?? dto.name,
+      image: primaryImage?.imageUrl ?? dto.image ?? '',
+      images: normalizedImages,
+      alt: primaryImage?.altText ?? dto.alt ?? dto.name,
       originalPrice: dto.originalPrice ?? undefined,
       salePrice: dto.salePrice ?? undefined,
       price: dto.price ?? undefined,
@@ -66,5 +79,23 @@ export class ProductService {
       scentFamily: dto.scentFamily ?? undefined,
       collection: dto.collection ?? undefined
     };
+  }
+
+  private normalizeImages(images: ProductImageDto[] | null | undefined): ProductImage[] {
+    if (!images || images.length === 0) {
+      return [];
+    }
+
+    return [...images]
+      .filter((item) => !!item?.imageUrl)
+      .sort((first, second) => (first.displayOrder ?? 0) - (second.displayOrder ?? 0));
+  }
+
+  private selectPrimaryImage(images: ProductImage[]): ProductImage | undefined {
+    if (images.length === 0) {
+      return undefined;
+    }
+
+    return images.find((item) => item.isPrimary) ?? images[0];
   }
 }

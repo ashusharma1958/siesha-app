@@ -1,0 +1,47 @@
+<app-navigation></app-navigation>
+
+<section class="signin-page">
+  <div class="container signin-wrap">
+    <div class="signin-card">
+      <h1>Sign In</h1>
+      <p class="signin-subtitle">Welcome back! Please enter your details.</p>
+
+      <form class="signin-form" novalidate>
+        <label>
+          <span>Email address</span>
+          <input type="email" placeholder="Enter your email">
+        </label>
+
+        <label>
+          <span>Password</span>
+          <input type="password" placeholder="Enter your password">
+        </label>
+
+        <div class="signin-actions">
+          <label class="remember-me">
+            <input type="checkbox">
+            <span>Remember me</span>
+          </label>
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <button type="submit">Sign In</button>
+      </form>
+
+      <div class="social-divider">or continue with</div>
+
+      <div class="social-signin">
+        <button type="button" class="social-btn" (click)="socialSignIn('google')">Continue with Google</button>
+        <button type="button" class="social-btn" (click)="socialSignIn('facebook')">Continue with Facebook</button>
+        <button type="button" class="social-btn" (click)="socialSignIn('apple')">Continue with Apple</button>
+      </div>
+
+      <p class="signup-copy">
+        Don’t have an account?
+        <a routerLink="/sign-up">Sign Up</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<app-footer></app-footer>

@@ -7,6 +7,9 @@ import { OrderTrackingComponent } from './components/order-tracking/order-tracki
 import { ProductDetail } from './components/product-detail/product-detail';
 import { AboutUs } from './components/about-us/about-us';
 import { ContactUs } from './components/contact-us/contact-us';
+import { SignInComponent } from './components/sign-in/sign-in';
+import { AuthCallbackComponent } from './components/auth-callback/auth-callback';
+import { SignUpComponent } from './components/sign-up/sign-up';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -41,5 +44,17 @@ export const routes: Routes = [
   {
     path: 'contact-us',
     component: ContactUs
+  },
+  {
+    path: 'sign-in',
+    component: SignInComponent
+  },
+  {
+    path: 'sign-up',
+    component: SignUpComponent
+  },
+  {
+    path: 'auth/callback',
+    component: AuthCallbackComponent
   }
 ];

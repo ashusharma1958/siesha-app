@@ -1,0 +1,13 @@
+<section class="auth-callback-page">
+  <div class="container auth-callback-wrap">
+    <div class="auth-callback-card">
+      <h1>Social Sign-In</h1>
+      <p [class.success]="status === 'success'" [class.error]="status === 'error'">{{ message }}</p>
+
+      <div class="auth-callback-actions" *ngIf="status !== 'processing'">
+        <a routerLink="/home" *ngIf="status === 'success'">Go to Home</a>
+        <a routerLink="/sign-in" *ngIf="status === 'error'">Back to Sign In</a>
+      </div>
+    </div>
+  </div>
+</section>

@@ -16,10 +16,41 @@
   align-items: start;
 }
 
+.detail-swiper-wrap {
+  position: relative;
+}
+
+.detail-swiper {
+  width: 100%;
+}
+
 .media img {
   width: 100%;
   border-radius: 18px;
   display: block;
+}
+
+.detail-swiper-prev,
+.detail-swiper-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+}
+
+.detail-swiper-prev {
+  left: 10px;
+}
+
+.detail-swiper-next {
+  right: 10px;
 }
 
 .info h1 {

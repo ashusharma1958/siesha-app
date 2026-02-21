@@ -5,7 +5,30 @@
 
   <div class="detail-grid">
     <div class="media">
-      <img [src]="product.image" [alt]="product.alt || product.name">
+      <div class="detail-swiper-wrap">
+        <div #detailSwiperContainer class="swiper detail-swiper">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide" *ngFor="let image of galleryImages; trackBy: trackByGalleryImage">
+              <img [src]="image.imageUrl" [alt]="image.altText || product.name">
+            </div>
+          </div>
+        </div>
+
+        <button
+          *ngIf="galleryImages.length > 1"
+          type="button"
+          class="detail-swiper-prev"
+          aria-label="Previous image">
+          &#10094;
+        </button>
+        <button
+          *ngIf="galleryImages.length > 1"
+          type="button"
+          class="detail-swiper-next"
+          aria-label="Next image">
+          &#10095;
+        </button>
+      </div>
     </div>
 
     <div class="info">
