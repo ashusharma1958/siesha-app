@@ -22,4 +22,16 @@ export class Footer {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
+
+  navigateToAbout() {
+    this.router.navigate(['/about-us']).then(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  navigateToContact() {
+    this.router.navigate(['/contact-us']).then(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 }
