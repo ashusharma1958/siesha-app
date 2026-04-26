@@ -4,57 +4,235 @@
   <div class="row min-vh-100">
 
     <!-- LEFT DETAIL FOR PAYMENT   -->
-    <div class="col-lg-7 px-4 px-lg-5 py-4">
+    <div class="px-4 px-lg-5 py-4" [class.col-lg-7]="!isAddressMode" [class.col-lg-8]="isAddressMode" [class.mx-auto]="isAddressMode">
 
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="section-title mb-0">Contact</h5>
-        <a routerLink="/sign-in" class="small text-decoration-none">Sign in</a>
-      </div>
-
-      <input class="form-control mb-3" placeholder="Email">
-      <div class="form-check mb-4">
-        <input class="form-check-input" type="checkbox">
-        <label class="form-check-label small">Email me with news and offers</label>
-      </div>
-
-      <h5 class="section-title">Delivery</h5>
-
-      <select class="form-select mb-3">
-        <option>India</option>
-      </select>
-
-      <div class="row">
-        <div class="col-md-6 mb-3"><input class="form-control" placeholder="First name"></div>
-        <div class="col-md-6 mb-3"><input class="form-control" placeholder="Last name"></div>
-      </div>
-
-      <input class="form-control mb-3" placeholder="Address">
-      <input class="form-control mb-3" placeholder="Apartment, suite, etc. (optional)">
-
-      <div class="row">
-        <div class="col-md-4 mb-3"><input class="form-control" placeholder="City"></div>
-        <div class="col-md-4 mb-3">
-          <select class="form-select"><option>Delhi</option></select>
+      <!-- SIGN IN / GUEST PROMPT (only for guests on checkout) -->
+      <div *ngIf="!isSignedIn && !isAddressMode" class="auth-prompt mb-4">
+        <div class="auth-prompt-inner">
+          <div class="auth-prompt-left">
+            <span class="auth-prompt-icon">&#128100;</span>
+            <div>
+              <div class="fw-semibold" style="font-size:15px">Have an account?</div>
+              <div class="text-muted" style="font-size:13px">Sign in to use saved addresses &amp; track orders.</div>
+            </div>
+          </div>
+          <a routerLink="/sign-in" class="btn-sign-in-prompt">Sign in</a>
         </div>
-        <div class="col-md-4 mb-3"><input class="form-control" placeholder="PIN code"></div>
+        <div class="auth-prompt-divider"><span>or continue as guest</span></div>
       </div>
 
-      <input class="form-control mb-3" placeholder="Phone">
+      <h5 class="section-title">{{ isAddressMode ? 'Add Address' : 'Billing address' }}</h5>
 
-      <div class="form-check mb-4">
-        <input class="form-check-input" type="checkbox">
-        <label class="form-check-label small">Save this information for next time</label>
-      </div>
+      <!-- LOGGED-IN CHECKOUT: saved addresses + add new -->
+      <ng-container *ngIf="isSignedIn && !isAddressMode">
 
-      <h5 class="section-title">Shipping method</h5>
-      <div class="bg-light p-3 rounded text-muted small mb-4">
-        Enter your shipping address to view available shipping methods.
-      </div>
+        <p *ngIf="addressesLoading" class="text-muted small">Loading your addresses...</p>
 
-      <h5 class="section-title">Payment</h5>
-      <p class="text-muted small mb-3">All transactions are secure and encrypted.</p>
+        <ng-container *ngIf="!addressesLoading">
 
-      <div class="payment-wrapper">
+          <p *ngIf="savedAddresses.length === 0 && !showNewAddressForm" class="text-muted small mb-3">
+            No saved addresses found.
+          </p>
+
+          <div *ngFor="let addr of savedAddresses"
+               class="address-card mb-2"
+               [class.address-card-selected]="selectedAddressId === addr.id"
+               (click)="selectedAddressId = addr.id ?? null">
+            <div class="d-flex align-items-start gap-3">
+              <input type="radio" name="savedAddress"
+                     [checked]="selectedAddressId === addr.id"
+                     (change)="selectedAddressId = addr.id ?? null"
+                     style="margin-top:3px; flex-shrink:0">
+              <div>
+                <div class="fw-semibold small">{{ addr.label }}</div>
+                <div class="small text-muted">{{ addr.line1 }}<span *ngIf="addr.line2">, {{ addr.line2 }}</span></div>
+                <div class="small text-muted">{{ addr.city }}, {{ addr.state }} – {{ addr.postalCode }}</div>
+                <div class="small text-muted" *ngIf="addr.phone">{{ addr.phone }}</div>
+              </div>
+            </div>
+          </div>
+
+          <button *ngIf="!showNewAddressForm" class="add-address-btn mb-4"
+                  type="button" (click)="toggleNewAddressForm()">
+            + Add new address
+          </button>
+
+          <!-- INLINE ADD ADDRESS FORM -->
+          <div *ngIf="showNewAddressForm" class="inline-address-form mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0 fw-semibold">New Address</h6>
+              <button type="button" class="btn-close" (click)="toggleNewAddressForm()"></button>
+            </div>
+
+            <select class="form-select mb-3" [(ngModel)]="addressForm.country">
+              <option>India</option>
+            </select>
+
+            <input class="form-control mb-3" placeholder="Address" [(ngModel)]="addressForm.line1">
+            <input class="form-control mb-3" placeholder="Apartment, suite, etc. (optional)" [(ngModel)]="addressForm.line2">
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <input class="form-control" placeholder="City"
+                       [(ngModel)]="addressForm.city"
+                       (ngModelChange)="onCityChange($event)"
+                       (keydown)="restrictCityInput($event)"
+                       (paste)="onCityPaste($event)"
+                       maxlength="50" pattern="[A-Za-z ]+">
+              </div>
+              <div class="col-md-4 mb-3">
+                <select class="form-select" [(ngModel)]="addressForm.state"><option>Delhi</option></select>
+              </div>
+              <div class="col-md-4 mb-3">
+                <input class="form-control" placeholder="PIN code"
+                       [(ngModel)]="addressForm.postalCode"
+                       (ngModelChange)="onPostalCodeChange($event)"
+                       (keydown)="restrictPostalCodeInput($event)"
+                       (paste)="onPostalCodePaste($event)"
+                       inputmode="numeric" maxlength="6" pattern="[0-9]{6}">
+              </div>
+            </div>
+
+            <input class="form-control mb-3" placeholder="Phone"
+                   [(ngModel)]="addressForm.phone"
+                   (ngModelChange)="onPhoneChange($event)"
+                   (keydown)="restrictPhoneInput($event)"
+                   (paste)="onPhonePaste($event)"
+                   type="tel" inputmode="numeric" maxlength="10" pattern="[0-9]{10}">
+
+            <p class="save-error" *ngIf="inlineAddressSaveError">{{ inlineAddressSaveError }}</p>
+
+            <button class="pay-btn" type="button"
+                    [disabled]="isSavingInlineAddress"
+                    (click)="saveInlineAddress()">
+              {{ isSavingInlineAddress ? 'Saving...' : 'Save address' }}
+            </button>
+          </div>
+
+        </ng-container>
+      </ng-container>
+
+      <!-- GUEST or ADDRESS-MODE: standard delivery form -->
+      <ng-container *ngIf="!isSignedIn || isAddressMode">
+
+        <select class="form-select mb-3" [(ngModel)]="addressForm.country">
+          <option>India</option>
+        </select>
+
+        <div class="row">
+          <div class="col-md-6 mb-3"><input class="form-control" placeholder="First name"></div>
+          <div class="col-md-6 mb-3"><input class="form-control" placeholder="Last name"></div>
+        </div>
+
+        <input class="form-control mb-3" placeholder="Address" [(ngModel)]="addressForm.line1">
+        <input class="form-control mb-3" placeholder="Apartment, suite, etc. (optional)" [(ngModel)]="addressForm.line2">
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <input class="form-control" placeholder="City"
+                   [(ngModel)]="addressForm.city"
+                   (ngModelChange)="onCityChange($event)"
+                   (keydown)="restrictCityInput($event)"
+                   (paste)="onCityPaste($event)"
+                   maxlength="50" pattern="[A-Za-z +]">
+          </div>
+          <div class="col-md-4 mb-3">
+            <select class="form-select" [(ngModel)]="addressForm.state"><option>Delhi</option></select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <input class="form-control" placeholder="PIN code"
+                   [(ngModel)]="addressForm.postalCode"
+                   (ngModelChange)="onPostalCodeChange($event)"
+                   (keydown)="restrictPostalCodeInput($event)"
+                   (paste)="onPostalCodePaste($event)"
+                   inputmode="numeric" maxlength="6" pattern="[0-9]{6}">
+          </div>
+        </div>
+
+        <p class="save-error" *ngIf="isAddressMode && addressSaveError">{{ addressSaveError }}</p>
+
+        <input class="form-control mb-3" placeholder="Phone"
+               [(ngModel)]="addressForm.phone"
+               (ngModelChange)="onPhoneChange($event)"
+               (keydown)="restrictPhoneInput($event)"
+               (paste)="onPhonePaste($event)"
+               type="tel" inputmode="numeric" maxlength="10" pattern="[0-9]{10}">
+
+      </ng-container>
+
+      <!-- SHIPPING ADDRESS -->
+      <ng-container *ngIf="!isAddressMode">
+        <h5 class="section-title mt-4">Shipping address</h5>
+
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="sameAsBilling" [(ngModel)]="shippingIsSameBilling">
+          <label class="form-check-label small" for="sameAsBilling">Same as billing address</label>
+        </div>
+
+        <!-- Show selected billing address as read-only preview -->
+        <ng-container *ngIf="shippingIsSameBilling">
+          <div *ngIf="selectedBillingAddress; else noBilling" class="address-card address-card-selected mb-4">
+            <div class="fw-semibold small">{{ selectedBillingAddress.label }}</div>
+            <div class="small text-muted">{{ selectedBillingAddress.line1 }}<span *ngIf="selectedBillingAddress.line2">, {{ selectedBillingAddress.line2 }}</span></div>
+            <div class="small text-muted">{{ selectedBillingAddress.city }}, {{ selectedBillingAddress.state }} – {{ selectedBillingAddress.postalCode }}</div>
+            <div class="small text-muted" *ngIf="selectedBillingAddress.phone">{{ selectedBillingAddress.phone }}</div>
+          </div>
+          <ng-template #noBilling>
+            <p class="text-muted small mb-4">Please fill in the billing address above first.</p>
+          </ng-template>
+        </ng-container>
+
+        <ng-container *ngIf="!shippingIsSameBilling">
+
+          <!-- Logged-in: saved addresses -->
+          <ng-container *ngIf="isSignedIn">
+            <p *ngIf="addressesLoading" class="text-muted small">Loading your addresses...</p>
+            <ng-container *ngIf="!addressesLoading">
+              <p *ngIf="savedAddresses.length === 0" class="text-muted small mb-3">No saved addresses found.</p>
+              <div *ngFor="let addr of savedAddresses"
+                   class="address-card mb-2"
+                   [class.address-card-selected]="selectedShippingAddressId === addr.id"
+                   (click)="selectedShippingAddressId = addr.id ?? null">
+                <div class="d-flex align-items-start gap-3">
+                  <input type="radio" name="shippingAddress"
+                         [checked]="selectedShippingAddressId === addr.id"
+                         (change)="selectedShippingAddressId = addr.id ?? null"
+                         style="margin-top:3px; flex-shrink:0">
+                  <div>
+                    <div class="fw-semibold small">{{ addr.label }}</div>
+                    <div class="small text-muted">{{ addr.line1 }}<span *ngIf="addr.line2">, {{ addr.line2 }}</span></div>
+                    <div class="small text-muted">{{ addr.city }}, {{ addr.state }} – {{ addr.postalCode }}</div>
+                    <div class="small text-muted" *ngIf="addr.phone">{{ addr.phone }}</div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+          </ng-container>
+
+          <!-- Guest: form -->
+          <ng-container *ngIf="!isSignedIn">
+            <select class="form-select mb-3" [(ngModel)]="shippingForm.country"><option>India</option></select>
+            <div class="row">
+              <div class="col-md-6 mb-3"><input class="form-control" placeholder="First name" [(ngModel)]="shippingForm.firstName"></div>
+              <div class="col-md-6 mb-3"><input class="form-control" placeholder="Last name" [(ngModel)]="shippingForm.lastName"></div>
+            </div>
+            <input class="form-control mb-3" placeholder="Address" [(ngModel)]="shippingForm.line1">
+            <input class="form-control mb-3" placeholder="Apartment, suite, etc. (optional)" [(ngModel)]="shippingForm.line2">
+            <div class="row">
+              <div class="col-md-4 mb-3"><input class="form-control" placeholder="City" [(ngModel)]="shippingForm.city"></div>
+              <div class="col-md-4 mb-3"><select class="form-select" [(ngModel)]="shippingForm.state"><option>Delhi</option></select></div>
+              <div class="col-md-4 mb-3"><input class="form-control" placeholder="PIN code" [(ngModel)]="shippingForm.postalCode" inputmode="numeric" maxlength="6"></div>
+            </div>
+            <input class="form-control mb-3" placeholder="Phone" [(ngModel)]="shippingForm.phone" type="tel" inputmode="numeric" maxlength="10">
+          </ng-container>
+
+        </ng-container>
+      </ng-container>
+
+      <h5 class="section-title" *ngIf="!isAddressMode">Payment</h5>
+      <p class="text-muted small mb-3" *ngIf="!isAddressMode">All transactions are secure and encrypted.</p>
+
+      <div class="payment-wrapper" *ngIf="!isAddressMode">
 
         <!-- SELECTED PAYMENT METHOD -->
         <div class="payment-header d-flex justify-content-between align-items-center">
@@ -79,66 +257,13 @@
       </div>
 
 
-      <h5 class="section-title">Billing address</h5>
+      <p class="save-error" *ngIf="!isAddressMode && orderError">{{ orderError }}</p>
 
-      <div class="border rounded-3 mb-3 overflow-hidden">
+      <button class="pay-btn mb-4" type="button" [disabled]="(isAddressMode && isSavingAddress) || isPlacingOrder" (click)="isAddressMode ? saveAddress() : placeOrder()">
+        {{ isAddressMode ? (isSavingAddress ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Update address' : 'Save address')) : (isPlacingOrder ? 'Placing order...' : 'Pay now') }}
+      </button>
 
-        <!-- SAME AS SHIPPING -->
-        <label class="d-flex align-items-center gap-2 p-3 border-bottom">
-          <input type="radio" name="billingAddress" checked
-                 (click)="toggleBilling(false)">
-          <span>Same as shipping address</span>
-        </label>
-
-        <!-- DIFFERENT BILLING -->
-        <label class="d-flex align-items-center gap-2 p-3 billing-active">
-          <input type="radio" name="billingAddress"
-                 (click)="toggleBilling(true)">
-          <span>Use a different billing address</span>
-        </label>
-
-        <!-- BILLING FORM (HIDDEN BY DEFAULT) -->
-        <div id="billingForm" class="billing-form px-3 pb-3 pt-3 d-none" >
-
-          <select class="form-select mb-3">
-            <option>India</option>
-          </select>
-
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <input class="form-control" placeholder="First name">
-            </div>
-            <div class="col-md-6 mb-3">
-              <input class="form-control" placeholder="Last name">
-            </div>
-          </div>
-
-          <input class="form-control mb-3" placeholder="Address">
-          <input class="form-control mb-3" placeholder="Apartment, suite, etc. (optional)">
-
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <input class="form-control" placeholder="City">
-            </div>
-            <div class="col-md-4 mb-3">
-              <select class="form-select">
-                <option>Delhi</option>
-              </select>
-            </div>
-            <div class="col-md-4 mb-3">
-              <input class="form-control" placeholder="PIN code">
-            </div>
-          </div>
-
-          <input class="form-control" placeholder="Phone (optional)">
-        </div>
-
-      </div>
-
-
-      <button class="pay-btn mb-4">Pay now</button>
-
-      <div class="checkout-footer-links ">
+      <div class="checkout-footer-links " *ngIf="!isAddressMode">
         <a href="#">Refund policy</a>
         <a href="#">Shipping</a>
         <a href="#">Privacy policy</a>
@@ -149,32 +274,44 @@
     </div>
 
     <!-- RIGHT  DETAILS OF PAYMENTS -->
-    <div class="col-lg-5 order-summary px-4 px-lg-5 py-4">
+    <div class="col-lg-5 order-summary px-4 px-lg-5 py-4" *ngIf="!isAddressMode">
 
-      <div class="d-flex align-items-center mb-4">
+      <div *ngFor="let item of cartItems" class="d-flex align-items-center mb-3">
         <div class="position-relative me-3">
-          <img src="assets/image/cart-item.png" class="product-thumb">
-          <span class="qty-badge">1</span>
+          <img [src]="item.product.image" [alt]="item.product.name" class="product-thumb">
+          <span class="qty-badge">{{ item.quantity }}</span>
         </div>
-        <div class="flex-grow-1 small">Ananas Candle</div>
-        <strong>₹1,199.00</strong>
+        <div class="flex-grow-1 small">{{ item.product.name }}</div>
+        <strong>₹{{ ((item.product.salePrice ?? item.product.price ?? 0) * item.quantity) | number:'1.2-2' }}</strong>
       </div>
 
 
       <div class="discount-wrapper d-flex gap-2">
         <input type="text"
                class="form-control discount-input"
-               placeholder="Discount code or gift card">
+               placeholder="Discount code or gift card"
+               [(ngModel)]="discountCode"
+               (keydown.enter)="applyDiscount()">
 
-        <button class="discount-btn" disabled>
+        <button class="discount-btn"
+                [class.active]="discountCode.trim().length > 0"
+                [disabled]="discountCode.trim().length === 0"
+                (click)="applyDiscount()">
           Apply
         </button>
       </div>
 
- 
+      <div *ngIf="discountError" class="small mb-2" style="color:#b42318">{{ discountError }}</div>
+      <div *ngIf="discountApplied" class="discount-success small mb-2">
+        <span>&#10003; Code <strong>{{ discountCode.trim().toUpperCase() }}</strong> applied — {{ discountPercent }}% off</span>
+        <button class="remove-discount-btn" (click)="discountCode=''; discountApplied=false; discountPercent=0; discountError=''">&#x2715;</button>
+      </div>
 
       <div class="d-flex justify-content-between small mb-2">
-        <span>Subtotal</span><span>₹1,199.00</span>
+        <span>Subtotal</span><span>₹{{ subtotal | number:'1.2-2' }}</span>
+      </div>
+      <div *ngIf="discountApplied" class="d-flex justify-content-between small mb-2 text-success">
+        <span>Discount ({{ discountPercent }}%)</span><span>−₹{{ discountAmount | number:'1.2-2' }}</span>
       </div>
       <div class="d-flex justify-content-between small mb-2">
         <span>Shipping</span><span class="text-muted">Enter shipping address</span>
@@ -183,12 +320,14 @@
       <hr>
 
       <div class="d-flex justify-content-between fw-semibold fs-6">
-        <span>Total</span><span>₹1,199.00</span>
+        <span>Total</span><span>₹{{ total | number:'1.2-2' }}</span>
       </div>
 
-      <p class="small text-muted mt-1">Including ₹128.46 in taxes</p>
+      <p class="small text-muted mt-1">Including ₹{{ (total * 0.107) | number:'1.2-2' }} in taxes</p>
 
     </div>
 
   </div>
 </div>
+
+<app-footer></app-footer>

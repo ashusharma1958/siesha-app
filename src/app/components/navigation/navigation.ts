@@ -10,5 +10,8 @@ import { CartComponent } from '../cart/cart';
   styleUrls: ['./navigation.css'],
 })
 export class Navigation {
+  get accountLink(): string {
+    return localStorage.getItem('auth.accessToken') ? '/profile' : '/sign-in';
+  }
 
 }

@@ -16,13 +16,13 @@
     <!-- SORT -->
     <div class="sort-box">
       <label>Sort by:</label>
-      <select>
-        <option>Featured</option>
-        <option>Best Selling</option>
-        <option>Price: Low to High</option>
-        <option>Price: High to Low</option>
+      <select [(ngModel)]="sortBy" (ngModelChange)="onSortChange()">
+        <option value="featured">Featured</option>
+        <option value="best-selling">Best Selling</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
       </select>
-      <span class="product-count">77 products</span>
+      <span class="product-count">{{ productCount }} products</span>
     </div>
 
     <!-- FILTERS -->
@@ -33,30 +33,30 @@
       <div class="price-filter">
 
         <!-- BUTTON -->
-        <button class="price-btn" id="priceToggle">
+        <button type="button" class="price-btn" id="priceToggle" [class.active]="openDropdown === 'price'" (click)="toggleDropdown('price', $event)">
           Price
           <i class="fa-solid fa-chevron-down arrow"></i>
         </button>
 
         <!-- DROPDOWN -->
-        <div class="price-dropdown" id="priceDropdown">
+        <div class="price-dropdown" id="priceDropdown" [style.display]="openDropdown === 'price' ? 'block' : 'none'">
 
           <!-- RANGE -->
           <div class="range-wrapper">
-            <input type="range" id="minRange" min="0" max="11000" step="100" value="0">
-            <input type="range" id="maxRange" min="0" max="11000" step="100" value="11000">
+            <input type="range" id="minRange" min="0" max="11000" step="100" [(ngModel)]="minPrice" (change)="onPriceChange()">
+            <input type="range" id="maxRange" min="0" max="11000" step="100" [(ngModel)]="maxPrice" (change)="onPriceChange()">
           </div>
 
           <!-- INPUTS -->
           <div class="price-inputs">
             <div class="price-box">
-              ₹ <input type="number" id="minInput" value="0">
+              ₹ <input type="number" id="minInput" [min]="minAllowedPrice" [max]="maxAllowedPrice" [(ngModel)]="minPrice" (change)="onPriceChange()">
             </div>
 
             <span class="to">to</span>
 
             <div class="price-box">
-              ₹ <input type="number" id="maxInput" value="11000">
+              ₹ <input type="number" id="maxInput" [min]="minAllowedPrice" [max]="maxAllowedPrice" [(ngModel)]="maxPrice" (change)="onPriceChange()">
             </div>
           </div>
 
@@ -69,17 +69,17 @@
       <!-- FRAGRANCE FAMILY -->
       <div class="filter-dropdown">
 
-        <button class="filter-btn">
+        <button type="button" class="filter-btn" [class.active]="openDropdown === 'fragrance'" (click)="toggleDropdown('fragrance', $event)">
           Fragrance Family
           <i class="fa-solid fa-chevron-down arrow"></i>
         </button>
 
-        <div class="filter-panel">
+        <div class="filter-panel" [style.display]="openDropdown === 'fragrance' ? 'block' : 'none'">
 
           <!-- Floral -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isFragranceSelected('Floral')" (change)="toggleFragrance('Floral', $any($event.target).checked)">
               Floral
             </label>
             <i class="fa-solid fa-chevron-right sub-arrow"></i>
@@ -93,7 +93,7 @@
           <!-- Fresh & Herbal -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isFragranceSelected('Fresh & Herbal')" (change)="toggleFragrance('Fresh & Herbal', $any($event.target).checked)">
               Fresh & Herbal
             </label>
             <i class="fa-solid fa-chevron-right sub-arrow"></i>
@@ -106,7 +106,7 @@
           <!-- Warm & Woody -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isFragranceSelected('Warm & Woody')" (change)="toggleFragrance('Warm & Woody', $any($event.target).checked)">
               Warm & Woody
             </label>
             <i class="fa-solid fa-chevron-right sub-arrow"></i>
@@ -119,7 +119,7 @@
           <!-- Gourmand -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isFragranceSelected('Gourmand')" (change)="toggleFragrance('Gourmand', $any($event.target).checked)">
               Gourmand
             </label>
             <i class="fa-solid fa-chevron-right sub-arrow"></i>
@@ -132,7 +132,7 @@
           <!-- Aquatic & Clean -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isFragranceSelected('Aquatic & Clean')" (change)="toggleFragrance('Aquatic & Clean', $any($event.target).checked)">
               Aquatic & Clean
             </label>
             <i class="fa-solid fa-chevron-right sub-arrow"></i>
@@ -145,7 +145,7 @@
           <!-- Fruity -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isFragranceSelected('Fruity')" (change)="toggleFragrance('Fruity', $any($event.target).checked)">
               Fruity
             </label>
           </div>
@@ -158,17 +158,17 @@
       <!-- RITUAL / MOOD -->
       <div class="filter-dropdown">
 
-        <button class="filter-btn">
+        <button type="button" class="filter-btn" [class.active]="openDropdown === 'ritual'" (click)="toggleDropdown('ritual', $event)">
           Ritual / Mood
           <i class="fa-solid fa-chevron-down arrow"></i>
         </button>
 
-        <div class="filter-panel">
+        <div class="filter-panel" [style.display]="openDropdown === 'ritual' ? 'block' : 'none'">
 
           <!-- Calm & Wind Down -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isRitualSelected('Calm & Wind Down')" (change)="toggleRitual('Calm & Wind Down', $any($event.target).checked)">
               Calm & Wind Down
             </label>
             <i class="fa-solid fa-chevron-right sub-arrow"></i>
@@ -182,7 +182,7 @@
           <!-- Fresh Start -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isRitualSelected('Fresh Start')" (change)="toggleRitual('Fresh Start', $any($event.target).checked)">
               Fresh Start
             </label>
             <i class="fa-solid fa-chevron-right sub-arrow"></i>
@@ -196,7 +196,7 @@
           <!-- Romance & Softness -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isRitualSelected('Romance & Softness')" (change)="toggleRitual('Romance & Softness', $any($event.target).checked)">
               Romance & Softness
             </label>
             <i class="fa-solid fa-chevron-right sub-arrow"></i>
@@ -210,7 +210,7 @@
           <!-- Focus & Grounding -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isRitualSelected('Focus & Grounding')" (change)="toggleRitual('Focus & Grounding', $any($event.target).checked)">
               Focus & Grounding
             </label>
             <i class="fa-solid fa-chevron-right sub-arrow"></i>
@@ -224,7 +224,7 @@
           <!-- Cozy Evenings -->
           <div class="filter-item">
             <label>
-              <input type="checkbox">
+              <input type="checkbox" [checked]="isRitualSelected('Cozy Evenings')" (change)="toggleRitual('Cozy Evenings', $any($event.target).checked)">
               Cozy Evenings
             </label>
             <i class="fa-solid fa-chevron-right sub-arrow"></i>
@@ -241,15 +241,21 @@
 
       <!-- CUSTOMER LOVE -->
       <div class="filter-dropdown">
-        <button class="filter-btn">
+        <button type="button" class="filter-btn" [class.active]="openDropdown === 'love'" (click)="toggleDropdown('love', $event)">
           Customer Love <i class="fa-solid fa-chevron-down arrow"></i>
         </button>
 
 
-        <div class="filter-panel">
-          <label><input type="checkbox"> ★★★★★ Most Loved</label>
-          <label><input type="checkbox"> ★★★★☆ & up</label>
-          <label><input type="checkbox"> ★★★☆☆ & up</label>
+        <div class="filter-panel" [style.display]="openDropdown === 'love' ? 'block' : 'none'">
+          <label>
+            <input type="checkbox" [checked]="isRatingSelected(5)" (change)="toggleRating(5, $any($event.target).checked)"> ★★★★★ Most Loved
+          </label>
+          <label>
+            <input type="checkbox" [checked]="isRatingSelected(4)" (change)="toggleRating(4, $any($event.target).checked)"> ★★★★☆ & up
+          </label>
+          <label>
+            <input type="checkbox" [checked]="isRatingSelected(3)" (change)="toggleRating(3, $any($event.target).checked)"> ★★★☆☆ & up
+          </label>
         </div>
       </div>
 

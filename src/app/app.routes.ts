@@ -10,6 +10,7 @@ import { ContactUs } from './components/contact-us/contact-us';
 import { SignInComponent } from './components/sign-in/sign-in';
 import { AuthCallbackComponent } from './components/auth-callback/auth-callback';
 import { SignUpComponent } from './components/sign-up/sign-up';
+import { ProfileComponent } from './components/profile/profile';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -52,6 +53,10 @@ export const routes: Routes = [
   {
     path: 'sign-up',
     component: SignUpComponent
+  },
+  {
+    path: 'profile',
+    component: ProfileComponent
   },
   {
     path: 'auth/callback',

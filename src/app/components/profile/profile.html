@@ -1,0 +1,75 @@
+<app-navigation></app-navigation>
+
+<section class="profile-page">
+  <div class="container profile-wrap">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div>
+          <h1>My Account</h1>
+          <p *ngIf="user?.fullName; else fallbackName">{{ user?.fullName }}</p>
+          <ng-template #fallbackName>
+            <p>Logged in user</p>
+          </ng-template>
+          <p class="email" *ngIf="user?.email">{{ user?.email }}</p>
+        </div>
+        <button type="button" class="logout-btn" (click)="logout()">Log out</button>
+      </div>
+
+      <div class="profile-section">
+        <h2>Recent Orders</h2>
+        <div class="list-card" *ngIf="orders.length > 0; else noOrders">
+          <div class="list-row" *ngFor="let order of orders">
+            <div>
+              <strong>{{ order.id }}</strong>
+              <p>{{ order.date }}</p>
+            </div>
+            <div>
+              <strong>{{ order.total }}</strong>
+              <p>{{ order.status }}</p>
+            </div>
+          </div>
+        </div>
+        <ng-template #noOrders>
+          <p class="empty-copy">No orders yet.</p>
+        </ng-template>
+      </div>
+
+      <div class="profile-section">
+        <h2>Saved Addresses</h2>
+        <div class="list-card" *ngIf="addresses.length; else noAddresses">
+          <div class="list-row address-row" *ngFor="let address of addresses">
+            <div class="address-content">
+              <strong>
+                {{ address.label || 'Address' }}
+                <span *ngIf="address.isDefault" class="default-badge">(Default)</span>
+              </strong>
+              <p *ngIf="address.line1">{{ address.line1 }}</p>
+              <p *ngIf="address.line2">{{ address.line2 }}</p>
+              <p>{{ address.city }}, {{ address.state }} {{ address.postalCode }}</p>
+              <p>{{ address.country }}</p>
+              <p *ngIf="address.phone">Phone: {{ address.phone }}</p>
+            </div>
+            <div class="address-actions">
+              <button class="action-btn edit-btn" (click)="editAddress(address)" title="Edit address">Edit</button>
+              <button class="action-btn delete-btn" (click)="deleteAddress(address)" title="Delete address">Delete</button>
+            </div>
+          </div>
+        </div>
+        <ng-template #noAddresses>
+          <p class="empty-copy">No saved addresses.</p>
+        </ng-template>
+
+        <div class="address-action">
+          <a class="add-address-link" routerLink="/checkout" [queryParams]="{ mode: 'address' }">Add address</a>
+        </div>
+      </div>
+
+      <div class="profile-links">
+        <a routerLink="/order-tracking">Track an order</a>
+        <a routerLink="/shop">Continue shopping</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<app-footer></app-footer>

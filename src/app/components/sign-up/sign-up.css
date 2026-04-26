@@ -59,6 +59,27 @@
   font-weight: 600;
 }
 
+.signup-feedback {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.signup-feedback.error {
+  color: #b3261e;
+}
+
+.signup-feedback.success {
+  color: #1f7a38;
+}
+
+.signup-feedback-link {
+  margin-top: -6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+}
+
 .social-divider {
   margin: 20px 0 12px;
   text-align: center;

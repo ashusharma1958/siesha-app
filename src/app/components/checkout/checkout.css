@@ -3,7 +3,65 @@
   margin:auto;
 }
 
-input,select{
+/* Sign in / guest prompt */
+.auth-prompt {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.auth-prompt-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  gap: 12px;
+}
+
+.auth-prompt-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-prompt-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.btn-sign-in-prompt {
+  flex-shrink: 0;
+  background: #1a3c2e;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.btn-sign-in-prompt:hover {
+  background: #0f2a1f;
+  color: #fff;
+}
+
+.auth-prompt-divider {
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: #888;
+  background: #fafafa;
+}
+
+.auth-prompt-divider span {
+  background: #fafafa;
+  padding: 0 10px;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),select{
   height:48px;
   font-size:14px;
   border-radius:6px;
@@ -166,4 +224,81 @@ input,select{
   color: #fff;
   border-color: #0d5bd8;
   cursor: pointer;
+}
+
+.discount-success {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f0faf4;
+  border: 1px solid #b7e4c7;
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #1a7f4b;
+}
+
+.remove-discount-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.remove-discount-btn:hover {
+  color: #b42318;
+}
+
+.save-error {
+  margin: 0 0 12px;
+  color: #b42318;
+  font-size: 13px;
+}
+
+/* Saved address cards */
+.address-card {
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.address-card:hover {
+  border-color: #0d5bd8;
+}
+
+.address-card-selected {
+  border-color: #0d5bd8;
+  background: #f5f7ff;
+}
+
+/* Add new address dashed button */
+.add-address-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px dashed #0d5bd8;
+  color: #0d5bd8;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-address-btn:hover {
+  background: #f0f4ff;
+}
+
+/* Inline add address form container */
+.inline-address-form {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 18px;
+  background: #fafafa;
+  animation: slideDown 0.2s ease;
 }

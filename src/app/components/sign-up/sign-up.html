@@ -6,33 +6,42 @@
       <h1>Sign Up</h1>
       <p class="signup-subtitle">Create your account to get started.</p>
 
-      <form class="signup-form">
+      <form class="signup-form" #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" novalidate>
         <label>
           <span>Full name</span>
-          <input type="text" name="fullName" placeholder="Enter your full name" required>
+          <input type="text" name="fullName" placeholder="Enter your full name" [(ngModel)]="signUpData.fullName" required minlength="2">
         </label>
 
         <label>
           <span>Email address</span>
-          <input type="email" name="email" placeholder="Enter your email" required>
+          <input type="email" name="email" placeholder="Enter your email" [(ngModel)]="signUpData.email" required email>
         </label>
 
         <label>
           <span>Contact number</span>
-          <input type="tel" name="contactNumber" placeholder="Enter your contact number" required>
+          <input type="tel" name="contactNumber" placeholder="Enter your contact number" [(ngModel)]="signUpData.contactNumber" required minlength="7" maxlength="20">
         </label>
 
         <label>
           <span>Password</span>
-          <input type="password" name="password" placeholder="Create password" required>
+          <input type="password" name="password" placeholder="Create password" [(ngModel)]="signUpData.password" required minlength="8">
         </label>
 
         <label>
           <span>Confirm password</span>
-          <input type="password" name="confirmPassword" placeholder="Confirm password" required>
+          <input type="password" name="confirmPassword" placeholder="Confirm password" [(ngModel)]="signUpData.confirmPassword" required>
         </label>
 
-        <button type="submit">Create Account</button>
+        <p *ngIf="feedbackType === 'error' || feedbackType === 'success'" class="signup-feedback" [class.error]="feedbackType === 'error'" [class.success]="feedbackType === 'success'" role="alert">
+          {{ feedbackMessage }}
+        </p>
+        <a *ngIf="errorStatusCode === 409" routerLink="/sign-in" class="signup-feedback-link">
+          This email already exists. Sign in instead.
+        </a>
+
+        <button type="submit" [disabled]="isSubmitting || signUpForm.invalid">
+          {{ isSubmitting ? 'Creating Account...' : 'Create Account' }}
+        </button>
       </form>
 
       <div class="social-divider">or continue with</div>

@@ -2,67 +2,64 @@
 
 <section class="track-order-section">
   <h2 class="order-tracking-title pt-4 text-center">Track Your Order</h2>
-  <div class="search-area px-3">
+  <form class="search-area px-3" (ngSubmit)="searchOrder()">
     <div class="row g-3">
       <div class="col-md-9">
-        <input class="form-control" placeholder="Please enter order id...">
+        <input
+          class="form-control"
+          placeholder="Please enter order number..."
+          [(ngModel)]="orderNumber"
+          name="orderNumber"
+          [disabled]="isLoading"
+        >
       </div>
       <div class="col-md-3 d-grid">
-        <button class="btn btn-success">Search</button>
+        <button class="btn btn-success" type="submit" [disabled]="isLoading">
+          {{ isLoading ? 'Searching...' : 'Search' }}
+        </button>
       </div>
     </div>
+  </form>
+
+  <div class="container mb-3" *ngIf="errorMessage">
+    <div class="alert alert-danger mb-0">{{ errorMessage }}</div>
   </div>
 
+  <div class="container mb-5" *ngIf="!trackingInfo && !errorMessage && !isLoading">
+    <div class="empty-state">Enter your order number to view tracking details.</div>
+  </div>
 
-  <div class="container mb-5">
+  <div class="container mb-5" *ngIf="trackingInfo as tracking">
     <div class="order-wrapper">
 
       <div class="row g-4 align-items-start">
 
-        <!-- PRODUCT IMAGE -->
         <div class="col-md-4 text-left">
-          <img src="assets/image/cart-item.png" class="product-img mb-3">
-          <div class="status-badge">In Transit</div>
+          <img [src]="tracking.productImage || 'assets/image/cart-item.png'" class="product-img mb-3" alt="Tracked product image">
+          <div class="status-badge">{{ formatStatus(tracking.currentStatus) }}</div>
         </div>
 
-        <!-- PRODUCT DETAILS  -->
         <div class="col-md-4">
           <div class="product-box">
-            <h6 class="mb-3">Ananas Candle</h6>
-            <p><strong>Order ID:</strong> #PT102938</p>
-            <p><strong>Quantity:</strong> 1</p>
-            <p><strong>Total Paid:</strong> ₹1,199</p>
+            <h6 class="mb-3">{{ tracking.productName }}</h6>
+            <p><strong>Order ID:</strong> {{ tracking.orderNumber }}</p>
+            <p><strong>Quantity:</strong> {{ tracking.quantity }}</p>
+            <p><strong>Total Paid:</strong> {{ formatCurrency(tracking.totalPaid) }}</p>
             <p class="mb-0">
               <strong>Delivery Address:</strong><br>
-              Delhi, India – 110001
+              {{ tracking.deliveryAddress }}
             </p>
           </div>
         </div>
 
-        <!-- ORDER TRACKING-->
         <div class="col-md-4">
           <div class="order-tracking-wrap ms-5">
             <h6 class="mb-3">Order Tracking</h6>
             <div class="timeline">
 
-              <div class="step">
-                <h6>Order Confirmed</h6>
-                <small>31 Jan 2026</small>
-              </div>
-
-              <div class="step">
-                <h6>Shipped</h6>
-                <small>1 Feb 2026</small>
-              </div>
-
-              <div class="step pending">
-                <h6>Out for Delivery</h6>
-                <small>Pending</small>
-              </div>
-
-              <div class="step pending">
-                <h6>Delivered</h6>
-                <small>Pending</small>
+              <div class="step" *ngFor="let step of tracking.statusHistory" [class.pending]="isPending(step)">
+                <h6>{{ step.statusLabel }}</h6>
+                <small>{{ step.date || 'Pending' }}</small>
               </div>
 
             </div>

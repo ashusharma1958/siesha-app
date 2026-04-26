@@ -123,3 +123,12 @@
   font-weight: 400;
   margin-bottom: 1rem;
 }
+
+.empty-state {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
+  color: #4b5563;
+  padding: 18px;
+  text-align: center;
+}

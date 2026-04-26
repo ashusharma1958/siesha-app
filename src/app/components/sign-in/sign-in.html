@@ -6,15 +6,28 @@
       <h1>Sign In</h1>
       <p class="signin-subtitle">Welcome back! Please enter your details.</p>
 
-      <form class="signin-form" novalidate>
+      <form class="signin-form" #signInForm="ngForm" (ngSubmit)="onSubmit(signInForm)" novalidate>
         <label>
           <span>Email address</span>
-          <input type="email" placeholder="Enter your email">
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            [(ngModel)]="signInData.email"
+            required
+            email
+          >
         </label>
 
         <label>
           <span>Password</span>
-          <input type="password" placeholder="Enter your password">
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            [(ngModel)]="signInData.password"
+            required
+          >
         </label>
 
         <div class="signin-actions">
@@ -25,7 +38,11 @@
           <a href="#">Forgot password?</a>
         </div>
 
-        <button type="submit">Sign In</button>
+        <p *ngIf="feedbackMessage">{{ feedbackMessage }}</p>
+
+        <button type="submit" [disabled]="isSubmitting || signInForm.invalid">
+          {{ isSubmitting ? 'Signing In...' : 'Sign In' }}
+        </button>
       </form>
 
       <div class="social-divider">or continue with</div>

@@ -54,6 +54,10 @@ export class CartService {
     this.itemsSubject.next(items);
   }
 
+  clearCart() {
+    this.itemsSubject.next([]);
+  }
+
   getTotal(): number {
     return this.itemsSubject.value.reduce((total, item) => {
       const price = item.product.salePrice ?? item.product.price ?? 0;

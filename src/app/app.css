@@ -1,3 +1,8 @@
 .route-shell {
 	min-height: 100vh;
+	position: relative;
+}
+
+.route-shell > * {
+	position: relative;
 }
