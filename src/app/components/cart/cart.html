@@ -2,7 +2,7 @@
 <div class="offcanvas offcanvas-end cart-offcanvas" tabindex="-1" id="cartOffcanvas">
   <div class="offcanvas-header cart-header">
     <h5>Your cart</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    <button type="button" class="btn-close cart-close-btn" data-bs-dismiss="offcanvas" aria-label="Close cart"></button>
   </div>
 
   <div class="offcanvas-body cart-body">
@@ -52,7 +52,14 @@
 
     <div class="collapse mt-3" id="instructionBox">
       <textarea class="form-control instruction-textarea"
+                [(ngModel)]="specialInstructions"
+                [attr.maxlength]="specialInstructionsLimit"
                 placeholder="Add a note to your order"></textarea>
+      <div class="instruction-counter"
+           [class.limit-reached]="isSpecialInstructionsLimitReached"
+           aria-live="polite">
+        {{ specialInstructionsLength }}/{{ specialInstructionsLimit }}
+      </div>
     </div>
 
     <!-- FOOTER -->

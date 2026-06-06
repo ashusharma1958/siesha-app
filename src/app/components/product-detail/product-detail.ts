@@ -88,6 +88,14 @@ export class ProductDetail implements OnInit, OnDestroy {
     return this.product.salePrice ?? this.product.price ?? undefined;
   }
 
+  formatScentFamily(value: string | null | undefined): string {
+    if (!value) {
+      return '';
+    }
+
+    return value.replace(/_/g, ' ');
+  }
+
   updateStars() {
     if (!this.product) {
       this.fullStars = [];

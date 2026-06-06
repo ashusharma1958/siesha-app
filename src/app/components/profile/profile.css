@@ -70,7 +70,7 @@
   border-bottom: 1px solid #efefef;
 }
 
-.list-row:last-child {
+.list-row-wrap:last-child .list-row {
   border-bottom: none;
 }
 
@@ -78,6 +78,100 @@
   margin: 4px 0 0;
   color: #666;
   font-size: 14px;
+}
+
+.tracking-link,
+.tracking-link:visited {
+  color: #0d5bd8;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.tracking-link:hover {
+  color: #0a47a8;
+}
+
+.order-toggle {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1;
+  font-weight: 700;
+  color: #111;
+  text-align: left;
+  cursor: pointer;
+}
+
+.order-toggle:hover {
+  color: #0d5bd8;
+}
+
+.order-items {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0 16px;
+  background: #fafbff;
+  border-top: 0;
+  transform: translateY(-3px);
+  will-change: max-height, opacity, transform;
+  transition: max-height 0.14s ease-out, opacity 0.1s ease-out, transform 0.14s ease-out, padding 0.14s ease-out, border-top 0.14s ease-out;
+}
+
+.order-items.expanded {
+  max-height: 1200px;
+  opacity: 1;
+  padding: 10px 16px 14px;
+  border-top: 1px dashed #d5d9e1;
+  transform: translateY(0);
+}
+
+.order-items h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2f3b52;
+}
+
+.order-item-row {
+  display: grid;
+  grid-template-columns: 60px 1.4fr 0.6fr 0.9fr 0.9fr;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #edf0f6;
+  font-size: 13px;
+  align-items: center;
+}
+
+.order-item-row:last-child {
+  border-bottom: none;
+}
+
+.item-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #e8e8e8;
+  background: #f5f5f5;
+}
+
+.item-name {
+  font-weight: 600;
+  color: #243042;
+}
+
+.item-qty,
+.item-price {
+  color: #5b6472;
 }
 
 .address-row {
@@ -188,5 +282,10 @@
 
   .list-row {
     flex-direction: column;
+  }
+
+  .order-item-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 }

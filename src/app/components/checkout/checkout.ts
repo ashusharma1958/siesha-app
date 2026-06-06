@@ -439,6 +439,12 @@ export class CheckoutComponent implements OnInit {
     const discountedSubtotal = this.total;
     const taxAmount = Math.round(discountedSubtotal * TAX_RATE * 100) / 100;
     const grandTotal = Math.round((discountedSubtotal + taxAmount + shippingCharge) * 100) / 100;
+    const specialInstructions = this.cartService.specialInstructions.trim();
+
+    if (specialInstructions.length > 500) {
+      this.orderError = 'Special instructions must not exceed 500 characters.';
+      return;
+    }
 
     const rawUserId = localStorage.getItem('auth.userId');
     const parsedUserId = rawUserId && /^\d+$/.test(rawUserId) ? Number(rawUserId) : null;
@@ -477,7 +483,8 @@ export class CheckoutComponent implements OnInit {
         transactionId: null
       },
       orderStatus: 'PLACED',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      specialInstructions: specialInstructions || null
     };
 
     this.isPlacingOrder = true;

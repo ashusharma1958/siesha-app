@@ -1,0 +1,146 @@
+<app-navigation></app-navigation>
+
+<section class="admin-orders-page">
+  <div class="container py-4">
+    <div class="admin-header">
+      <h2>Order Management</h2>
+      <p>Manage customer orders and update status from one place.</p>
+    </div>
+
+    <div class="stats-grid" *ngIf="stats as s">
+      <article class="stat-card">
+        <h6>Total</h6>
+        <strong>{{ s.totalOrders }}</strong>
+      </article>
+      <article class="stat-card">
+        <h6>Pending</h6>
+        <strong>{{ s.pendingOrders }}</strong>
+      </article>
+      <article class="stat-card">
+        <h6>Processing</h6>
+        <strong>{{ s.processingOrders }}</strong>
+      </article>
+      <article class="stat-card">
+        <h6>Shipped</h6>
+        <strong>{{ s.shippedOrders }}</strong>
+      </article>
+      <article class="stat-card">
+        <h6>Delivered</h6>
+        <strong>{{ s.deliveredOrders }}</strong>
+      </article>
+      <article class="stat-card">
+        <h6>Cancelled</h6>
+        <strong>{{ s.cancelledOrders }}</strong>
+      </article>
+    </div>
+
+    <div class="toolbar">
+      <label for="statusFilter">Filter by status</label>
+      <select
+        id="statusFilter"
+        class="form-select"
+        [(ngModel)]="selectedStatus"
+        (change)="onStatusFilterChange()"
+      >
+        <option *ngFor="let option of statusOptions" [value]="option">
+          {{ option }}
+        </option>
+      </select>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <div class="table-wrap" *ngIf="!isLoadingOrders; else loadingState">
+      <table class="table table-striped align-middle" *ngIf="orders.length > 0; else emptyState">
+        <thead>
+          <tr>
+            <th>Order Number</th>
+            <th>Customer</th>
+            <th>Placed On</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Special Instructions</th>
+            <th>Tracking Number</th>
+            <th>Tracking URL</th>
+            <th>Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of orders">
+            <td>{{ order.orderNumber }}</td>
+            <td>
+              <div>{{ order.customerName }}</div>
+              <small *ngIf="order.customerEmail && order.customerEmail !== '-'">{{ order.customerEmail }}</small>
+            </td>
+            <td>{{ formatDate(order.createdAt) }}</td>
+            <td>{{ formatCurrency(order.total) }}</td>
+            <td>
+              <span class="badge rounded-pill" [class]="'status-' + order.orderStatus.toLowerCase()">
+                {{ order.orderStatus }}
+              </span>
+            </td>
+            <td class="special-instructions-cell" [title]="order.specialInstructions">
+              {{ order.specialInstructions }}
+            </td>
+            <td>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Enter tracking number"
+                [(ngModel)]="order.trackingNumber"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="order.orderStatus !== 'SHIPPED' || isUpdating"
+              >
+            </td>
+            <td>
+              <input
+                type="url"
+                class="form-control form-control-sm"
+                placeholder="Enter tracking URL"
+                [(ngModel)]="order.trackingUrl"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="order.orderStatus !== 'SHIPPED' || isUpdating"
+              >
+            </td>
+            <td>
+              <div class="d-flex gap-2 align-items-center">
+                <select
+                  class="form-select form-select-sm"
+                  [(ngModel)]="order.orderStatus"
+                  [ngModelOptions]="{ standalone: true }"
+                  [disabled]="isUpdating"
+                >
+                  <option value="PENDING">PENDING</option>
+                  <option value="PROCESSING">PROCESSING</option>
+                  <option value="SHIPPED">SHIPPED</option>
+                  <option value="DELIVERED">DELIVERED</option>
+                  <option value="CANCELLED">CANCELLED</option>
+                </select>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  [disabled]="isUpdating"
+                  (click)="saveOrder(order)"
+                >
+                  Save
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #loadingState>
+      <div class="text-center py-5">Loading orders...</div>
+    </ng-template>
+
+    <ng-template #emptyState>
+      <div class="text-center py-5">No orders found for the selected filter.</div>
+    </ng-template>
+  </div>
+</section>
+
+<app-footer></app-footer>

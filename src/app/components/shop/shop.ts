@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Navigation } from '../navigation/navigation';
 import { ShopFilter, ShopFilterState } from '../shop-filter/shop-filter';
 import { Footer } from '../footer/footer';
@@ -17,6 +17,7 @@ import { CartService } from '../../services/cart.service';
 export class Shop implements OnInit {
   allProducts: Product[] = [];
   products: Product[] = [];
+  searchQuery = '';
   activeFilters: ShopFilterState = {
     sortBy: 'featured',
     minPrice: 0,
@@ -27,12 +28,18 @@ export class Shop implements OnInit {
   };
 
   constructor(
+    private route: ActivatedRoute,
     private productService: ProductService,
     private cart: CartService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    this.route.queryParamMap.subscribe((params) => {
+      this.searchQuery = this.normalizeSearchQuery(params.get('q'));
+      this.applyFilters();
+    });
+
     this.productService.getProducts().subscribe({
       next: (items) => {
         const priced = items.filter((item) => item.price != null || item.salePrice != null);
@@ -104,6 +111,16 @@ export class Shop implements OnInit {
       result = result.filter((product) => (product.rating ?? 0) >= this.activeFilters.minRating!);
     }
 
+    if (this.searchQuery) {
+      result = result.filter((product) => {
+        const searchableText = this.normalizeText(
+          `${product.name} ${product.description} ${(product.highlights ?? []).join(' ')} ${product.scentFamily ?? ''}`
+        );
+
+        return searchableText.includes(this.searchQuery);
+      });
+    }
+
     result.sort((first, second) => {
       switch (this.activeFilters.sortBy) {
         case 'price-asc':
@@ -139,6 +156,13 @@ export class Shop implements OnInit {
   }
 
   private normalizeText(value: string | null | undefined): string {
-    return (value ?? '').toLowerCase().trim();
+    return (value ?? '')
+      .trim()
+      .replace(/\s+/g, ' ')
+      .toLocaleLowerCase();
+  }
+
+  private normalizeSearchQuery(value: string | null | undefined): string {
+    return this.normalizeText((value ?? '').replace(/[^A-Za-z\s]/g, ''));
   }
 }

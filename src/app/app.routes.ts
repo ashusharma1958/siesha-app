@@ -11,6 +11,7 @@ import { SignInComponent } from './components/sign-in/sign-in';
 import { AuthCallbackComponent } from './components/auth-callback/auth-callback';
 import { SignUpComponent } from './components/sign-up/sign-up';
 import { ProfileComponent } from './components/profile/profile';
+import { AdminOrdersComponent } from './components/admin-orders/admin-orders';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -57,6 +58,10 @@ export const routes: Routes = [
   {
     path: 'profile',
     component: ProfileComponent
+  },
+  {
+    path: 'admin/orders',
+    component: AdminOrdersComponent
   },
   {
     path: 'auth/callback',

@@ -14,9 +14,19 @@ export type CartItem = {
 export class CartService {
   private itemsSubject = new BehaviorSubject<CartItem[]>([]);
   items$ = this.itemsSubject.asObservable();
+  private specialInstructionsSubject = new BehaviorSubject<string>('');
+  specialInstructions$ = this.specialInstructionsSubject.asObservable();
 
   get items(): CartItem[] {
     return this.itemsSubject.value;
+  }
+
+  get specialInstructions(): string {
+    return this.specialInstructionsSubject.value;
+  }
+
+  setSpecialInstructions(value: string): void {
+    this.specialInstructionsSubject.next((value ?? '').slice(0, 500));
   }
 
   addItem(product: Product, quantity = 1) {
@@ -56,6 +66,7 @@ export class CartService {
 
   clearCart() {
     this.itemsSubject.next([]);
+    this.specialInstructionsSubject.next('');
   }
 
   getTotal(): number {

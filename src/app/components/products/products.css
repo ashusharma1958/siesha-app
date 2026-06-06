@@ -37,6 +37,8 @@
 
 .product-img img {
   width: 100%;
+  height: auto;
+  display: block;
 }
 
 .sale {
@@ -52,6 +54,10 @@
 .product-card h6 {
   margin-top: 14px;
   font-weight: 400;
+}
+
+.price {
+  margin-bottom: 10px;
 }
 
 .price del {

@@ -18,14 +18,56 @@
       <div class="profile-section">
         <h2>Recent Orders</h2>
         <div class="list-card" *ngIf="orders.length > 0; else noOrders">
-          <div class="list-row" *ngFor="let order of orders">
-            <div>
-              <strong>{{ order.id }}</strong>
-              <p>{{ order.date }}</p>
+          <div class="list-row-wrap" *ngFor="let order of orders">
+            <div class="list-row">
+              <div>
+                <button
+                  type="button"
+                  class="order-toggle"
+                  (click)="toggleOrderItems(order)"
+                  [attr.aria-expanded]="isOrderExpanded(order)"
+                >
+                  {{ order.orderNumber || order.id }}
+                </button>
+                <p>{{ order.date }}</p>
+              </div>
+              <div>
+                <strong>{{ order.total }}</strong>
+                <p>{{ order.status }}</p>
+                <p *ngIf="shouldShowTrackingNumber(order)">
+                  Tracking Number:
+                  <a
+                    *ngIf="hasTrackingUrl(order); else plainTrackingNumber"
+                    class="tracking-link"
+                    [href]="getTrackingUrl(order)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >{{ getTrackingNumber(order) }}</a>
+                  <ng-template #plainTrackingNumber>{{ getTrackingNumber(order) }}</ng-template>
+                </p>
+              </div>
             </div>
-            <div>
-              <strong>{{ order.total }}</strong>
-              <p>{{ order.status }}</p>
+
+            <div class="order-items" [class.expanded]="isOrderExpanded(order)">
+              <h3>Items</h3>
+              <div *ngIf="getOrderItems(order).length > 0; else noOrderItems">
+                <div class="order-item-row" *ngFor="let item of getOrderItems(order)">
+                  <div class="item-image-container">
+                    <img 
+                      [src]="getItemImage(item)" 
+                      [alt]="item.productName || 'Product'"
+                      class="item-image"
+                    />
+                  </div>
+                  <div class="item-name">{{ item.productName || '-' }}</div>
+                  <div class="item-qty">Qty: {{ item.quantity || 0 }}</div>
+                  <div class="item-price">Unit: {{ formatItemAmount(item.unitPrice) }}</div>
+                  <div class="item-price">Total: {{ formatItemAmount(item.totalPrice) }}</div>
+                </div>
+              </div>
+              <ng-template #noOrderItems>
+                <p class="empty-copy">No items available for this order.</p>
+              </ng-template>
             </div>
           </div>
         </div>

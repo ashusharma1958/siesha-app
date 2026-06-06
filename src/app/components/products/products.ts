@@ -100,7 +100,6 @@ export class Products implements OnInit, AfterViewInit {
   }
 
   onSlideChange() {
-    console.log('slide change');
   }
 
   trackByProduct(index: number, product: Product): number {

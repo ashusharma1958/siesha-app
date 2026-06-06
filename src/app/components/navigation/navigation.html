@@ -22,9 +22,51 @@
 
     <!-- RIGHT ICONS -->
     <div class="align-items-center d-flex header-icons-wrap justify-content-end order-lg-3">
-      <a href="#" class="header__icon header__icon--account link focus-inset small-hide">
-        <img src="/assets/image/search-icon.svg" class="img-fluid">
-      </a>
+      <div class="nav-search-form" *ngIf="isSearchOpen">
+        <div class="nav-search-row">
+          <i class="bi bi-search nav-search-inline-icon" aria-hidden="true"></i>
+          <input
+            type="search"
+            name="productSearch"
+            [(ngModel)]="searchTerm"
+            (input)="onSearchInput()"
+            (keydown)="onSearchKeydown($event)"
+            (keydown.enter)="onSearchEnter($event)"
+            class="nav-search-input"
+            placeholder="Search by name, scent, mood..."
+            autocomplete="off"
+            maxlength="80">
+        </div>
+
+        <div class="nav-search-results" *ngIf="shouldShowSuggestions">
+          <section class="nav-search-col nav-search-products">
+            <h6>Suggested Products: {{ searchTerm.trim() }}</h6>
+
+            <button
+              type="button"
+              class="nav-search-product-item"
+              *ngFor="let product of suggestedProducts"
+              (click)="selectProduct(product)">
+              <img [src]="product.image" [alt]="product.alt || product.name">
+              <div>
+                <p>{{ product.name }}</p>
+                <span>Rs. {{ getDisplayPrice(product) }}</span>
+              </div>
+            </button>
+
+            <p class="nav-search-empty" *ngIf="suggestedProducts.length === 0">No products found</p>
+          </section>
+        </div>
+      </div>
+
+      <button type="button"
+        class="header__icon header__icon--account link focus-inset small-hide nav-search-toggle"
+        (click)="toggleSearch()"
+        [attr.aria-label]="isSearchOpen ? 'Close search' : 'Search products'"
+        [attr.aria-expanded]="isSearchOpen">
+        <img *ngIf="!isSearchOpen" src="/assets/image/search-icon.svg" class="img-fluid">
+        <i *ngIf="isSearchOpen" class="bi bi-x-lg nav-search-toggle-close" aria-hidden="true"></i>
+      </button>
 
       <a [routerLink]="accountLink" class="header__icon header__icon--account link focus-inset small-hide">
         <img src="/assets/image/icon-account.svg" class="img-fluid">
@@ -53,6 +95,9 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" routerLink="/about-us">About Us</a>
+        </li>
+        <li class="nav-item" *ngIf="isAdmin">
+          <a class="nav-link" routerLink="/admin/orders">Order Manage</a>
         </li>
       </ul>
     </div>

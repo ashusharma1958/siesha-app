@@ -61,11 +61,13 @@ export class SignInComponent {
       .subscribe({
         next: (response) => {
           localStorage.setItem('auth.accessToken', response.body.token);
+          const derivedRole = this.extractRoleFromResponseBody(response.body);
           localStorage.setItem(
             'auth.user',
             JSON.stringify({
               email: response.body.email,
-              fullName: response.body.fullName
+              fullName: response.body.fullName,
+              role: derivedRole
             })
           );
 
@@ -80,6 +82,70 @@ export class SignInComponent {
           this.feedbackMessage = this.resolveSignInError(errorResponse);
         }
       });
+  }
+
+  private extractRoleFromResponseBody(body: unknown): string | undefined {
+    if (!body || typeof body !== 'object') {
+      return undefined;
+    }
+
+    const candidate = body as Record<string, unknown>;
+    const directRole = candidate['role'] ?? candidate['userRole'];
+
+    if (typeof directRole === 'string' && directRole.trim()) {
+      return directRole.trim().toUpperCase().replace(/^ROLE_/, '');
+    }
+
+    const sources = [candidate['roles'], candidate['authorities']];
+    for (const source of sources) {
+      const role = this.extractRoleFromUnknown(source);
+      if (role) {
+        return role;
+      }
+    }
+
+    if (candidate['user'] && typeof candidate['user'] === 'object') {
+      return this.extractRoleFromResponseBody(candidate['user']);
+    }
+
+    return undefined;
+  }
+
+  private extractRoleFromUnknown(source: unknown): string | undefined {
+    if (typeof source === 'string') {
+      const values = source.split(/[\s,]+/).map((value) => value.trim().toUpperCase()).filter(Boolean);
+      if (values.includes('ADMIN') || values.includes('ROLE_ADMIN')) {
+        return 'ADMIN';
+      }
+
+      if (values.includes('USER') || values.includes('ROLE_USER')) {
+        return 'USER';
+      }
+
+      return undefined;
+    }
+
+    if (Array.isArray(source)) {
+      for (const item of source) {
+        const role = this.extractRoleFromUnknown(item);
+        if (role) {
+          return role;
+        }
+      }
+      return undefined;
+    }
+
+    if (source && typeof source === 'object') {
+      const objectValue = source as Record<string, unknown>;
+      return (
+        this.extractRoleFromUnknown(objectValue['role']) ||
+        this.extractRoleFromUnknown(objectValue['authority']) ||
+        this.extractRoleFromUnknown(objectValue['name']) ||
+        this.extractRoleFromUnknown(objectValue['value'])
+      );
+    }
+
+    return undefined;
   }
 
   private resolveSignInError(errorResponse: HttpErrorResponse): string {

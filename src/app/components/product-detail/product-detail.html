@@ -51,7 +51,7 @@
       <div class="meta" *ngIf="product.size || product.burnTime || product.scentFamily">
         <div *ngIf="product.size"><strong>Size:</strong> {{ product.size }}</div>
         <div *ngIf="product.burnTime"><strong>Burn time:</strong> {{ product.burnTime }}</div>
-        <div *ngIf="product.scentFamily"><strong>Scent family:</strong> {{ product.scentFamily }}</div>
+        <div *ngIf="product.scentFamily"><strong>Scent family:</strong> {{ formatScentFamily(product.scentFamily) }}</div>
       </div>
 
       <div class="highlights" *ngIf="product.highlights?.length">

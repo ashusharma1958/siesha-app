@@ -17,12 +17,14 @@ export type SignUpRequest = {
   contactNumber: string;
   password: string;
   confirmPassword: string;
+  role: string;
 };
 
 export type SignUpResponseBody = {
   token: string;
   email: string;
   fullName: string;
+  role?: string;
 };
 
 export type SignInRequest = {
@@ -34,13 +36,29 @@ export type SignInResponseBody = {
   token: string;
   email: string;
   fullName: string;
+  role?: string;
 };
 
 export type ProfileOrder = {
-  id: string;
+  id?: string;
+  orderNumber?: string;
   date: string;
   total: string;
   status: string;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  items?: ProfileOrderItem[];
+  orderItems?: ProfileOrderItem[];
+};
+
+export type ProfileOrderItem = {
+  id?: number | string;
+  productId?: number | string;
+  productName?: string;
+  quantity?: number;
+  unitPrice?: number | string;
+  totalPrice?: number | string;
+  productImage?: string;
 };
 
 export type ProfileAddress = {

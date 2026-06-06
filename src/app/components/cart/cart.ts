@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { CartService, CartItem } from '../../services/cart.service';
@@ -7,12 +8,30 @@ import { CartService, CartItem } from '../../services/cart.service';
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cart.html',
   styleUrls: ['./cart.css']
 })
 export class CartComponent {
+  readonly specialInstructionsLimit = 500;
+
   constructor(private router: Router, public cart: CartService) {}
+
+  get specialInstructions(): string {
+    return this.cart.specialInstructions;
+  }
+
+  set specialInstructions(value: string) {
+    this.cart.setSpecialInstructions(value);
+  }
+
+  get specialInstructionsLength(): number {
+    return this.specialInstructions.length;
+  }
+
+  get isSpecialInstructionsLimitReached(): boolean {
+    return this.specialInstructionsLength >= this.specialInstructionsLimit;
+  }
 
   trackByItem(index: number, item: CartItem): number {
     return item.product.id;
