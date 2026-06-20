@@ -1,0 +1,222 @@
+<app-navigation></app-navigation>
+
+<section class="admin-vouchers-page">
+  <div class="container py-4">
+    <div class="admin-header">
+      <h2>Voucher Management</h2>
+      <p>Manage vouchers and discounts from one place.</p>
+    </div>
+
+    <div class="stats-grid" *ngIf="stats as s">
+      <article class="stat-card">
+        <h6>Total</h6>
+        <strong>{{ s.totalVouchers }}</strong>
+      </article>
+      <article class="stat-card">
+        <h6>Active</h6>
+        <strong>{{ s.activeVouchers }}</strong>
+      </article>
+      <article class="stat-card">
+        <h6>Inactive</h6>
+        <strong>{{ s.inactiveVouchers }}</strong>
+      </article>
+    </div>
+
+    <div class="toolbar">
+      <label for="statusFilter">Filter by status</label>
+      <select
+        id="statusFilter"
+        class="form-select"
+        [(ngModel)]="selectedStatus"
+        (change)="onStatusFilterChange()"
+      >
+        <option *ngFor="let option of statusOptions" [value]="option">
+          {{ option }}
+        </option>
+      </select>
+      <button
+        type="button"
+        class="btn btn-success"
+        (click)="startAddNew()"
+        [disabled]="isAddingNew || isUpdating"
+      >
+        + Add New Voucher
+      </button>
+    </div>
+
+    <div class="new-voucher-form" *ngIf="isAddingNew">
+      <div class="form-section">
+        <h5>Create New Voucher</h5>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="newCode">Voucher Code</label>
+            <input
+              id="newCode"
+              type="text"
+              class="form-control"
+              [(ngModel)]="newVoucher.code"
+              (ngModelChange)="onVoucherCodeInput('new', $event)"
+              pattern="[A-Za-z0-9]*"
+              placeholder="e.g., SUMMER20"
+              [disabled]="isUpdating"
+            >
+          </div>
+          <div class="form-group">
+            <label for="newDiscount">Discount %</label>
+            <select
+              id="newDiscount"
+              class="form-control"
+              [(ngModel)]="newVoucher.percentageDiscount"
+              [disabled]="isUpdating"
+            >
+              <option *ngFor="let discount of discountOptions" [ngValue]="discount">
+                {{ discount }}%
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newMinValue">Minimum Cart Value</label>
+            <input
+              id="newMinValue"
+              type="number"
+              class="form-control"
+              [(ngModel)]="newVoucher.minimumCartValue"
+              placeholder="e.g., 500"
+              [disabled]="isUpdating"
+            >
+          </div>
+        </div>
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-success"
+            (click)="addNewVoucher()"
+            [disabled]="isUpdating"
+          >
+            Create Voucher
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cancelAddNew()"
+            [disabled]="isUpdating"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table table-striped align-middle" *ngIf="filteredVouchers.length > 0; else emptyState">
+        <thead>
+          <tr>
+            <th>Voucher Code</th>
+            <th>Percentage Discount</th>
+            <th>Minimum Cart Value</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let voucher of filteredVouchers">
+            <td class="voucher-code">
+              <div *ngIf="editingId !== voucher.id">
+                <strong>{{ voucher.code }}</strong>
+              </div>
+              <input
+                *ngIf="editingId === voucher.id"
+                type="text"
+                class="form-control form-control-sm"
+                [ngModel]="editingVoucher?.code"
+                (ngModelChange)="onVoucherCodeInput('edit', $event)"
+                pattern="[A-Za-z0-9]*"
+                [disabled]="isUpdating"
+              >
+            </td>
+            <td class="discount">
+              <div *ngIf="editingId !== voucher.id">
+                {{ voucher.percentageDiscount }}%
+              </div>
+              <select
+                *ngIf="editingId === voucher.id"
+                class="form-control form-control-sm"
+                [ngModel]="editingVoucher?.percentageDiscount"
+                (ngModelChange)="editingVoucher!.percentageDiscount = $event"
+                [disabled]="isUpdating"
+              >
+                <option *ngFor="let discount of discountOptions" [ngValue]="discount">
+                  {{ discount }}%
+                </option>
+              </select>
+            </td>
+            <td class="min-value">
+              <div *ngIf="editingId !== voucher.id">
+                Rs. {{ voucher.minimumCartValue }}
+              </div>
+              <input
+                *ngIf="editingId === voucher.id"
+                type="number"
+                class="form-control form-control-sm"
+                [ngModel]="editingVoucher?.minimumCartValue"
+                (ngModelChange)="editingVoucher!.minimumCartValue = $event"
+                [disabled]="isUpdating"
+              >
+            </td>
+            <td>
+              <span class="badge rounded-pill" [class]="'status-' + voucher.status.toLowerCase()">
+                {{ voucher.status | uppercase }}
+              </span>
+            </td>
+            <td>
+              <div *ngIf="editingId !== voucher.id" class="d-flex gap-2">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-primary"
+                  (click)="startEdit(voucher)"
+                  [disabled]="isUpdating"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-success]="voucher.status === 'active'"
+                  [class.btn-danger]="voucher.status === 'inactive'"
+                  (click)="toggleStatus(voucher)"
+                  [disabled]="isUpdating"
+                >
+                  {{ voucher.status === 'active' ? 'Deactivate' : 'Activate' }}
+                </button>
+              </div>
+              <div *ngIf="editingId === voucher.id" class="d-flex gap-2">
+                <button
+                  type="button"
+                  class="btn btn-success btn-sm"
+                  (click)="saveVoucher(voucher)"
+                  [disabled]="isUpdating"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  (click)="cancelEdit()"
+                  [disabled]="isUpdating"
+                >
+                  Cancel
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #emptyState>
+      <div class="text-center py-5">No vouchers found for the selected filter.</div>
+    </ng-template>
+  </div>
+</section>
+
+<app-footer></app-footer>

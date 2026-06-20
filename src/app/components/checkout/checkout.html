@@ -301,6 +301,43 @@
         </button>
       </div>
 
+      <div class="small text-muted mt-3 mb-2" *ngIf="vouchersLoading">
+        Loading eligible vouchers...
+      </div>
+
+      <div class="small mb-2" *ngIf="vouchersLoadError" style="color:#b42318">
+        {{ vouchersLoadError }}
+      </div>
+
+      <div *ngIf="!vouchersLoading" class="voucher-suggestion-list mb-3">
+        <div class="small fw-semibold mb-2">Available vouchers for your cart</div>
+
+        <div *ngIf="eligibleVouchers.length === 0" class="small text-muted">
+          No active vouchers match your current cart value.
+        </div>
+
+        <details
+          *ngFor="let voucher of eligibleVouchers"
+          class="voucher-faq-item"
+        >
+          <summary class="voucher-faq-summary">
+            <span class="voucher-suggestion-code">{{ voucher.code }}</span>
+            <span class="voucher-suggestion-meta">
+              {{ voucher.discountPercentage }}% off · Min cart {{ voucher.minimumCartValue | number:'1.0-0' }}
+            </span>
+          </summary>
+          <div class="voucher-faq-body">
+            <button
+              type="button"
+              class="voucher-faq-apply"
+              (click)="applySuggestedVoucher(voucher)"
+            >
+              Apply
+            </button>
+          </div>
+        </details>
+      </div>
+
       <div *ngIf="discountError" class="small mb-2" style="color:#b42318">{{ discountError }}</div>
       <div *ngIf="discountApplied" class="discount-success small mb-2">
         <span>&#10003; Code <strong>{{ discountCode.trim().toUpperCase() }}</strong> applied — {{ discountPercent }}% off</span>

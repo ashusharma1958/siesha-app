@@ -201,6 +201,103 @@ input:not([type="checkbox"]):not([type="radio"]),select{
   margin-bottom: 20px;
 }
 
+.voucher-suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.voucher-faq-item {
+  display: block;
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.voucher-faq-item[open] {
+  border-color: #0d5bd8;
+  box-shadow: 0 8px 20px rgba(13, 91, 216, 0.08);
+}
+
+.voucher-faq-summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: left;
+  background: #fff;
+  color: #111827;
+}
+
+.voucher-faq-summary::-webkit-details-marker {
+  display: none;
+}
+
+.voucher-faq-summary::after {
+  content: '+';
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 700;
+}
+
+.voucher-faq-item[open] .voucher-faq-summary::after {
+  content: '–';
+}
+
+.voucher-faq-summary:hover {
+  background: #f8fbff;
+}
+
+.voucher-faq-body {
+  border-top: 1px solid #eef2f7;
+  padding: 12px 14px 14px;
+  background: #fafcff;
+  text-align: left;
+}
+
+.voucher-faq-apply {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #0d5bd8;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.voucher-faq-apply:hover {
+  background: #0846a3;
+}
+
+.voucher-suggestion-code {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.voucher-suggestion-meta {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
 .discount-input {
   height: 48px;
   border-radius: 8px;

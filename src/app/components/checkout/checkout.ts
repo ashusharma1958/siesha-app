@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 import { AddAddressRequest, AuthService, ProfileAddress } from '../../services/auth.service';
 import { CreateOrderRequest, OrderService } from '../../services/order.service';
 import { CartItem, CartService } from '../../services/cart.service';
+import { ApiVoucher, VoucherService } from '../../services/voucher.service';
 import { Footer } from '../footer/footer';
 import { Navigation } from '../navigation/navigation';
 
@@ -50,6 +51,9 @@ export class CheckoutComponent implements OnInit {
   discountPercent = 0;
   discountApplied = false;
   discountError = '';
+  availableVouchers: ApiVoucher[] = [];
+  vouchersLoading = false;
+  vouchersLoadError = '';
 
   isPlacingOrder = false;
   orderError = '';
@@ -70,8 +74,12 @@ export class CheckoutComponent implements OnInit {
     return this.subtotal - this.discountAmount;
   }
 
+  get eligibleVouchers(): ApiVoucher[] {
+    return this.availableVouchers.filter((voucher) => this.isVoucherEligible(voucher));
+  }
+
   applyDiscount(): void {
-    const code = this.discountCode.trim().toLowerCase();
+    const code = this.normalizeVoucherCode(this.discountCode);
     this.discountError = '';
     this.discountApplied = false;
     this.discountPercent = 0;
@@ -81,12 +89,34 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    if (code === 'firstorder') {
-      this.discountPercent = 20;
-      this.discountApplied = true;
-    } else {
+    const matchedVoucher = this.availableVouchers.find(
+      (voucher) => this.normalizeVoucherCode(voucher.code) === code
+    );
+
+    if (!matchedVoucher) {
       this.discountError = 'Invalid discount code.';
+      return;
     }
+
+    if (!this.isVoucherActive(matchedVoucher)) {
+      this.discountError = 'This discount code is inactive.';
+      return;
+    }
+
+    const minimumCartValue = Number(matchedVoucher.minimumCartValue ?? 0);
+    if (this.subtotal < minimumCartValue) {
+      this.discountError = `This code requires a minimum cart value of ₹${minimumCartValue.toFixed(2)}.`;
+      return;
+    }
+
+    this.discountPercent = Number(matchedVoucher.discountPercentage ?? 0);
+    this.discountCode = matchedVoucher.code;
+    this.discountApplied = true;
+  }
+
+  applySuggestedVoucher(voucher: ApiVoucher): void {
+    this.discountCode = voucher.code;
+    this.applyDiscount();
   }
 
   addressForm = {
@@ -106,6 +136,7 @@ export class CheckoutComponent implements OnInit {
     private authService: AuthService,
     private cartService: CartService,
     private orderService: OrderService,
+    private voucherService: VoucherService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -126,6 +157,10 @@ export class CheckoutComponent implements OnInit {
       if (this.isSignedIn && !this.isAddressMode) {
         this.loadSavedAddresses();
       }
+
+      if (!this.isAddressMode) {
+        this.loadAvailableVouchers();
+      }
     });
   }
 
@@ -144,6 +179,28 @@ export class CheckoutComponent implements OnInit {
         if (this.savedAddresses.length > 0 && !this.selectedAddressId) {
           this.selectedAddressId = this.savedAddresses[0].id ?? null;
         }
+      }
+    });
+  }
+
+  private loadAvailableVouchers(): void {
+    this.vouchersLoading = true;
+    this.vouchersLoadError = '';
+
+    this.voucherService.getVouchers().pipe(
+      timeout(8000),
+      catchError(() => {
+        this.vouchersLoadError = 'Unable to load available vouchers right now.';
+        return of([] as ApiVoucher[]);
+      }),
+      finalize(() => {
+        this.vouchersLoading = false;
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: (response) => {
+        this.availableVouchers = this.extractVoucherList(response).filter((voucher) => this.isVoucherActive(voucher));
+        this.cdr.markForCheck();
       }
     });
   }
@@ -396,6 +453,50 @@ export class CheckoutComponent implements OnInit {
     event.preventDefault();
     const clipboardText = event.clipboardData?.getData('text') ?? '';
     this.addressForm.phone = clipboardText.replace(/\D/g, '').slice(0, 10);
+  }
+
+  private isVoucherEligible(voucher: ApiVoucher): boolean {
+    return this.isVoucherActive(voucher) && this.subtotal >= Number(voucher.minimumCartValue ?? 0);
+  }
+
+  private isVoucherActive(voucher: ApiVoucher): boolean {
+    const record = voucher as Record<string, unknown>;
+    const activeValue = record['isActive'] ?? record['active'];
+    return this.toBoolean(activeValue);
+  }
+
+  private normalizeVoucherCode(value: string): string {
+    return String(value ?? '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '');
+  }
+
+  private extractVoucherList(response: unknown): ApiVoucher[] {
+    if (Array.isArray(response)) {
+      return response as ApiVoucher[];
+    }
+
+    if (response && typeof response === 'object') {
+      const payload = response as Record<string, unknown>;
+      if (Array.isArray(payload['body'])) {
+        return payload['body'] as ApiVoucher[];
+      }
+    }
+
+    return [];
+  }
+
+  private toBoolean(value: unknown): boolean {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      return ['true', '1', 'active', 'yes', 'y'].includes(normalized);
+    }
+
+    return false;
   }
 
   placeOrder(): void {

@@ -90,14 +90,17 @@
         <li class="nav-item">
           <a class="nav-link" routerLink="/shop">Shop</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="!isAdmin">
           <a class="nav-link" routerLink="/contact-us">Contact Us</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="!isAdmin">
           <a class="nav-link" routerLink="/about-us">About Us</a>
         </li>
         <li class="nav-item" *ngIf="isAdmin">
           <a class="nav-link" routerLink="/admin/orders">Order Manage</a>
+        </li>
+        <li class="nav-item" *ngIf="isAdmin">
+          <a class="nav-link" routerLink="/admin/vouchers">Voucher Management</a>
         </li>
       </ul>
     </div>
