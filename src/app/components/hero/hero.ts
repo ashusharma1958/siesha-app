@@ -1,6 +1,7 @@
 import { Component, AfterViewInit, ChangeDetectorRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 import Swiper from 'swiper';
 import { Pagination, Autoplay } from 'swiper/modules';
@@ -14,6 +15,7 @@ type HeroSlide = {
   id: number;
   image: string;
   alt: string;
+  productRedirectionUrl?: string;
 };
 
 type HeroResponse = {
@@ -37,7 +39,11 @@ export class Hero implements OnInit, AfterViewInit {
   swiper: Swiper | undefined;
   viewReady = false;
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.loadSlides();
@@ -97,5 +103,15 @@ export class Hero implements OnInit, AfterViewInit {
 
   trackBySlide(index: number, slide: any): number {
     return slide.id;
+  }
+
+  onSlideClick(slide: HeroSlide) {
+    const redirectUrl = slide.productRedirectionUrl;
+
+    if (!redirectUrl) {
+      return;
+    }
+
+    this.router.navigateByUrl(redirectUrl);
   }
 }

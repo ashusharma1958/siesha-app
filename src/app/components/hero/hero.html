@@ -2,7 +2,11 @@
   <div class="hero-swiper">
     <div #swiperContainer class="swiper">
       <div class="swiper-wrapper">
-        <div class="swiper-slide" *ngFor="let slide of slides; trackBy: trackBySlide">
+        <div
+          class="swiper-slide"
+          *ngFor="let slide of slides; trackBy: trackBySlide"
+          (click)="onSlideClick(slide)"
+        >
           <img [src]="slide.image" [alt]="slide.alt" class="hero-image">
         </div>
       </div>

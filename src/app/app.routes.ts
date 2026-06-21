@@ -25,6 +25,10 @@ export const routes: Routes = [
     component: Shop
   },
   {
+    path: 'products',
+    component: Shop
+  },
+  {
     path: 'faq',
     component: Faq
   },
@@ -38,6 +42,10 @@ export const routes: Routes = [
   },
   {
     path: 'product/:id',
+    component: ProductDetail
+  },
+  {
+    path: 'products/:id',
     component: ProductDetail
   },
   {
