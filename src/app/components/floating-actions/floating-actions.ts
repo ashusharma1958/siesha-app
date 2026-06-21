@@ -7,5 +7,8 @@ import { Component } from '@angular/core';
   styleUrl: './floating-actions.css',
 })
 export class FloatingActions {
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
 }

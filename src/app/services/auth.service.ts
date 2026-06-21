@@ -51,6 +51,14 @@ export type ProfileOrder = {
   orderItems?: ProfileOrderItem[];
 };
 
+export type ProfileOrderItemReview = {
+  id?: number | string;
+  rating?: number;
+  review?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type ProfileOrderItem = {
   id?: number | string;
   productId?: number | string;
@@ -59,6 +67,13 @@ export type ProfileOrderItem = {
   unitPrice?: number | string;
   totalPrice?: number | string;
   productImage?: string;
+  canReview?: boolean;
+  review?: ProfileOrderItemReview | null;
+};
+
+export type UpsertOrderReviewRequest = {
+  rating: number;
+  review: string;
 };
 
 export type ProfileAddress = {
@@ -161,6 +176,28 @@ export class AuthService {
   deleteAddress(id: number | string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(
       `${environment.apiBaseUrl}/api/addresses/${id}`
+    );
+  }
+
+  createOrderProductReview(
+    orderId: number,
+    productId: number,
+    payload: UpsertOrderReviewRequest
+  ): Observable<ApiResponse<ProfileOrderItemReview>> {
+    return this.http.post<ApiResponse<ProfileOrderItemReview>>(
+      `${environment.apiBaseUrl}/api/reviews/orders/${orderId}/products/${productId}`,
+      payload
+    );
+  }
+
+  updateOrderProductReview(
+    orderId: number,
+    productId: number,
+    payload: UpsertOrderReviewRequest
+  ): Observable<ApiResponse<ProfileOrderItemReview>> {
+    return this.http.put<ApiResponse<ProfileOrderItemReview>>(
+      `${environment.apiBaseUrl}/api/reviews/orders/${orderId}/products/${productId}`,
+      payload
     );
   }
 

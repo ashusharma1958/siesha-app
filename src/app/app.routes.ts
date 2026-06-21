@@ -13,6 +13,7 @@ import { SignUpComponent } from './components/sign-up/sign-up';
 import { ProfileComponent } from './components/profile/profile';
 import { AdminOrdersComponent } from './components/admin-orders/admin-orders';
 import { VoucherManagementComponent } from './components/voucher-management/voucher-management';
+import { AdminQueriesComponent } from './components/admin-queries/admin-queries';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -75,6 +76,10 @@ export const routes: Routes = [
   {
     path: 'admin/vouchers',
     component: VoucherManagementComponent
+  },
+  {
+    path: 'admin/queries',
+    component: AdminQueriesComponent
   },
   {
     path: 'auth/callback',

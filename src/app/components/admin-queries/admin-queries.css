@@ -1,0 +1,43 @@
+.admin-queries-page {
+  background: #f7f8fb;
+  min-height: 70vh;
+}
+
+.admin-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.admin-header p {
+  color: #667085;
+  margin-bottom: 1.2rem;
+}
+
+.table-wrap {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+}
+
+.table {
+  margin: 0;
+}
+
+.message-cell {
+  min-width: 280px;
+  max-width: 420px;
+  white-space: normal;
+  word-break: break-word;
+  color: #334155;
+}
+
+.consent-yes {
+  background: #ecfdf3;
+  color: #166534;
+}
+
+.consent-no {
+  background: #fef2f2;
+  color: #991b1b;
+}

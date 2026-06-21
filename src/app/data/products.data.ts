@@ -6,6 +6,15 @@ export type ProductImage = {
   isPrimary?: boolean | null;
 };
 
+export type ProductReview = {
+  id: number;
+  author: string;
+  rating: number;
+  title: string;
+  content: string;
+  date: string;
+};
+
 export type Product = {
   id: number;
   name: string;
@@ -23,4 +32,5 @@ export type Product = {
   burnTime?: string | null;
   scentFamily?: string | null;
   collection?: 'home' | 'shop' | null;
+  reviews?: ProductReview[] | null;
 };

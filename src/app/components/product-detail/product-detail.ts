@@ -7,7 +7,7 @@ import { Navigation as SwiperNavigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-import { Product, ProductImage } from '../../data/products.data';
+import { Product, ProductImage, ProductReview } from '../../data/products.data';
 import { Navigation } from '../navigation/navigation';
 import { Footer } from '../footer/footer';
 import { CartService } from '../../services/cart.service';
@@ -24,11 +24,13 @@ export class ProductDetail implements OnInit, OnDestroy {
 
   product: Product | undefined;
   galleryImages: ProductImage[] = [];
+  productReviews: ProductReview[] = [];
   fullStars: number[] = [];
   emptyStars: number[] = [];
   quantity = 1;
   viewReady = false;
-  swiper: Swiper | undefined;
+  gallerySwiper: Swiper | undefined;
+  reviewSwiper: Swiper | undefined;
 
   private routeSub?: Subscription;
 
@@ -54,6 +56,8 @@ export class ProductDetail implements OnInit, OnDestroy {
         next: (item) => {
           this.product = item;
           this.galleryImages = this.resolveGalleryImages(item);
+          this.productReviews = this.resolveReviews(item);
+          this.loadActualReviews(id);
           this.updateStars();
           this.cdr.detectChanges();
           this.initSwiperIfReady();
@@ -62,6 +66,7 @@ export class ProductDetail implements OnInit, OnDestroy {
           console.error('Failed to load product detail', error);
           this.product = undefined;
           this.galleryImages = [];
+          this.productReviews = [];
           this.updateStars();
           this.cdr.detectChanges();
         }
@@ -76,8 +81,10 @@ export class ProductDetail implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.routeSub?.unsubscribe();
-    this.swiper?.destroy(true, true);
-    this.swiper = undefined;
+    this.gallerySwiper?.destroy(true, true);
+    this.gallerySwiper = undefined;
+    this.reviewSwiper?.destroy(true, true);
+    this.reviewSwiper = undefined;
   }
 
   get displayPrice(): number | undefined {
@@ -86,6 +93,16 @@ export class ProductDetail implements OnInit, OnDestroy {
     }
 
     return this.product.salePrice ?? this.product.price ?? undefined;
+  }
+
+  get formattedDescription(): string {
+    if (!this.product?.description) {
+      return '';
+    }
+
+    return this.product.description
+      .replace(/\\n/g, '\n')
+      .replace(/\/n/g, '\n');
   }
 
   formatScentFamily(value: string | null | undefined): string {
@@ -130,7 +147,24 @@ export class ProductDetail implements OnInit, OnDestroy {
     return image.id ?? index;
   }
 
+  trackByReview(index: number, review: ProductReview): number {
+    return review.id ?? index;
+  }
+
+  getReviewFilledStars(review: ProductReview): number[] {
+    return Array.from({ length: Math.min(Math.max(Math.round(review.rating ?? 0), 0), 5) }, (_, index) => index);
+  }
+
+  getReviewEmptyStars(review: ProductReview): number[] {
+    return Array.from({ length: Math.max(5 - Math.min(Math.max(Math.round(review.rating ?? 0), 0), 5), 0) }, (_, index) => index);
+  }
+
   private initSwiperIfReady() {
+    this.initGallerySwiperIfReady();
+    this.initReviewSwiperIfReady();
+  }
+
+  private initGallerySwiperIfReady() {
     if (!this.viewReady || !this.detailSwiperContainer || this.galleryImages.length === 0) {
       return;
     }
@@ -140,12 +174,12 @@ export class ProductDetail implements OnInit, OnDestroy {
         return;
       }
 
-      if (this.swiper) {
-        this.swiper.destroy(true, true);
-        this.swiper = undefined;
+      if (this.gallerySwiper) {
+        this.gallerySwiper.destroy(true, true);
+        this.gallerySwiper = undefined;
       }
 
-      this.swiper = new Swiper(this.detailSwiperContainer.nativeElement, {
+      this.gallerySwiper = new Swiper(this.detailSwiperContainer.nativeElement, {
         modules: [SwiperNavigation, Autoplay],
         slidesPerView: 1,
         spaceBetween: 12,
@@ -160,6 +194,56 @@ export class ProductDetail implements OnInit, OnDestroy {
         navigation: {
           nextEl: '.detail-swiper-next',
           prevEl: '.detail-swiper-prev'
+        }
+      });
+    }, 0);
+  }
+
+  private initReviewSwiperIfReady() {
+    if (!this.viewReady || !this.productReviews.length) {
+      return;
+    }
+
+    const reviewContainer = document.querySelector('.review-swiper') as HTMLElement | null;
+    if (!reviewContainer) {
+      return;
+    }
+
+    setTimeout(() => {
+      if (!reviewContainer) {
+        return;
+      }
+
+      if (this.reviewSwiper) {
+        this.reviewSwiper.destroy(true, true);
+        this.reviewSwiper = undefined;
+      }
+
+      this.reviewSwiper = new Swiper(reviewContainer, {
+        modules: [Autoplay],
+        slidesPerView: 1,
+        spaceBetween: 18,
+        loop: this.productReviews.length > 1,
+        autoplay: this.productReviews.length > 1
+          ? {
+              delay: 2500,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true
+            }
+          : false,
+        breakpoints: {
+          640: {
+            slidesPerView: 1.15,
+            spaceBetween: 18
+          },
+          900: {
+            slidesPerView: 2,
+            spaceBetween: 20
+          },
+          1200: {
+            slidesPerView: 3,
+            spaceBetween: 22
+          }
         }
       });
     }, 0);
@@ -185,5 +269,34 @@ export class ProductDetail implements OnInit, OnDestroy {
     }
 
     return [];
+  }
+
+  private resolveReviews(item: Product | undefined): ProductReview[] {
+    if (!item) {
+      return [];
+    }
+
+    return item.reviews ?? [];
+  }
+
+  private loadActualReviews(productId: number): void {
+    this.productService.getProductReviews(productId).subscribe({
+      next: (reviews) => {
+        this.productReviews = reviews;
+
+        if (this.reviewSwiper && reviews.length === 0) {
+          this.reviewSwiper.destroy(true, true);
+          this.reviewSwiper = undefined;
+        }
+
+        this.cdr.detectChanges();
+        this.initReviewSwiperIfReady();
+      },
+      error: () => {
+        this.productReviews = this.product?.reviews ?? [];
+        this.cdr.detectChanges();
+        this.initReviewSwiperIfReady();
+      }
+    });
   }
 }

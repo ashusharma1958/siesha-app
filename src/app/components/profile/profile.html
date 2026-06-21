@@ -51,18 +51,97 @@
             <div class="order-items" [class.expanded]="isOrderExpanded(order)">
               <h3>Items</h3>
               <div *ngIf="getOrderItems(order).length > 0; else noOrderItems">
-                <div class="order-item-row" *ngFor="let item of getOrderItems(order)">
-                  <div class="item-image-container">
-                    <img 
-                      [src]="getItemImage(item)" 
-                      [alt]="item.productName || 'Product'"
-                      class="item-image"
-                    />
+                <div class="order-item-block" *ngFor="let item of getOrderItems(order); let itemIndex = index">
+                  <div class="order-item-row">
+                    <div class="item-image-container">
+                      <img
+                        [src]="getItemImage(item)"
+                        [alt]="item.productName || 'Product'"
+                        class="item-image"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      class="item-name item-name-button"
+                      (click)="toggleItemReview(order, item, itemIndex)"
+                      [attr.aria-expanded]="isItemReviewOpen(order, item, itemIndex)"
+                    >
+                      {{ item.productName || '-' }}
+                    </button>
+                    <div class="item-qty">Qty: {{ item.quantity || 0 }}</div>
+                    <div class="item-price">Unit: {{ formatItemAmount(item.unitPrice) }}</div>
+                    <div class="item-price">Total: {{ formatItemAmount(item.totalPrice) }}</div>
                   </div>
-                  <div class="item-name">{{ item.productName || '-' }}</div>
-                  <div class="item-qty">Qty: {{ item.quantity || 0 }}</div>
-                  <div class="item-price">Unit: {{ formatItemAmount(item.unitPrice) }}</div>
-                  <div class="item-price">Total: {{ formatItemAmount(item.totalPrice) }}</div>
+
+                  <div
+                    class="item-review-panel"
+                    [class.expanded]="isItemReviewOpen(order, item, itemIndex)"
+                    [attr.aria-hidden]="!isItemReviewOpen(order, item, itemIndex)"
+                  >
+                    <div class="review-disabled-note" *ngIf="!canItemBeReviewed(item)">
+                      Review for this item is not available yet.
+                    </div>
+
+                    <div *ngIf="canItemBeReviewed(item)">
+                      <div class="review-section">
+                        <p class="review-label">Rating</p>
+                        <div class="review-stars" role="radiogroup" aria-label="Select rating">
+                          <button
+                            type="button"
+                            class="star-btn"
+                            *ngFor="let star of reviewStars"
+                            (click)="setItemReviewRating(order, item, itemIndex, star)"
+                            [class.filled]="star <= getItemReviewRating(order, item, itemIndex)"
+                            [attr.aria-checked]="star === getItemReviewRating(order, item, itemIndex)"
+                            role="radio"
+                            [disabled]="isItemReviewSubmitting(order, item, itemIndex)"
+                          >
+                            &#9733;
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="review-section">
+                        <label class="review-label" [attr.for]="'review-text-' + itemIndex">Review</label>
+                        <textarea
+                          class="review-textarea"
+                          [id]="'review-text-' + itemIndex"
+                          rows="4"
+                          maxlength="2000"
+                          placeholder="Write your review here"
+                          [value]="getItemReviewText(order, item, itemIndex)"
+                          (input)="updateItemReviewText(order, item, itemIndex, $event)"
+                        ></textarea>
+                        <p class="review-count">
+                          {{ getItemReviewText(order, item, itemIndex).length }}/2000
+                        </p>
+                      </div>
+
+                      <div class="review-actions">
+                        <button
+                          type="button"
+                          class="post-review-btn"
+                          (click)="submitItemReview(order, item, itemIndex)"
+                          [disabled]="!canSubmitItemReview(order, item, itemIndex)"
+                        >
+                          {{ getReviewActionLabel(order, item, itemIndex) }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <p
+                      class="review-feedback review-feedback-success"
+                      *ngIf="getItemReviewSuccess(order, item, itemIndex)"
+                    >
+                      {{ getItemReviewSuccess(order, item, itemIndex) }}
+                    </p>
+                    <p
+                      class="review-feedback review-feedback-error"
+                      *ngIf="getItemReviewError(order, item, itemIndex)"
+                    >
+                      {{ getItemReviewError(order, item, itemIndex) }}
+                    </p>
+                  </div>
                 </div>
               </div>
               <ng-template #noOrderItems>

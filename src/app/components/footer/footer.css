@@ -1,0 +1,39 @@
+.footer-inner {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.footer-columns {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+	gap: 32px;
+	align-items: start;
+}
+
+.footer-right,
+.footer-left {
+	min-width: 0;
+}
+
+.footer-right {
+	max-width: none;
+}
+
+.follow-strip {
+	margin-top: 0;
+}
+
+.footer-links {
+	align-items: flex-start;
+}
+
+.footer-links a {
+	margin-left: 0;
+}
+
+@media (max-width: 900px) {
+	.footer-columns {
+		grid-template-columns: 1fr;
+		gap: 24px;
+	}
+}

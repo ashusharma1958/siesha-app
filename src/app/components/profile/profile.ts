@@ -1,9 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, finalize, forkJoin, of, throwError } from 'rxjs';
 
-import { AuthService, ProfileAddress, ProfileOrder, ProfileOrderItem } from '../../services/auth.service';
+import {
+  AuthService,
+  ProfileAddress,
+  ProfileOrder,
+  ProfileOrderItem,
+  ProfileOrderItemReview,
+  UpsertOrderReviewRequest
+} from '../../services/auth.service';
 import { Footer } from '../footer/footer';
 import { Navigation } from '../navigation/navigation';
 
@@ -24,6 +32,13 @@ export class ProfileComponent implements OnInit {
   orders: ProfileOrder[] = [];
   addresses: ProfileAddress[] = [];
   expandedOrderKeys = new Set<string>();
+  activeReviewKey: string | null = null;
+  readonly reviewStars = [1, 2, 3, 4, 5];
+  private reviewRatingByKey: Record<string, number> = {};
+  private reviewTextByKey: Record<string, string> = {};
+  private reviewSubmittingByKey: Record<string, boolean> = {};
+  private reviewSuccessByKey: Record<string, string> = {};
+  private reviewErrorByKey: Record<string, string> = {};
   private orderItemsByKey: Record<string, ProfileOrderItem[]> = {};
 
   constructor(
@@ -84,6 +99,9 @@ export class ProfileComponent implements OnInit {
   toggleOrderItems(order: ProfileOrder): void {
     const key = this.getOrderKey(order);
 
+    // Keep only one interaction open at a time: close review panel on order toggle.
+    this.activeReviewKey = null;
+
     if (this.expandedOrderKeys.has(key)) {
       this.expandedOrderKeys.delete(key);
       return;
@@ -117,11 +135,186 @@ export class ProfileComponent implements OnInit {
         quantity: Number(item['quantity'] ?? 0),
         unitPrice: (item['unitPrice'] as number | string | undefined) ?? item['price'] as number | string | undefined,
         totalPrice: (item['totalPrice'] as number | string | undefined) ?? item['amount'] as number | string | undefined,
-        productImage: (item['productImage'] as string | undefined) ?? (item['product_image'] as string | undefined) ?? undefined
+        productImage: (item['productImage'] as string | undefined) ?? (item['product_image'] as string | undefined) ?? undefined,
+        canReview: this.resolveCanReview(item['canReview'], order),
+        review: this.normalizeItemReview(item['review'])
       }));
 
     this.orderItemsByKey[key] = normalized;
     return normalized;
+  }
+
+  toggleItemReview(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): void {
+    const reviewKey = this.getReviewKey(order, item, itemIndex);
+
+    if (this.activeReviewKey === reviewKey) {
+      this.activeReviewKey = null;
+      return;
+    }
+
+    this.activeReviewKey = reviewKey;
+
+    const existingReview = item.review;
+    this.reviewRatingByKey[reviewKey] = this.normalizeRating(existingReview?.rating) ?? 5;
+    this.reviewTextByKey[reviewKey] = existingReview?.review?.trim() ?? '';
+    this.reviewSuccessByKey[reviewKey] = '';
+    this.reviewErrorByKey[reviewKey] = '';
+  }
+
+  isItemReviewOpen(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): boolean {
+    return this.activeReviewKey === this.getReviewKey(order, item, itemIndex);
+  }
+
+  setItemReviewRating(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number, rating: number): void {
+    const reviewKey = this.getReviewKey(order, item, itemIndex);
+    this.reviewRatingByKey[reviewKey] = this.normalizeRating(rating) ?? 5;
+    this.reviewSuccessByKey[reviewKey] = '';
+    this.reviewErrorByKey[reviewKey] = '';
+  }
+
+  getItemReviewRating(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): number {
+    const reviewKey = this.getReviewKey(order, item, itemIndex);
+    return this.reviewRatingByKey[reviewKey] ?? 5;
+  }
+
+  updateItemReviewText(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number, event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement | null;
+    const reviewKey = this.getReviewKey(order, item, itemIndex);
+    this.reviewTextByKey[reviewKey] = textarea?.value ?? '';
+    this.reviewSuccessByKey[reviewKey] = '';
+    this.reviewErrorByKey[reviewKey] = '';
+  }
+
+  getItemReviewText(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): string {
+    const reviewKey = this.getReviewKey(order, item, itemIndex);
+    return this.reviewTextByKey[reviewKey] ?? '';
+  }
+
+  canItemBeReviewed(item: ProfileOrderItem): boolean {
+    return item.canReview === true;
+  }
+
+  hasItemReview(item: ProfileOrderItem): boolean {
+    return !!item.review;
+  }
+
+  getReviewActionLabel(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): string {
+    const isSubmitting = this.isItemReviewSubmitting(order, item, itemIndex);
+    const baseLabel = this.hasItemReview(item) ? 'Update' : 'Post';
+
+    if (!isSubmitting) {
+      return baseLabel;
+    }
+
+    return this.hasItemReview(item) ? 'Updating...' : 'Posting...';
+  }
+
+  isItemReviewSubmitting(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): boolean {
+    const reviewKey = this.getReviewKey(order, item, itemIndex);
+    return this.reviewSubmittingByKey[reviewKey] === true;
+  }
+
+  getItemReviewSuccess(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): string {
+    const reviewKey = this.getReviewKey(order, item, itemIndex);
+    return this.reviewSuccessByKey[reviewKey] ?? '';
+  }
+
+  getItemReviewError(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): string {
+    const reviewKey = this.getReviewKey(order, item, itemIndex);
+    return this.reviewErrorByKey[reviewKey] ?? '';
+  }
+
+  canSubmitItemReview(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): boolean {
+    if (!this.canItemBeReviewed(item)) {
+      return false;
+    }
+
+    const orderId = this.resolveOrderId(order);
+    if (orderId === null || this.resolveProductId(item) === null) {
+      return false;
+    }
+
+    const rating = this.getItemReviewRating(order, item, itemIndex);
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      return false;
+    }
+
+    const comment = this.getItemReviewText(order, item, itemIndex).trim();
+    if (comment.length === 0 || comment.length > 2000) {
+      return false;
+    }
+
+    return !this.isItemReviewSubmitting(order, item, itemIndex);
+  }
+
+  submitItemReview(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): void {
+    const reviewKey = this.getReviewKey(order, item, itemIndex);
+    const orderId = this.resolveOrderId(order);
+    const productId = this.resolveProductId(item);
+    const rating = this.getItemReviewRating(order, item, itemIndex);
+    const comment = this.getItemReviewText(order, item, itemIndex).trim();
+
+    this.reviewSuccessByKey[reviewKey] = '';
+    this.reviewErrorByKey[reviewKey] = '';
+
+    if (!this.canItemBeReviewed(item)) {
+      this.reviewErrorByKey[reviewKey] = 'This item is not eligible for review yet.';
+      return;
+    }
+
+    if (orderId === null) {
+      this.reviewErrorByKey[reviewKey] = 'Unable to identify this order for review.';
+      return;
+    }
+
+    if (productId === null) {
+      this.reviewErrorByKey[reviewKey] = 'Unable to identify this product for review.';
+      return;
+    }
+
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      this.reviewErrorByKey[reviewKey] = 'Rating is required and must be between 1 and 5.';
+      return;
+    }
+
+    if (!comment) {
+      this.reviewErrorByKey[reviewKey] = 'Please enter your review before posting.';
+      return;
+    }
+
+    if (comment.length > 2000) {
+      this.reviewErrorByKey[reviewKey] = 'Review must be 2000 characters or less.';
+      return;
+    }
+
+    const payload: UpsertOrderReviewRequest = { rating, review: comment };
+    const hasExistingReview = this.hasItemReview(item);
+
+    this.reviewSubmittingByKey[reviewKey] = true;
+
+    this.submitOrderReview(orderId, productId, payload, hasExistingReview)
+      .pipe(
+        catchError((error: unknown) => {
+          if (!hasExistingReview && this.isConflictError(error)) {
+            return this.authService.updateOrderProductReview(orderId, productId, payload);
+          }
+          return throwError(() => error);
+        }),
+        finalize(() => {
+          this.reviewSubmittingByKey[reviewKey] = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.reviewSuccessByKey[reviewKey] = hasExistingReview ? 'Review updated successfully.' : 'Review posted successfully.';
+          this.reviewErrorByKey[reviewKey] = '';
+          this.refreshOrdersAfterReview();
+        },
+        error: (error: unknown) => {
+          this.reviewErrorByKey[reviewKey] = this.mapReviewError(error, hasExistingReview);
+          this.reviewSuccessByKey[reviewKey] = '';
+        }
+      });
   }
 
   getItemImage(item: ProfileOrderItem): string {
@@ -231,6 +424,130 @@ export class ProfileComponent implements OnInit {
 
   private getOrderKey(order: ProfileOrder): string {
     return String(order.orderNumber ?? order.id ?? 'unknown-order');
+  }
+
+  private getReviewKey(order: ProfileOrder, item: ProfileOrderItem, itemIndex: number): string {
+    const orderKey = this.getOrderKey(order);
+    const itemIdentity = String(item.id ?? item.productId ?? item.productName ?? itemIndex);
+    return `${orderKey}::${itemIdentity}::${itemIndex}`;
+  }
+
+  private resolveProductId(item: ProfileOrderItem): number | null {
+    const raw = item.productId ?? item.id;
+    if (raw == null) {
+      return null;
+    }
+
+    const normalized = Number(raw);
+    if (!Number.isInteger(normalized) || normalized <= 0) {
+      return null;
+    }
+
+    return normalized;
+  }
+
+  private resolveOrderId(order: ProfileOrder): number | null {
+    if (order.id == null) {
+      return null;
+    }
+
+    const normalized = Number(order.id);
+    if (!Number.isInteger(normalized) || normalized <= 0) {
+      return null;
+    }
+
+    return normalized;
+  }
+
+  private normalizeRating(value: unknown): number | null {
+    const parsed = Number(value);
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 5) {
+      return null;
+    }
+
+    return parsed;
+  }
+
+  private normalizeItemReview(value: unknown): ProfileOrderItemReview | null {
+    if (!value || typeof value !== 'object') {
+      return null;
+    }
+
+    const payload = value as Record<string, unknown>;
+    const normalizedReview = String(payload['review'] ?? payload['comment'] ?? '').trim();
+    const rating = this.normalizeRating(payload['rating']);
+
+    if (!normalizedReview && rating == null) {
+      return null;
+    }
+
+    return {
+      id: (payload['id'] as number | string | undefined) ?? undefined,
+      rating: rating ?? undefined,
+      review: normalizedReview || undefined,
+      createdAt: (payload['createdAt'] as string | undefined) ?? undefined,
+      updatedAt: (payload['updatedAt'] as string | undefined) ?? undefined
+    };
+  }
+
+  private resolveCanReview(value: unknown, order: ProfileOrder): boolean {
+    // Respect explicit backend lock; otherwise allow reviews for fulfilled/in-transit orders.
+    if (value === false) {
+      return false;
+    }
+
+    if (value === true) {
+      return true;
+    }
+
+    const status = this.getOrderStatus(order);
+    return status === 'DELIVERED' || status === 'SHIPPED';
+  }
+
+  private submitOrderReview(orderId: number, productId: number, payload: UpsertOrderReviewRequest, updateMode: boolean) {
+    if (updateMode) {
+      return this.authService.updateOrderProductReview(orderId, productId, payload);
+    }
+
+    return this.authService.createOrderProductReview(orderId, productId, payload);
+  }
+
+  private isConflictError(error: unknown): boolean {
+    return error instanceof HttpErrorResponse && error.status === 409;
+  }
+
+  private mapReviewError(error: unknown, updateMode: boolean): string {
+    if (error instanceof HttpErrorResponse) {
+      if (error.status === 400) {
+        return 'Invalid review request. Please check rating and review text.';
+      }
+
+      if (error.status === 404) {
+        return updateMode
+          ? 'Review not found for this order item.'
+          : 'Order or product was not found for this review.';
+      }
+
+      if (error.status === 409) {
+        return 'A review already exists. Please update it instead.';
+      }
+    }
+
+    return updateMode ? 'Failed to update review. Please try again.' : 'Failed to post review. Please try again.';
+  }
+
+  private refreshOrdersAfterReview(): void {
+    this.authService
+      .getMyOrders()
+      .pipe(catchError(() => of({ body: this.orders as ProfileOrder[] })))
+      .subscribe((orders) => {
+        this.orders = this.extractList<ProfileOrder>(orders);
+        this.orderItemsByKey = {};
+        for (const order of this.orders) {
+          this.getOrderItems(order);
+        }
+        this.cdr.markForCheck();
+      });
   }
 
   private readTrackingUrlFromObject(source: unknown): string | null {

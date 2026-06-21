@@ -46,7 +46,7 @@
         <span>Rs.{{ displayPrice }}</span>
       </p>
 
-      <p class="description">{{ product.description }}</p>
+      <p class="description">{{ formattedDescription }}</p>
 
       <div class="meta" *ngIf="product.size || product.burnTime || product.scentFamily">
         <div *ngIf="product.size"><strong>Size:</strong> {{ product.size }}</div>
@@ -65,6 +65,34 @@
         <button type="button" class="qty-btn" (click)="decreaseQuantity()">-</button>
         <button type="button" class="primary" (click)="addToCart()">Add to cart ({{ quantity }})</button>
         <button type="button" class="qty-btn" (click)="increaseQuantity()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="reviews reviews--full" *ngIf="productReviews.length > 0">
+    <div class="reviews-header">
+      <h4>Customer Reviews</h4>
+      <span>{{ product.reviewCount || productReviews.length }} reviews</span>
+    </div>
+
+    <div #reviewSwiperContainer class="swiper review-swiper">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide" *ngFor="let review of productReviews; trackBy: trackByReview">
+          <article class="review-card">
+            <div class="review-top">
+              <div>
+                <h5>{{ review.title }}</h5>
+                <p class="review-meta">{{ review.author }} · {{ review.date }}</p>
+              </div>
+              <div class="review-rating">
+                <span *ngFor="let _ of getReviewFilledStars(review)">&#9733;</span>
+                <span *ngFor="let _ of getReviewEmptyStars(review)">&#9734;</span>
+              </div>
+            </div>
+
+            <p class="review-content">{{ review.content }}</p>
+          </article>
+        </div>
       </div>
     </div>
   </div>

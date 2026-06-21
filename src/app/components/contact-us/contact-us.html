@@ -6,40 +6,51 @@
 
     <div class="contact-highlights">
       <div class="contact-gallery" aria-label="Contact banner images">
-        <img src="/assets/image/slider-img-1.webp" alt="Scented candle setup 1" loading="lazy">
-        <img src="/assets/image/slider-img-2.webp" alt="Scented candle setup 2" loading="lazy">
-        <img src="/assets/image/slider-img-3.webp" alt="Scented candle setup 3" loading="lazy">
+        <img src="/assets/image/SIESHA_panel_1.png" alt="Scented candle setup 1" loading="lazy">
+        <img src="/assets/image/SIESHA_panel_2.png" alt="Scented candle setup 2" loading="lazy">
+        <img src="/assets/image/SIESHA_panel_3.png" alt="Scented candle setup 3" loading="lazy">
       </div>
 
       <div class="contact-notes">
         <article class="note-card">
-          <h2>For Businesses - Bulk &amp; Corporate Orders</h2>
+          <h2>Who We Cater To</h2>
           <p>Looking for candles made just for your event or audience? We offer full customization for:</p>
           <ul>
-            <li>Weddings &amp; Roka Ceremonies</li>
-            <li>Birthday Parties &amp; Baby Showers</li>
-            <li>Wellness Retreats &amp; Spas</li>
-            <li>Wedding Planners &amp; Event Stylists</li>
-            <li>Resellers &amp; White Labelling Partners</li>
+            <li>Corporate gifting &amp; employee appreciation</li>
+            <li>Weddings &amp; celebrations</li>
+            <li>Event favours &amp; keepsakes</li>
+            <li>Luxury gift hampers</li>
+            <li>Hotel amenities</li>
+            <li>Brand merchandise & white-label collections</li>
+            
           </ul>
           <p>
-            With low MOQs, wide fragrance libraries, tailored packaging, and exclusive scent profiles,
-            we make your candle vision a reality.
+           Minimum Order Quantity: 50 candles
           </p>
         </article>
 
         <article class="note-card">
-          <h2>For Custom Needs - Personalised, Just for You</h2>
-          <p>Need handcrafted gifting for small celebrations or personal moments? We can help with:</p>
+          <h2>What We Offer</h2>
           <ul>
-            <li>Personalized return gifts</li>
-            <li>Festive hampers &amp; gift sets</li>
-            <li>Custom labels &amp; thank-you notes</li>
-            <li>Special fragrance requests</li>
-            <li>Small batch made-to-order candles</li>
+            <li>Custom Labels – Names, logos, event details &amp; artwork</li>
+            <li>Signature Fragrances – Choose from our collection or create your own scent story</li>
+            <li>Custom Packaging – Sleeves, boxes, inserts &amp; message cards</li>
+            <li>White Label Solutions – Launch candles under your own brand</li>
+            <li>Premium Soy Wax – Hand-poured with high-quality ingredients</li>
+            <li>Modern Indian-Inspired Fragrances – Designed to evoke memories and rituals</li>
+            <li>Design Assistance – We work with you from concept to creation</li>
+            <li>PAN India Shipping – Seamless delivery across the country</li>
           </ul>
+         
+          <br>
+          
           <p>
-            Share your idea and budget, and our team will curate a beautiful, made-for-you candle experience.
+            Thank you for taking the time to explore SIESHA
+          </p>
+          <br>
+         
+          <p>
+            We personally pour, check, and pack every candle ourselves - because trust isn't given, it's earned order after order. As a small, hands-on brand, we're excited to grow alongside the businesses we partner with.
           </p>
         </article>
       </div>
@@ -52,53 +63,84 @@
         <div class="contact-info">
           <div class="info-block">
             <h3>Address</h3>
-            <p>Typsy Beauty Procurement Services Pvt. Ltd.</p>
-            <p>2nd Floor, Unitech Crest, Block C</p>
-            <p>Greenwood City, Sector 45 Gurugram,</p>
-            <p>Haryana - 122003, INDIA</p>
+            <p>Ambica Vihar, Paschim Vihar, Delhi-110087</p>
           </div>
 
           <div class="info-block">
-            <h3>Information</h3>
-            <p>+91 92896 29944</p>
-            <a href="mailto:pingtheprincess@typsybeauty.com">pingtheprincess@typsybeauty.com</a>
+            <h3>Contact</h3>
+            <p>8373991643, 9811124285</p>
+            <a href="mailto:sieshaofficial@gmail.com">sieshaofficial@gmail.com</a>
           </div>
 
           <div class="info-block">
-            <h3>Social</h3>
-            <p class="follow-title">Follow us</p>
-            <div class="social-links">
-              <a href="#" aria-label="Facebook">Facebook</a>
-              <a href="#" aria-label="Instagram">Instagram</a>
-              <a href="#" aria-label="LinkedIn">LinkedIn</a>
-            </div>
+            <h3>Follow us on</h3>
+            <a href="https://www.instagram.com/sieshaofficial" class="follow-title" target="_blank" aria-label="Instagram">@sieshaofficial</a>
           </div>
         </div>
 
-        <form class="contact-form" novalidate>
+        <form class="contact-form" #contactForm="ngForm" novalidate (ngSubmit)="submitContact(contactForm)">
           <label>
             <span>Or drop us a line</span>
-            <input type="text" placeholder="Enter please your name">
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter please your name"
+              [(ngModel)]="form.name"
+              required
+              minlength="2"
+              pattern="^[A-Za-z][A-Za-z .'-]{1,}$">
+            <small class="field-error" *ngIf="contactForm.submitted && contactForm.controls['name']?.errors?.['required']">Name is required.</small>
+            <small class="field-error" *ngIf="(contactForm.controls['name']?.touched || contactForm.submitted) && contactForm.controls['name']?.errors?.['minlength']">Name must be at least 2 characters long.</small>
+            <small class="field-error" *ngIf="(contactForm.controls['name']?.touched || contactForm.submitted) && contactForm.controls['name']?.errors?.['pattern']">Enter a valid name.</small>
           </label>
 
           <label>
-            <input type="email" placeholder="Enter please your email address *">
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter please your email address *"
+              [(ngModel)]="form.email"
+              required
+              email>
+            <small class="field-error" *ngIf="contactForm.submitted && contactForm.controls['email']?.errors?.['required']">Email is required.</small>
+            <small class="field-error" *ngIf="(contactForm.controls['email']?.touched || contactForm.submitted) && contactForm.controls['email']?.errors?.['email']">Enter a valid email address.</small>
           </label>
 
           <label>
-            <input type="tel" placeholder="Enter please your phone number">
+            <input
+              type="tel"
+              name="phoneNumber"
+              placeholder="Enter please your phone number"
+              [(ngModel)]="form.phoneNumber"
+              required
+              pattern="^[+]?[0-9\s()-]{7,15}$">
+            <small class="field-error" *ngIf="contactForm.submitted && contactForm.controls['phoneNumber']?.errors?.['required']">Phone number is required.</small>
+            <small class="field-error" *ngIf="(contactForm.controls['phoneNumber']?.touched || contactForm.submitted) && contactForm.controls['phoneNumber']?.errors?.['pattern']">Enter a valid phone number.</small>
           </label>
 
           <label>
-            <textarea rows="4" placeholder="Enter please your message"></textarea>
+            <textarea
+              rows="4"
+              name="message"
+              placeholder="Enter please your message"
+              [(ngModel)]="form.message"
+              required></textarea>
           </label>
 
           <label class="checkbox-row">
-            <input type="checkbox">
+            <input
+              type="checkbox"
+              name="notificationConsent"
+              [(ngModel)]="form.notificationConsent">
             <span>I hereby authorize to send notifications on SMS/Messages/Promotional/informational messages.</span>
           </label>
 
-          <button type="submit">Submit</button>
+          <p class="form-feedback success" *ngIf="successMessage">{{ successMessage }}</p>
+          <p class="form-feedback error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+          <button type="submit" [disabled]="submitting || contactForm.invalid">
+            {{ submitting ? 'Sending...' : 'Submit' }}
+          </button>
         </form>
       </div>
     </section>

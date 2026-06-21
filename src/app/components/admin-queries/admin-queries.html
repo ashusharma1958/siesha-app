@@ -1,0 +1,53 @@
+<app-navigation></app-navigation>
+
+<section class="admin-queries-page">
+  <div class="container py-4">
+    <div class="admin-header">
+      <h2>Queries</h2>
+      <p>View all customer messages submitted from the contact-us page.</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <div class="table-wrap" *ngIf="!isLoading; else loadingState">
+      <table class="table table-striped align-middle" *ngIf="queries.length > 0; else emptyState">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Message</th>
+            <th>Consent</th>
+            <th>Submitted On</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let query of queries">
+            <td>{{ query.name }}</td>
+            <td>{{ query.email }}</td>
+            <td>{{ query.phoneNumber }}</td>
+            <td class="message-cell" [title]="query.message">{{ query.message }}</td>
+            <td>
+              <span class="badge rounded-pill" [class]="query.notificationConsent ? 'consent-yes' : 'consent-no'">
+                {{ query.notificationConsent ? 'Yes' : 'No' }}
+              </span>
+            </td>
+            <td>{{ formatDate(query.createdAt) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #loadingState>
+      <div class="text-center py-5">Loading queries...</div>
+    </ng-template>
+
+    <ng-template #emptyState>
+      <div class="text-center py-5">No contact queries found.</div>
+    </ng-template>
+  </div>
+</section>
+
+<app-footer></app-footer>
