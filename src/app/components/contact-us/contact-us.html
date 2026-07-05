@@ -6,9 +6,9 @@
 
     <div class="contact-highlights">
       <div class="contact-gallery" aria-label="Contact banner images">
-        <img src="/assets/image/SIESHA_panel_1.png" alt="Scented candle setup 1" loading="lazy">
-        <img src="/assets/image/SIESHA_panel_2.png" alt="Scented candle setup 2" loading="lazy">
-        <img src="/assets/image/SIESHA_panel_3.png" alt="Scented candle setup 3" loading="lazy">
+        <div class="gallery-panel panel-left" [style.background-image]="leftPanelBackground" role="img" aria-label="SIESHA panel left"></div>
+        <div class="gallery-panel panel-center" [style.background-image]="centerPanelBackground" role="img" aria-label="SIESHA panel center"></div>
+        <div class="gallery-panel panel-right" [style.background-image]="rightPanelBackground" role="img" aria-label="SIESHA panel right"></div>
       </div>
 
       <div class="contact-notes">

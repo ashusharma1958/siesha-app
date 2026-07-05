@@ -241,8 +241,170 @@
   color: #555;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .detail-grid {
     grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .media,
+  .info,
+  .reviews--full {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .product-detail {
+    padding: 32px 20px 56px;
+    box-sizing: border-box;
+  }
+
+  .info h1 {
+    font-size: 28px;
+  }
+
+  .reviews--full {
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-detail {
+    padding: 24px 18px 48px;
+  }
+
+  .back-link {
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+
+  .detail-grid {
+    gap: 20px;
+  }
+
+  .media img {
+    border-radius: 14px;
+  }
+
+  .detail-swiper-prev,
+  .detail-swiper-next {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .info h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .rating {
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .rating-text {
+    font-size: 13px;
+  }
+
+  .price {
+    font-size: 18px;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .description,
+  .meta,
+  .highlights ul,
+  .review-content {
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .meta {
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .highlights ul {
+    padding-left: 16px;
+    margin-bottom: 18px;
+  }
+
+  .cart-cta {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .cart-cta .primary {
+    grid-column: 1 / -1;
+    order: -1;
+    width: 100%;
+  }
+
+  .cart-cta .qty-btn {
+    width: 100%;
+    height: 42px;
+  }
+
+  .reviews-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  .review-card {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .review-top {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .review-rating {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-detail {
+    padding: 20px 14px 40px;
+  }
+
+  .info h1 {
+    font-size: 22px;
+  }
+
+  .price {
+    font-size: 17px;
+  }
+
+  .cart-cta {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-cta .primary {
+    order: 0;
+  }
+
+  .review-card {
+    padding: 16px;
+  }
+
+  .detail-swiper-prev {
+    left: 8px;
+  }
+
+  .detail-swiper-next {
+    right: 8px;
+  }
+
+  .highlights h4,
+  .reviews-header h4 {
+    font-size: 15px;
   }
 }

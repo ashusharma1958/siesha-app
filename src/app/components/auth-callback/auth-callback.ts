@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-auth-callback',
@@ -15,7 +16,8 @@ export class AuthCallbackComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
@@ -31,7 +33,9 @@ export class AuthCallbackComponent implements OnInit {
     const refreshToken = getValue('refresh_token');
     const idToken = getValue('id_token');
     const userRaw = getValue('user');
+    const stateRaw = getValue('state');
     const error = getValue('error') ?? getValue('error_description');
+    const returnTo = this.resolveReturnToPath(stateRaw);
 
     if (error) {
       this.status = 'error';
@@ -48,6 +52,25 @@ export class AuthCallbackComponent implements OnInit {
       return;
     }
 
+    let nextUserEmail: string | null = null;
+    if (userRaw) {
+      try {
+        const decodedUserRaw = decodeURIComponent(userRaw);
+        const parsedUser = JSON.parse(decodedUserRaw) as Record<string, unknown>;
+        const parsedEmail = parsedUser['email'];
+        nextUserEmail = typeof parsedEmail === 'string' ? parsedEmail.trim().toLowerCase() : null;
+      } catch {
+        nextUserEmail = null;
+      }
+    }
+
+    const previousEmail = this.readStoredUserEmail();
+    if (previousEmail && nextUserEmail && previousEmail !== nextUserEmail) {
+      this.cartService.clearCart();
+    }
+
+    sessionStorage.removeItem('checkout.pendingOrderPayload');
+
     if (accessToken) {
       localStorage.setItem('auth.accessToken', accessToken);
     }
@@ -62,7 +85,8 @@ export class AuthCallbackComponent implements OnInit {
 
     if (userRaw) {
       try {
-        const parsedUser = JSON.parse(userRaw);
+        const decodedUserRaw = decodeURIComponent(userRaw);
+        const parsedUser = JSON.parse(decodedUserRaw);
         localStorage.setItem('auth.user', JSON.stringify(parsedUser));
       } catch {
         localStorage.setItem('auth.user', userRaw);
@@ -73,7 +97,55 @@ export class AuthCallbackComponent implements OnInit {
     this.message = 'Sign in successful. Redirecting...';
 
     setTimeout(() => {
-      this.router.navigate(['/home']);
+      this.router.navigateByUrl(returnTo);
     }, 1400);
+  }
+
+  private resolveReturnToPath(stateRaw: string | null): string {
+    const fallback = this.normalizeReturnToPath(sessionStorage.getItem('auth.oauth.returnTo'));
+    sessionStorage.removeItem('auth.oauth.returnTo');
+
+    if (!stateRaw) {
+      return fallback;
+    }
+
+    try {
+      const decoded = atob(stateRaw);
+      const state = JSON.parse(decoded) as Record<string, unknown>;
+      return this.normalizeReturnToPath(typeof state['returnTo'] === 'string' ? state['returnTo'] : fallback);
+    } catch {
+      return fallback;
+    }
+  }
+
+  private normalizeReturnToPath(candidate: string | null): string {
+    if (!candidate || !candidate.trim()) {
+      return '/home';
+    }
+
+    if (!candidate.startsWith('/')) {
+      return '/home';
+    }
+
+    if (candidate.startsWith('//')) {
+      return '/home';
+    }
+
+    return candidate;
+  }
+
+  private readStoredUserEmail(): string | null {
+    const raw = localStorage.getItem('auth.user');
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      const email = parsed['email'];
+      return typeof email === 'string' ? email.trim().toLowerCase() : null;
+    } catch {
+      return null;
+    }
   }
 }

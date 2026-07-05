@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, map, Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
@@ -9,6 +9,23 @@ type ApiResponse<T> = {
   message: string;
   body: T;
   timestamp?: string;
+};
+
+export type ApiFieldErrors = Record<string, string>;
+
+export type ApiErrorResponse = {
+  statusCode?: number;
+  message?: string;
+  body?: ApiFieldErrors | string | null;
+  error?: string;
+  path?: string;
+  timestamp?: string;
+};
+
+export type AuthApiError = {
+  statusCode: number | null;
+  message: string;
+  fieldErrors: ApiFieldErrors;
 };
 
 export type SignUpRequest = {
@@ -38,6 +55,19 @@ export type SignInResponseBody = {
   fullName: string;
   role?: string;
 };
+
+export type ForgotPasswordRequest = {
+  email: string;
+};
+
+export type ResetPasswordRequest = {
+  email: string;
+  secretCode: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
+export type AuthMessageResponse = ApiResponse<string>;
 
 export type ProfileOrder = {
   id?: string;
@@ -117,6 +147,20 @@ export class AuthService {
   signIn(payload: SignInRequest): Observable<ApiResponse<SignInResponseBody>> {
     return this.http.post<ApiResponse<SignInResponseBody>>(
       `${environment.apiBaseUrl}/api/auth/sign-in`,
+      payload
+    );
+  }
+
+  requestPasswordResetCode(payload: ForgotPasswordRequest): Observable<AuthMessageResponse> {
+    return this.http.post<AuthMessageResponse>(
+      `${environment.apiBaseUrl}/api/auth/forgot-password`,
+      payload
+    );
+  }
+
+  resetPasswordWithSecretCode(payload: ResetPasswordRequest): Observable<AuthMessageResponse> {
+    return this.http.post<AuthMessageResponse>(
+      `${environment.apiBaseUrl}/api/auth/reset-password`,
       payload
     );
   }
@@ -233,4 +277,32 @@ export class AuthService {
       };
     }
   }
+}
+
+export function mapAuthApiError(error: unknown, fallbackMessage = 'Something went wrong. Please try again.'): AuthApiError {
+  if (!(error instanceof HttpErrorResponse)) {
+    return {
+      statusCode: null,
+      message: fallbackMessage,
+      fieldErrors: {}
+    };
+  }
+
+  const raw = error.error as ApiErrorResponse | null | undefined;
+  const fieldErrors =
+    raw && raw.body && typeof raw.body === 'object' && !Array.isArray(raw.body)
+      ? (raw.body as ApiFieldErrors)
+      : {};
+
+  const messageFromBody = raw && typeof raw.body === 'string' ? raw.body : '';
+  const message =
+    (raw && typeof raw.message === 'string' && raw.message.trim()) ||
+    (messageFromBody && messageFromBody.trim()) ||
+    fallbackMessage;
+
+  return {
+    statusCode: error.status || null,
+    message,
+    fieldErrors
+  };
 }

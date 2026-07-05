@@ -2,14 +2,15 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { Navigation } from '../navigation/navigation';
 import { Footer } from '../footer/footer';
 import { environment } from '../../../environments/environment';
 import { AuthService, SignInRequest } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 
-type SocialProvider = 'google' | 'facebook' | 'apple';
+type SocialProvider = 'google';
 
 @Component({
   selector: 'app-sign-in',
@@ -25,26 +26,58 @@ export class SignInComponent {
   };
 
   isSubmitting = false;
+  isSocialRedirecting = false;
   feedbackMessage = '';
+  showPassword = false;
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
+    private cartService: CartService
   ) {}
 
-  socialSignIn(provider: SocialProvider) {
-    const providerUrl = environment.socialAuthUrls?.[provider];
-
-    if (!providerUrl) {
-      window.alert(`Social sign-in for ${provider} is not configured yet.`);
+  socialSignIn(provider: SocialProvider): void {
+    if (this.isSocialRedirecting) {
       return;
     }
 
-    const callbackUrl = `${window.location.origin}/auth/callback`;
-    const separator = providerUrl.includes('?') ? '&' : '?';
-    const redirectUrl = `${providerUrl}${separator}redirect_uri=${encodeURIComponent(callbackUrl)}`;
+    const providerUrl = environment.socialAuthUrls?.[provider];
 
-    window.location.href = redirectUrl;
+    if (!providerUrl) {
+      this.feedbackMessage = `Social sign-in for ${provider} is not configured yet.`;
+      return;
+    }
+
+    const callbackUrl = new URL('/auth/callback', window.location.origin).toString();
+    const returnTo = this.normalizeReturnToPath(this.route.snapshot.queryParamMap.get('returnTo'));
+    const state = btoa(JSON.stringify({ returnTo }));
+
+    const redirectUrl = new URL(providerUrl);
+    redirectUrl.searchParams.set('redirect_uri', callbackUrl);
+    redirectUrl.searchParams.set('state', state);
+
+    sessionStorage.setItem('auth.oauth.returnTo', returnTo);
+    this.isSocialRedirecting = true;
+    this.feedbackMessage = 'Redirecting to Google...';
+
+    window.location.assign(redirectUrl.toString());
+  }
+
+  private normalizeReturnToPath(candidate: string | null): string {
+    if (!candidate || !candidate.trim()) {
+      return '/home';
+    }
+
+    if (!candidate.startsWith('/')) {
+      return '/home';
+    }
+
+    if (candidate.startsWith('//')) {
+      return '/home';
+    }
+
+    return candidate;
   }
 
   onSubmit(form: NgForm): void {
@@ -60,6 +93,15 @@ export class SignInComponent {
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: (response) => {
+          const previousEmail = this.readStoredUserEmail();
+          const nextEmail = (response.body.email ?? '').trim().toLowerCase();
+
+          if (previousEmail && nextEmail && previousEmail !== nextEmail) {
+            this.cartService.clearCart();
+          }
+
+          sessionStorage.removeItem('checkout.pendingOrderPayload');
+
           localStorage.setItem('auth.accessToken', response.body.token);
           const derivedRole = this.extractRoleFromResponseBody(response.body);
           localStorage.setItem(
@@ -82,6 +124,25 @@ export class SignInComponent {
           this.feedbackMessage = this.resolveSignInError(errorResponse);
         }
       });
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  private readStoredUserEmail(): string | null {
+    const raw = localStorage.getItem('auth.user');
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      const email = parsed['email'];
+      return typeof email === 'string' ? email.trim().toLowerCase() : null;
+    } catch {
+      return null;
+    }
   }
 
   private extractRoleFromResponseBody(body: unknown): string | undefined {

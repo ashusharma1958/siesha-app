@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -29,7 +29,39 @@ type ApiResponse = {
   templateUrl: './contact-us.html',
   styleUrl: './contact-us.css',
 })
-export class ContactUs {
+export class ContactUs implements OnInit, OnDestroy {
+  private readonly mainProductImages: string[] = [
+    'https://raw.githubusercontent.com/ashusharma1958/static/main/image/products/Citrus Sundaze/Citrus Sundaze-Main.png',
+    'https://raw.githubusercontent.com/ashusharma1958/static/main/image/products/Pink Heat/Pink Heat-Main.png',
+    'https://raw.githubusercontent.com/ashusharma1958/static/main/image/products/Zesty Daydream/Zesty Daydream-Main.png',
+    'https://raw.githubusercontent.com/ashusharma1958/static/main/image/products/vara/Vara-Main.png',
+    'https://raw.githubusercontent.com/ashusharma1958/static/main/image/products/Nirvaan/Nirvaan-Main.png'
+  ];
+
+  private readonly leftPanelImages: string[] = [
+    ...this.mainProductImages
+  ];
+
+  private readonly centerPanelImages: string[] = [
+    ...this.mainProductImages
+  ];
+
+  private readonly rightPanelImages: string[] = [
+    ...this.mainProductImages
+  ];
+
+  leftPanelBackground = '';
+  centerPanelBackground = '';
+  rightPanelBackground = '';
+
+  private leftPanelIndex = 0;
+  private centerPanelIndex = 0;
+  private rightPanelIndex = 0;
+
+  private leftPanelTimerId: ReturnType<typeof setInterval> | null = null;
+  private centerPanelTimerId: ReturnType<typeof setInterval> | null = null;
+  private rightPanelTimerId: ReturnType<typeof setInterval> | null = null;
+
   form: ContactUsRequest = {
     name: '',
     email: '',
@@ -42,7 +74,53 @@ export class ContactUs {
   successMessage = '';
   errorMessage = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.leftPanelIndex = 0;
+    this.centerPanelIndex = 0;
+    this.rightPanelIndex = 0;
+
+    this.syncPanelBackgrounds();
+
+    this.leftPanelTimerId = setInterval(() => {
+      this.leftPanelIndex = (this.leftPanelIndex + 1) % this.leftPanelImages.length;
+      this.leftPanelBackground = this.toBackgroundImage(this.leftPanelImages[this.leftPanelIndex]);
+      this.cdr.detectChanges();
+    }, 2600);
+
+    this.centerPanelTimerId = setInterval(() => {
+      this.centerPanelIndex = (this.centerPanelIndex + 1) % this.centerPanelImages.length;
+      this.centerPanelBackground = this.toBackgroundImage(this.centerPanelImages[this.centerPanelIndex]);
+      this.cdr.detectChanges();
+    }, 3400);
+
+    this.rightPanelTimerId = setInterval(() => {
+      this.rightPanelIndex = (this.rightPanelIndex + 1) % this.rightPanelImages.length;
+      this.rightPanelBackground = this.toBackgroundImage(this.rightPanelImages[this.rightPanelIndex]);
+      this.cdr.detectChanges();
+    }, 4300);
+  }
+
+  ngOnDestroy(): void {
+    if (this.leftPanelTimerId) {
+      clearInterval(this.leftPanelTimerId);
+      this.leftPanelTimerId = null;
+    }
+
+    if (this.centerPanelTimerId) {
+      clearInterval(this.centerPanelTimerId);
+      this.centerPanelTimerId = null;
+    }
+
+    if (this.rightPanelTimerId) {
+      clearInterval(this.rightPanelTimerId);
+      this.rightPanelTimerId = null;
+    }
+  }
 
   submitContact(form: NgForm) {
     this.successMessage = '';
@@ -81,5 +159,16 @@ export class ContactUs {
     }).add(() => {
       this.submitting = false;
     });
+  }
+
+  private syncPanelBackgrounds(): void {
+    this.leftPanelBackground = this.toBackgroundImage(this.leftPanelImages[this.leftPanelIndex]);
+    this.centerPanelBackground = this.toBackgroundImage(this.centerPanelImages[this.centerPanelIndex]);
+    this.rightPanelBackground = this.toBackgroundImage(this.rightPanelImages[this.rightPanelIndex]);
+  }
+
+  private toBackgroundImage(path: string): string {
+    const encodedPath = encodeURI(path);
+    return `url("${encodedPath}")`;
   }
 }

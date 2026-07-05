@@ -9,8 +9,12 @@
           <img [src]="product.image" [alt]="product.alt || product.name">
         </div>
         <h6>{{ product.name }}</h6>
-        <div class="rating" *ngIf="product.rating != null && product.reviewCount != null">
-          Rating: {{ product.rating }} <span>({{ product.reviewCount }})</span>
+        <div class="rating"
+          [class.rating-hidden]="!shouldShowRating(product.rating, product.reviewCount)"
+          [attr.aria-label]="shouldShowRating(product.rating, product.reviewCount) ? ('Rated ' + getRoundedRating(product.rating) + ' out of 5') : null"
+          [attr.aria-hidden]="!shouldShowRating(product.rating, product.reviewCount)">
+          {{ getRatingStars(product.rating) }}
+          <span class="rating-reviews">{{ getReviewCount(product.reviewCount) }} {{ getReviewLabel(product.reviewCount) }}</span>
         </div>
         <p class="price" *ngIf="getDisplayPrice(product) as price">Rs. {{ price }}</p>
         <button type="button" (click)="addToCart(product, $event)">Add to cart</button>

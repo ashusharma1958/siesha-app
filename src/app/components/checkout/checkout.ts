@@ -12,6 +12,333 @@ import { ApiVoucher, VoucherService } from '../../services/voucher.service';
 import { Footer } from '../footer/footer';
 import { Navigation } from '../navigation/navigation';
 
+type PolicyKey = 'refund' | 'shipping' | 'privacy' | 'terms' | 'contact';
+
+type PolicySection = {
+  heading?: string;
+  paragraphs?: string[];
+  items?: string[];
+};
+
+type CheckoutPolicy = {
+  title: string;
+  updatedAt?: string;
+  intro?: string[];
+  sections: PolicySection[];
+};
+
+const CHECKOUT_POLICIES: Record<PolicyKey, CheckoutPolicy> = {
+  refund: {
+    title: 'Refund Policy',
+    intro: [
+      'At Siesha, every candle is hand-poured in small batches with care and intention. As a small business, we do not offer returns or exchanges for personal preferences or a change of mind.',
+      'Not sure about a scent? Feel free to reach out to us on Instagram @sieshaofficial. We are happy to help you choose the right one.'
+    ],
+    sections: [
+      {
+        heading: 'We offer exchanges only if',
+        items: [
+          'Your product arrived damaged or broken. Report the issue within 24 hours of delivery via WhatsApp on +91 8373991643.',
+          'You received the wrong item, or an item is missing from your order. Report the issue within 24 hours of delivery via WhatsApp on +91 8373991643.'
+        ]
+      },
+      {
+        heading: 'To request an exchange',
+        items: [
+          'Share an unboxing video starting from the sealed package.',
+          'Report the issue within 24 hours of delivery via WhatsApp on +91 8373991643.',
+          'Ensure the product is unused and in original condition.',
+          'Return shipping costs will be borne by the customer.'
+        ]
+      },
+      {
+        heading: 'We offer cancellations only if',
+        items: [
+          'Orders can be cancelled within 12 hours of placement or before production begins, whichever is earlier. You can contact us for cancellation via WhatsApp on +91 8373991643.',
+          'Once production has started, orders cannot be cancelled.',
+          'Customised or personalised orders cannot be cancelled once confirmed.',
+          'If SIESHA is unable to fulfil your order for any reason, you will receive a full refund to your original payment method.',
+          'Approved refunds for cancelled orders will be processed within 5-7 business days, depending on your payment provider.'
+        ]
+      },
+      {
+        paragraphs: [
+          'We truly appreciate your support. Every order helps keep the ritual of Siesha alive. Thank you for being a part of our journey.'
+        ]
+      }
+    ]
+  },
+  shipping: {
+    title: 'Shipping',
+    intro: [
+      'At SIESHA, every candle is thoughtfully handcrafted with care. To ensure you receive the best quality, out of stock candles are made fresh to order and cured before dispatch.'
+    ],
+    sections: [
+      {
+        heading: 'Order Processing',
+        paragraphs: [
+          'In-Stock Products: If your selected candle is available in stock, your order will be processed and dispatched within 2-3 business days, subject to current order volume.',
+          'Made-to-Order Products: If a product is out of stock, we prepare a fresh batch specifically for your order. Since soy candles require proper curing for the best fragrance performance, please allow up to 7 business days for production and curing. Your order will be dispatched immediately after the curing process is complete.'
+        ]
+      },
+      {
+        heading: 'Delivery Timeline',
+        items: [
+          'Metro and major cities: 3-5 business days.',
+          'Most locations across India: 3-7 business days.',
+          'Remote and difficult-to-service areas, including parts of Jammu and Kashmir, Himachal Pradesh, North-East India, Ladakh, and certain rural locations: 7-10 business days or longer, depending on courier availability.'
+        ]
+      },
+      {
+        paragraphs: [
+          'Delivery timelines are estimates and may vary due to weather conditions, public holidays, courier delays, or unforeseen circumstances.',
+          'Once your order has been shipped, you will receive a tracking link via email or WhatsApp, where applicable, to monitor your shipment.',
+          'Please ensure your shipping address and contact details are accurate while placing your order. SIESHA is not responsible for delays, missed delivery due to customer unavailability, or additional shipping charges resulting from incorrect or incomplete address or contact information.',
+          'If you have any questions regarding your order or shipping timeline, feel free to contact us. We are always happy to help.'
+        ]
+      }
+    ]
+  },
+  privacy: {
+    title: 'Privacy Policy',
+    updatedAt: 'Last Updated: June 29, 2026',
+    intro: [
+      'At SIESHA, we value your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or place an order with us.',
+      'By using our website, you agree to the terms of this Privacy Policy.'
+    ],
+    sections: [
+      {
+        heading: '1. Information We Collect',
+        items: [
+          'Personal information such as full name, email address, phone number, shipping and billing address, and payment information processed securely through third-party payment providers. We do not store your card details.',
+          'Automatically collected information such as IP address, browser type and device information, pages visited, and website usage data through cookies and analytics tools.'
+        ]
+      },
+      {
+        heading: '2. How We Use Your Information',
+        items: [
+          'Process and fulfil your orders.',
+          'Deliver your purchases.',
+          'Communicate order updates.',
+          'Respond to customer support requests.',
+          'Improve our website and customer experience.',
+          'Send promotional emails or messages only if you have opted in.',
+          'Prevent fraud and maintain website security.',
+          'Comply with legal obligations.'
+        ]
+      },
+      {
+        heading: '3. Payment Security',
+        paragraphs: [
+          'All online payments are processed through trusted third-party payment gateways. We do not collect or store your debit card, credit card, UPI PIN, CVV, or banking credentials.'
+        ]
+      },
+      {
+        heading: '4. Sharing Your Information',
+        paragraphs: [
+          'We do not sell, rent, or trade your personal information.',
+          'We may share your information only with trusted service providers necessary to operate our business, including payment processors, shipping and logistics partners, website hosting providers, and analytics and marketing service providers.'
+        ]
+      },
+      {
+        heading: '5. Cookies',
+        paragraphs: [
+          'Our website may use cookies to remember your preferences, improve website functionality, analyze website traffic, and enhance your shopping experience.',
+          'You can disable cookies through your browser settings, although some website features may not function properly.'
+        ]
+      },
+      {
+        heading: '6. Data Retention',
+        paragraphs: [
+          'We retain your information only for as long as necessary to fulfil your orders, comply with legal requirements, resolve disputes, and maintain our business records.'
+        ]
+      },
+      {
+        heading: '7. Your Rights',
+        items: [
+          'Access the personal information we hold about you.',
+          'Correct inaccurate information.',
+          'Update your contact details.',
+          'Request deletion of your personal information, subject to applicable legal obligations.'
+        ]
+      },
+      {
+        heading: '8. Data Security',
+        paragraphs: [
+          'We implement reasonable technical and organizational measures to protect your personal information from unauthorized access, misuse, alteration, or disclosure. While we strive to protect your data, no method of internet transmission or electronic storage is completely secure.'
+        ]
+      },
+      {
+        heading: '9. Third-Party Links',
+        paragraphs: [
+          'Our website may contain links to third-party websites. We are not responsible for the privacy practices or content of those external websites.'
+        ]
+      },
+      {
+        heading: '10. Children\'s Privacy',
+        paragraphs: [
+          'Our website is not intended for children under the age of 18. We do not knowingly collect personal information from children.'
+        ]
+      },
+      {
+        heading: '11. Changes to This Privacy Policy',
+        paragraphs: [
+          'We may update this Privacy Policy from time to time. Any changes will be posted on this page with the revised last updated date.'
+        ]
+      },
+      {
+        heading: '12. Contact Us',
+        items: [
+          'Email: sieshaofficial@gmail.com',
+          'Phone: 8373991643, 9811124285',
+          'Business Hours: Monday - Saturday | 10:00 AM - 6:00 PM IST'
+        ]
+      }
+    ]
+  },
+  terms: {
+    title: 'Terms of Service',
+    updatedAt: 'Last Updated: June 29, 2026',
+    intro: [
+      'Welcome to SIESHA. These Terms of Service govern your use of our website and the purchase of products from us. By accessing our website or placing an order, you agree to be bound by these Terms.'
+    ],
+    sections: [
+      {
+        heading: '1. General',
+        paragraphs: [
+          'SIESHA reserves the right to update, modify, or replace these Terms at any time without prior notice. Continued use of our website constitutes acceptance of the revised Terms.',
+          'By using this website, you confirm that you are at least 18 years of age or are using the website under the supervision of a parent or legal guardian.'
+        ]
+      },
+      {
+        heading: '2. Products',
+        paragraphs: [
+          'All products sold by SIESHA are handcrafted. As a result, slight variations in colour, finish, fragrance intensity, wax texture, labels, and overall appearance may occur. These natural variations are part of the handcrafted process and do not constitute defects.',
+          'Product images are intended for illustrative purposes only. While we strive to accurately represent colours and finishes, actual products may vary slightly due to lighting, photography, screen settings, and the handmade nature of our products.'
+        ]
+      },
+      {
+        heading: '3. Pricing',
+        paragraphs: [
+          'All prices are listed in Indian Rupees and are inclusive of applicable taxes unless stated otherwise.',
+          'SIESHA reserves the right to modify prices, discontinue products, or correct pricing errors at any time without prior notice.'
+        ]
+      },
+      {
+        heading: '4. Orders',
+        items: [
+          'All orders are subject to acceptance and availability.',
+          'We reserve the right to cancel or refuse any order due to product unavailability, incorrect pricing, payment issues, suspected fraudulent activity, or any other legitimate business reason.',
+          'If payment has already been received for a cancelled order, an appropriate refund will be initiated.'
+        ]
+      },
+      {
+        heading: '5. Made-to-Order Products',
+        paragraphs: [
+          'Many of our candles are handcrafted after an order is placed to ensure optimal quality.',
+          'Production and dispatch timelines may therefore vary depending on product availability, curing requirements, and order volume.',
+          'Estimated timelines are provided in our Shipping Policy and should not be considered guaranteed delivery dates.'
+        ]
+      },
+      {
+        heading: '6. Shipping and Delivery',
+        paragraphs: [
+          'Orders are dispatched according to our Shipping Policy.',
+          'Delivery timelines are estimates only and may vary due to courier delays, weather conditions, public holidays, remote delivery locations, and events beyond our reasonable control.',
+          'SIESHA shall not be liable for delays caused by third-party courier partners.',
+          'Risk of loss and ownership of products pass to the customer upon successful delivery.'
+        ]
+      },
+      {
+        heading: '7. Returns, Refunds and Cancellations',
+        paragraphs: [
+          'Please refer to our Return and Refund Policy for complete details.',
+          'Personalised or customised products are non-returnable and non-refundable once production has begun.',
+          'Refunds or replacements may be offered only where products arrive damaged, defective, or incorrect.'
+        ]
+      },
+      {
+        heading: '8. Candle Care and Safe Usage',
+        items: [
+          'Never leave a burning candle unattended.',
+          'Keep candles away from children and pets.',
+          'Place candles on a heat-resistant surface.',
+          'Keep away from curtains and flammable materials.',
+          'Trim the wick before each use.',
+          'Do not burn beyond the recommended duration.'
+        ]
+      },
+      {
+        heading: '9. Limitation of Liability',
+        paragraphs: [
+          'To the maximum extent permitted by applicable law, SIESHA shall not be liable for any direct, indirect, incidental, consequential, or special damages arising from improper use of products, failure to follow candle care instructions, delayed deliveries, product misuse, allergic reactions or sensitivities to fragrances, or circumstances beyond our reasonable control.',
+          'Our total liability for any claim shall not exceed the amount paid by the customer for the relevant product or products.'
+        ]
+      },
+      {
+        heading: '10. Product Performance',
+        paragraphs: [
+          'Burn times provided are approximate and may vary depending on environmental conditions, wick maintenance, room temperature, airflow, and burning practices.',
+          'Fragrance performance is subjective and may differ from person to person.'
+        ]
+      },
+      {
+        heading: '11. Intellectual Property',
+        paragraphs: [
+          'All content on this website, including photographs, logos, branding, product names, graphics, text, and designs, is the property of SIESHA unless otherwise stated.',
+          'No content may be copied, reproduced, distributed, or used without prior written permission.'
+        ]
+      },
+      {
+        heading: '12. Custom Orders',
+        paragraphs: [
+          'Customers placing customised or personalised orders are responsible for ensuring that all names, spellings, artwork, logos, and other submitted content are accurate before approval.',
+          'Once production has commenced, customised orders cannot be modified or cancelled.'
+        ]
+      },
+      {
+        heading: '13. Privacy',
+        paragraphs: [
+          'Your use of this website is also governed by our Privacy Policy, which explains how we collect, use, and protect your personal information.'
+        ]
+      },
+      {
+        heading: '14. Force Majeure',
+        paragraphs: [
+          'SIESHA shall not be held liable for any delay or failure to perform its obligations where such delay or failure results from circumstances beyond our reasonable control, including natural disasters, floods, pandemics, government actions, strikes, transportation disruptions, power failures, or courier service interruptions.'
+        ]
+      },
+      {
+        heading: '15. Governing Law',
+        paragraphs: [
+          'These Terms shall be governed by and construed in accordance with the laws of India.',
+          'Any disputes arising out of or relating to these Terms shall be subject to the exclusive jurisdiction of the courts located in Delhi, India.'
+        ]
+      },
+      {
+        heading: '16. Contact Us',
+        items: [
+          'Email: sieshaofficial@gmail.com',
+          'Phone: 8373991643, 9811124285',
+          'Business Hours: Monday - Saturday | 10:00 AM - 6:00 PM IST'
+        ]
+      }
+    ]
+  },
+  contact: {
+    title: 'Contact',
+    sections: [
+      {
+        items: [
+          'Address: Ambica Vihar, Paschim Vihar, Delhi-110087',
+          'Contact: 8373991643, 9811124285',
+          'Gmail: sieshaofficial@gmail.com'
+        ]
+      }
+    ]
+  }
+};
+
 @Component({
   selector: 'app-checkout',
   standalone: true,
@@ -20,6 +347,8 @@ import { Navigation } from '../navigation/navigation';
   styleUrls: ['./checkout.css']
 })
 export class CheckoutComponent implements OnInit {
+  readonly policyContent = CHECKOUT_POLICIES;
+  selectedPolicyKey: PolicyKey | null = null;
   isAddressMode = false;
   isEditMode = false;
   editAddressId: number | string | null = null;
@@ -56,6 +385,7 @@ export class CheckoutComponent implements OnInit {
   vouchersLoadError = '';
 
   isPlacingOrder = false;
+  paymentStatusMessage = '';
   orderError = '';
 
   get cartItems(): CartItem[] {
@@ -76,6 +406,18 @@ export class CheckoutComponent implements OnInit {
 
   get eligibleVouchers(): ApiVoucher[] {
     return this.availableVouchers.filter((voucher) => this.isVoucherEligible(voucher));
+  }
+
+  get selectedPolicy(): CheckoutPolicy | null {
+    return this.selectedPolicyKey ? this.policyContent[this.selectedPolicyKey] : null;
+  }
+
+  openPolicy(policyKey: PolicyKey): void {
+    this.selectedPolicyKey = policyKey;
+  }
+
+  closePolicy(): void {
+    this.selectedPolicyKey = null;
   }
 
   applyDiscount(): void {
@@ -499,26 +841,22 @@ export class CheckoutComponent implements OnInit {
     return false;
   }
 
-  placeOrder(): void {
-    if (this.isPlacingOrder) return;
-
-    this.orderError = '';
-
+  private buildOrderPayload(): CreateOrderRequest | null {
     const billing = this.selectedBillingAddress;
     if (!billing) {
       this.orderError = 'Please select or fill in a billing address.';
-      return;
+      return null;
     }
 
     if (this.cartItems.length === 0) {
       this.orderError = 'Your cart is empty.';
-      return;
+      return null;
     }
 
     const shippingAddr = this.shippingIsSameBilling
       ? billing
       : (this.isSignedIn
-          ? (this.savedAddresses.find(a => a.id === this.selectedShippingAddressId) ?? null)
+          ? (this.savedAddresses.find((a) => a.id === this.selectedShippingAddressId) ?? null)
           : {
               label: 'Shipping',
               line1: this.shippingForm.line1,
@@ -532,10 +870,10 @@ export class CheckoutComponent implements OnInit {
 
     if (!shippingAddr) {
       this.orderError = 'Please select or fill in a shipping address.';
-      return;
+      return null;
     }
 
-    const TAX_RATE = 0.09; // 9%
+    const TAX_RATE = 0.09;
     const shippingCharge = 0;
     const discountedSubtotal = this.total;
     const taxAmount = Math.round(discountedSubtotal * TAX_RATE * 100) / 100;
@@ -544,13 +882,13 @@ export class CheckoutComponent implements OnInit {
 
     if (specialInstructions.length > 500) {
       this.orderError = 'Special instructions must not exceed 500 characters.';
-      return;
+      return null;
     }
 
     const rawUserId = localStorage.getItem('auth.userId');
     const parsedUserId = rawUserId && /^\d+$/.test(rawUserId) ? Number(rawUserId) : null;
 
-    const payload: CreateOrderRequest = {
+    return {
       customer: {
         userId: parsedUserId,
         guest: !this.isSignedIn
@@ -562,7 +900,7 @@ export class CheckoutComponent implements OnInit {
         id: (shippingAddr as ProfileAddress).id ?? null,
         sameAsBilling: this.shippingIsSameBilling
       },
-      items: this.cartItems.map(item => ({
+      items: this.cartItems.map((item) => ({
         productId: item.product.id,
         productName: item.product.name,
         quantity: item.quantity,
@@ -579,25 +917,42 @@ export class CheckoutComponent implements OnInit {
         total: grandTotal
       },
       payment: {
-        method: 'PHONEPE',
-        status: 'PENDING',
+        method: 'RAZORPAY',
+        status: 'SUCCESS',
         transactionId: null
       },
       orderStatus: 'PLACED',
       createdAt: new Date().toISOString(),
       specialInstructions: specialInstructions || null
     };
+  }
+
+  placeOrder(): void {
+    if (this.isPlacingOrder) return;
+
+    this.orderError = '';
+    this.paymentStatusMessage = 'Placing your order...';
+
+    const payload = this.buildOrderPayload();
+    if (!payload) {
+      this.paymentStatusMessage = '';
+      return;
+    }
 
     this.isPlacingOrder = true;
-    this.orderService.createOrder(payload).subscribe({
-      next: () => {
+    this.orderService.createOrder(payload).pipe(
+      finalize(() => {
         this.isPlacingOrder = false;
+      })
+    ).subscribe({
+      next: () => {
+        this.paymentStatusMessage = '';
         this.cartService.clearCart();
         void this.router.navigate(['/order-tracking']);
       },
       error: () => {
-        this.isPlacingOrder = false;
-        this.orderError = 'Unable to place order. Please try again.';
+        this.paymentStatusMessage = '';
+        this.orderError = 'Unable to place order right now. Please try again.';
       }
     });
   }

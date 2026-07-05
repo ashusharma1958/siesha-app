@@ -1,5 +1,6 @@
 export const environment = {
-  apiBaseUrl: 'http://localhost:8080',
+  // Set this to your production backend URL, for example: https://api.siesha.com
+  apiBaseUrl: 'https://api.your-domain.com',
   paymentEndpoints: {
     razorpayCreateOrder: '/api/payments/razorpay/order',
     razorpayVerify: '/api/payments/razorpay/verify',
@@ -10,6 +11,6 @@ export const environment = {
     addresses: '/api/addresses/me'
   },
   socialAuthUrls: {
-    google: 'http://localhost:8080/auth/google'
+    google: 'https://api.your-domain.com/auth/google'
   }
 };

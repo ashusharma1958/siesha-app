@@ -32,6 +32,8 @@ type HeroResponse = {
   styleUrl: './hero.css',
 })
 export class Hero implements OnInit, AfterViewInit {
+  private static readonly STATIC_IMAGE_BASE_URL = 'https://raw.githubusercontent.com/ashusharma1958/static/main/image/';
+
   @ViewChild('swiperContainer', { static: false }) swiperContainer: any;
 
   slides: HeroSlide[] = [];
@@ -59,7 +61,10 @@ export class Hero implements OnInit, AfterViewInit {
       .get<HeroResponse>(`${environment.apiBaseUrl}/home-page/hero`)
       .subscribe({
         next: (response) => {
-          this.slides = response.body ?? [];
+          this.slides = (response.body ?? []).map((slide) => ({
+            ...slide,
+            image: this.resolveImageUrl(slide.image)
+          }));
           this.cdr.detectChanges();
           this.initSwiperIfReady();
         },
@@ -113,5 +118,32 @@ export class Hero implements OnInit, AfterViewInit {
     }
 
     this.router.navigateByUrl(redirectUrl);
+  }
+
+  private resolveImageUrl(rawUrl: string | null | undefined): string {
+    const url = String(rawUrl ?? '').trim();
+    if (!url) {
+      return '';
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+
+    const normalized = url.replace(/^\/+/, '');
+
+    if (normalized.startsWith('assets/image/')) {
+      return Hero.STATIC_IMAGE_BASE_URL + normalized.slice('assets/image/'.length);
+    }
+
+    if (normalized.startsWith('image/')) {
+      return Hero.STATIC_IMAGE_BASE_URL + normalized.slice('image/'.length);
+    }
+
+    if (normalized.startsWith('banners/') || normalized.startsWith('products/')) {
+      return Hero.STATIC_IMAGE_BASE_URL + normalized;
+    }
+
+    return Hero.STATIC_IMAGE_BASE_URL + normalized;
   }
 }

@@ -4,14 +4,20 @@
   <div class="container profile-wrap">
     <div class="profile-card">
       <div class="profile-header">
-        <div>
+        <div *ngIf="user as currentUser; else anonymousProfileHeader">
           <h1>My Account</h1>
-          <p *ngIf="user?.fullName; else fallbackName">{{ user?.fullName }}</p>
+          <p *ngIf="currentUser.fullName; else fallbackName">{{ currentUser.fullName }}</p>
           <ng-template #fallbackName>
             <p>Logged in user</p>
           </ng-template>
-          <p class="email" *ngIf="user?.email">{{ user?.email }}</p>
+          <p class="email" *ngIf="currentUser.email">{{ currentUser.email }}</p>
         </div>
+        <ng-template #anonymousProfileHeader>
+          <div>
+            <h1>My Account</h1>
+            <p>Logged in user</p>
+          </div>
+        </ng-template>
         <button type="button" class="logout-btn" (click)="logout()">Log out</button>
       </div>
 
@@ -79,7 +85,7 @@
                     [attr.aria-hidden]="!isItemReviewOpen(order, item, itemIndex)"
                   >
                     <div class="review-disabled-note" *ngIf="!canItemBeReviewed(item)">
-                      Review for this item is not available yet.
+                      You can review this item once the order is delivered.
                     </div>
 
                     <div *ngIf="canItemBeReviewed(item)">

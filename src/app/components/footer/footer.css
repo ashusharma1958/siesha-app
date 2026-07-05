@@ -36,4 +36,31 @@
 		grid-template-columns: 1fr;
 		gap: 24px;
 	}
+
+	.footer-inner {
+		max-width: 100%;
+	}
+
+	.footer-right,
+	.footer-left {
+		max-width: none;
+	}
+
+	.follow-strip {
+		flex-wrap: wrap;
+	}
+}
+
+@media (max-width: 576px) {
+	.footer-columns {
+		gap: 20px;
+	}
+
+	.footer-links {
+		row-gap: 10px;
+	}
+
+	.footer-brand img {
+		width: 48px;
+	}
 }

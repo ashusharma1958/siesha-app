@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export type ShopSortOption = 'featured' | 'best-selling' | 'price-asc' | 'price-desc';
@@ -20,7 +20,7 @@ export type ShopFilterState = {
   templateUrl: './shop-filter.html',
   styleUrl: './shop-filter.css',
 })
-export class ShopFilter {
+export class ShopFilter implements OnDestroy {
   @Input() productCount = 0;
   @Output() filtersChange = new EventEmitter<ShopFilterState>();
 
@@ -59,6 +59,21 @@ export class ShopFilter {
   selectedRatings = new Set<number>();
 
   openDropdown: ShopDropdownSection | null = null;
+  isMobileFiltersOpen = false;
+
+  ngOnDestroy(): void {
+    this.unlockBodyScroll();
+  }
+
+  openMobileFilters(): void {
+    this.isMobileFiltersOpen = true;
+    this.lockBodyScroll();
+  }
+
+  closeMobileFilters(): void {
+    this.isMobileFiltersOpen = false;
+    this.unlockBodyScroll();
+  }
 
   toggleDropdown(section: ShopDropdownSection, event: Event): void {
     event.preventDefault();
@@ -143,6 +158,20 @@ export class ShopFilter {
       rituals: [...this.selectedRituals],
       minRating
     });
+  }
+
+  private lockBodyScroll(): void {
+    if (window.innerWidth > 768) {
+      return;
+    }
+
+    document.documentElement.classList.add('shop-filters-open');
+    document.body.classList.add('shop-filters-open');
+  }
+
+  private unlockBodyScroll(): void {
+    document.documentElement.classList.remove('shop-filters-open');
+    document.body.classList.remove('shop-filters-open');
   }
 
 }

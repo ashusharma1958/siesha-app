@@ -10,6 +10,8 @@ import { ContactUs } from './components/contact-us/contact-us';
 import { SignInComponent } from './components/sign-in/sign-in';
 import { AuthCallbackComponent } from './components/auth-callback/auth-callback';
 import { SignUpComponent } from './components/sign-up/sign-up';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password';
+import { ResetPasswordComponent } from './components/reset-password/reset-password';
 import { ProfileComponent } from './components/profile/profile';
 import { AdminOrdersComponent } from './components/admin-orders/admin-orders';
 import { VoucherManagementComponent } from './components/voucher-management/voucher-management';
@@ -64,6 +66,14 @@ export const routes: Routes = [
   {
     path: 'sign-up',
     component: SignUpComponent
+  },
+  {
+    path: 'forgot-password',
+    component: ForgotPasswordComponent
+  },
+  {
+    path: 'reset-password',
+    component: ResetPasswordComponent
   },
   {
     path: 'profile',

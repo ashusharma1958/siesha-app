@@ -10,7 +10,7 @@ import { Footer } from '../footer/footer';
 import { environment } from '../../../environments/environment';
 import { AuthService, SignUpRequest } from '../../services/auth.service';
 
-type SocialProvider = 'google' | 'facebook' | 'apple';
+type SocialProvider = 'google';
 
 @Component({
   selector: 'app-sign-up',
@@ -33,6 +33,8 @@ export class SignUpComponent {
   feedbackMessage = '';
   feedbackType: 'success' | 'error' | null = null;
   errorStatusCode: number | null = null;
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor(
     private authService: AuthService,
@@ -122,6 +124,14 @@ export class SignUpComponent {
           this.cdr.detectChanges();
         }
       });
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   private resolveSignUpError(errorResponse: unknown): string {

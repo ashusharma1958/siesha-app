@@ -36,6 +36,46 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+## Production Deployment (Start Here)
+
+1. Update production backend values in `src/environments/environment.production.ts`:
+- `apiBaseUrl`
+- `socialAuthUrls.google`
+
+2. Build production assets:
+
+```bash
+npm run build:prod
+```
+
+3. Deploy generated files from:
+- `dist/siesha-app/browser`
+
+Use your preferred static hosting provider (Azure Static Web Apps, Netlify, Vercel, S3 + CloudFront, etc.).
+
+## Docker Deployment
+
+1. Ensure production URLs are set in `src/environments/environment.production.ts`.
+
+2. Build Docker image:
+
+```bash
+docker build -t siesha-app:prod .
+```
+
+3. Run container:
+
+```bash
+docker run -d --name siesha-app -p 8081:80 siesha-app:prod
+```
+
+4. Open app at:
+- http://localhost:8081
+
+Notes:
+- The container serves static Angular files through Nginx.
+- SPA routing fallback is configured in `nginx.conf`.
+
 ## Running unit tests
 
 To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:

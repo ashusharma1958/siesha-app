@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 
 import { Footer } from '../footer/footer';
 import { Navigation } from '../navigation/navigation';
-import { AdminOrder, AdminOrderStats, OrderService } from '../../services/order.service';
+import { AdminOrder, AdminOrderStats, AdminOrdersPageBody, OrderService } from '../../services/order.service';
 
 type StatusOption = 'ALL' | 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 
@@ -20,6 +20,12 @@ export class AdminOrdersComponent implements OnInit {
   orders: AdminOrder[] = [];
   stats: AdminOrderStats | null = null;
   selectedStatus: StatusOption = 'ALL';
+  orderIdSearch = '';
+  currentPage = 0;
+  pageSize = 50;
+  readonly pageSizeOptions = [10, 25, 50, 100];
+  totalPages = 0;
+  totalElements = 0;
   isLoadingOrders = false;
   isLoadingStats = false;
   isUpdating = false;
@@ -51,7 +57,40 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   onStatusFilterChange(): void {
+    this.currentPage = 0;
     this.loadOrders();
+  }
+
+  onPageSizeChange(): void {
+    this.currentPage = 0;
+    this.loadOrders();
+  }
+
+  applyOrderIdSearch(): void {
+    this.currentPage = 0;
+    this.loadOrders();
+  }
+
+  goToPreviousPage(): void {
+    if (this.currentPage <= 0 || this.isLoadingOrders) {
+      return;
+    }
+
+    this.currentPage -= 1;
+    this.loadOrders();
+  }
+
+  goToNextPage(): void {
+    if (this.isLoadingOrders || this.currentPage + 1 >= this.totalPages) {
+      return;
+    }
+
+    this.currentPage += 1;
+    this.loadOrders();
+  }
+
+  get filteredOrders(): AdminOrder[] {
+    return this.orders;
   }
 
   saveOrder(order: AdminOrder): void {
@@ -115,20 +154,57 @@ export class AdminOrdersComponent implements OnInit {
     this.errorMessage = '';
 
     const status = this.selectedStatus === 'ALL' ? undefined : this.selectedStatus;
+    const search = this.orderIdSearch.trim() || undefined;
 
-    this.orderService.getAdminOrders(status).subscribe({
+    this.orderService.getAdminOrders(status, this.currentPage, this.pageSize, search).subscribe({
       next: (response) => {
+        const pageData = this.normalizeOrdersPage(response.body);
         this.isLoadingOrders = false;
-        this.orders = this.normalizeOrders(response.body);
+        this.orders = pageData.orders;
+        this.currentPage = pageData.page;
+        this.totalPages = pageData.totalPages;
+        this.totalElements = pageData.totalElements;
         this.cdr.detectChanges();
       },
       error: () => {
         this.isLoadingOrders = false;
         this.orders = [];
+        this.totalPages = 0;
+        this.totalElements = 0;
         this.errorMessage = 'Unable to fetch admin orders right now. Please try again.';
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private normalizeOrdersPage(raw: unknown): {
+    orders: AdminOrder[];
+    page: number;
+    totalPages: number;
+    totalElements: number;
+  } {
+    if (Array.isArray(raw)) {
+      return {
+        orders: this.normalizeOrders(raw),
+        page: this.currentPage,
+        totalPages: 0,
+        totalElements: raw.length
+      };
+    }
+
+    const pageBody = raw && typeof raw === 'object' ? (raw as AdminOrdersPageBody) : null;
+    const content = pageBody?.content;
+    const orders = this.normalizeOrders(content);
+    const page = Number.isFinite(Number(pageBody?.number)) ? Math.max(0, Number(pageBody?.number)) : this.currentPage;
+    const totalPages = Number.isFinite(Number(pageBody?.totalPages)) ? Math.max(0, Number(pageBody?.totalPages)) : 0;
+    const totalElements = Number.isFinite(Number(pageBody?.totalElements)) ? Math.max(0, Number(pageBody?.totalElements)) : orders.length;
+
+    return {
+      orders,
+      page,
+      totalPages,
+      totalElements
+    };
   }
 
   private loadStats(): void {
@@ -155,85 +231,92 @@ export class AdminOrdersComponent implements OnInit {
 
     return raw
       .filter((item): item is Record<string, unknown> => !!item && typeof item === 'object')
-      .map((item) => ({
-        orderNumber: this.readText(item, ['orderNumber'], ['orderNo'], ['orderId']),
-        orderStatus: this.normalizeStatusValue(
-          item['orderStatus'] ??
-          item['status'] ??
-          item['order_state'] ??
-          item['orderStatusName'] ??
-          item['currentStatus'] ??
-          'PENDING'
-        ),
-        createdAt: this.readText(
-          item,
-          ['createdAt'],
-          ['placedOn'],
-          ['orderDate'],
-          ['createdOn'],
-          ['date'],
-          ['created_at']
-        ),
-        total: this.readNumber(
-          item,
-          ['total'],
-          ['totalPaid'],
-          ['totalAmount'],
-          ['grandTotal'],
-          ['amount'],
-          ['pricing', 'total'],
-          ['pricing', 'totalAmount'],
-          ['pricing', 'grandTotal'],
-          ['pricing', 'amount']
-        ),
-        customerName: this.readText(
-          item,
-          ['customerName'],
-          ['fullName'],
-          ['name'],
-          ['customer', 'fullName'],
-          ['customer', 'name'],
-          ['customer', 'customerName'],
-          ['buyer', 'fullName'],
-          ['user', 'fullName']
-        ),
-        customerEmail: this.readText(
-          item,
-          ['customerEmail'],
-          ['email'],
-          ['customer', 'email'],
-          ['buyer', 'email'],
-          ['user', 'email']
-        ),
-        specialInstructions: this.readText(
-          item,
-          ['specialInstructions'],
-          ['specialInstruction'],
-          ['notes'],
-          ['note'],
-          ['customerNote'],
-          ['customerNotes']
-        ),
-        trackingNumber: this.readText(
-          item,
-          ['trackingNumber'],
-          ['trackingNo'],
-          ['tracking_no'],
-          ['shipping', 'trackingNumber'],
-          ['shipping', 'trackingNo']
-        ),
-        trackingUrl: this.readText(
-          item,
-          ['trackingUrl'],
-          ['trackingURL'],
-          ['tracking_link'],
-          ['trackingLink'],
-          ['shipping', 'trackingUrl'],
-          ['shipping', 'trackingURL'],
-          ['shipping', 'trackingLink']
-        )
-      }))
+      .map((item) => this.normalizeOrderItem(item))
+      .filter((order): order is AdminOrder => order !== null)
       .filter((order) => order.orderNumber.length > 0);
+  }
+
+  private normalizeOrderItem(item: Record<string, unknown>): AdminOrder | null {
+    const order = {
+      orderNumber: this.readText(item, ['orderNumber'], ['orderNo'], ['orderId']),
+      orderStatus: this.normalizeStatusValue(
+        item['orderStatus'] ??
+        item['status'] ??
+        item['order_state'] ??
+        item['orderStatusName'] ??
+        item['currentStatus'] ??
+        'PENDING'
+      ),
+      createdAt: this.readText(
+        item,
+        ['createdAt'],
+        ['placedOn'],
+        ['orderDate'],
+        ['createdOn'],
+        ['date'],
+        ['created_at']
+      ),
+      total: this.readNumber(
+        item,
+        ['total'],
+        ['totalPaid'],
+        ['totalAmount'],
+        ['grandTotal'],
+        ['amount'],
+        ['pricing', 'total'],
+        ['pricing', 'totalAmount'],
+        ['pricing', 'grandTotal'],
+        ['pricing', 'amount']
+      ),
+      customerName: this.readText(
+        item,
+        ['customerName'],
+        ['fullName'],
+        ['name'],
+        ['customer', 'fullName'],
+        ['customer', 'name'],
+        ['customer', 'customerName'],
+        ['buyer', 'fullName'],
+        ['user', 'fullName']
+      ),
+      customerEmail: this.readText(
+        item,
+        ['customerEmail'],
+        ['email'],
+        ['customer', 'email'],
+        ['buyer', 'email'],
+        ['user', 'email']
+      ),
+      specialInstructions: this.readText(
+        item,
+        ['specialInstructions'],
+        ['specialInstruction'],
+        ['notes'],
+        ['note'],
+        ['customerNote'],
+        ['customerNotes']
+      ),
+      trackingNumber: this.readText(
+        item,
+        ['trackingNumber'],
+        ['trackingNo'],
+        ['tracking_no'],
+        ['shipping', 'trackingNumber'],
+        ['shipping', 'trackingNo']
+      ),
+      trackingUrl: this.readText(
+        item,
+        ['trackingUrl'],
+        ['trackingURL'],
+        ['tracking_link'],
+        ['trackingLink'],
+        ['shipping', 'trackingUrl'],
+        ['shipping', 'trackingURL'],
+        ['shipping', 'trackingLink']
+      )
+    };
+
+    return order.orderNumber.length > 0 ? order : null;
   }
 
   private normalizeStats(raw: unknown): AdminOrderStats {
@@ -321,6 +404,13 @@ export class AdminOrdersComponent implements OnInit {
     }
 
     return Number(value);
+  }
+
+  private normalizeOrderSearchValue(value: string): string {
+    return value
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '');
   }
 
   private isAdminUser(): boolean {

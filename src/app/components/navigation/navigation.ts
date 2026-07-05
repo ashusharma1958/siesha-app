@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -15,13 +15,19 @@ import { ProductService } from '../../services/product.service';
   templateUrl: './navigation.html',
   styleUrls: ['./navigation.css'],
 })
-export class Navigation {
+export class Navigation implements OnInit, AfterViewInit, OnDestroy {
   searchTerm = '';
   isSearchOpen = false;
   suggestedProducts: Product[] = [];
   private allProducts: Product[] = [];
   private readonly searchInput$ = new Subject<string>();
   private readonly destroy$ = new Subject<void>();
+  private mobileMenuElement: HTMLElement | null = null;
+  private lockedScrollY = 0;
+  private isBodyScrollLocked = false;
+  private readonly onMenuShow = () => this.lockBodyScroll();
+  private readonly onMenuHide = () => this.unlockBodyScroll();
+  private readonly onMenuHidden = () => this.unlockBodyScroll();
 
   constructor(private router: Router, private productService: ProductService) {
     this.searchInput$
@@ -40,7 +46,19 @@ export class Navigation {
     });
   }
 
+  ngAfterViewInit(): void {
+    this.mobileMenuElement = document.getElementById('mainNavbar');
+
+    this.mobileMenuElement?.addEventListener('show.bs.collapse', this.onMenuShow);
+    this.mobileMenuElement?.addEventListener('hide.bs.collapse', this.onMenuHide);
+    this.mobileMenuElement?.addEventListener('hidden.bs.collapse', this.onMenuHidden);
+  }
+
   ngOnDestroy(): void {
+    this.mobileMenuElement?.removeEventListener('show.bs.collapse', this.onMenuShow);
+    this.mobileMenuElement?.removeEventListener('hide.bs.collapse', this.onMenuHide);
+    this.mobileMenuElement?.removeEventListener('hidden.bs.collapse', this.onMenuHidden);
+    this.unlockBodyScroll();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -51,6 +69,41 @@ export class Navigation {
     if (!this.isSearchOpen) {
       this.resetSearchState();
     }
+  }
+
+  onMenuToggleClick(event: Event): void {
+    if (!this.isMobileMenuViewport()) {
+      return;
+    }
+
+    const trigger = event.currentTarget as HTMLElement | null;
+    const isExpanded = trigger?.getAttribute('aria-expanded') === 'true';
+
+    if (isExpanded) {
+      this.unlockBodyScroll();
+      return;
+    }
+
+    window.setTimeout(() => {
+      if (this.isMenuExpanded()) {
+        this.lockBodyScroll();
+      }
+    }, 40);
+  }
+
+  onMobileMenuContentClick(event: Event): void {
+    if (!this.isMobileMenuViewport() || !this.isMenuExpanded()) {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+    const actionableElement = target?.closest('a, button');
+
+    if (!actionableElement || actionableElement.classList.contains('navbar-toggler')) {
+      return;
+    }
+
+    this.closeMobileMenu();
   }
 
   onSearchInput(): void {
@@ -157,25 +210,91 @@ export class Navigation {
       .filter(Boolean)
       .join(' '));
 
-    return searchableText.includes(normalizedQuery);
+    const queryTokens = normalizedQuery.split(' ').filter(Boolean);
+    return queryTokens.every((token) => searchableText.includes(token));
   }
 
   private normalizeSearchValue(value: string | null | undefined): string {
     const sanitized = this.sanitizeSearchInput(value ?? '');
 
     return sanitized
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
       .trim()
       .replace(/\s+/g, ' ')
       .toLocaleLowerCase();
   }
 
   private sanitizeSearchInput(value: string): string {
-    return value.replace(/[^A-Za-z\s]/g, '');
+    return value.replace(/[^\p{L}\p{N}\s'-]/gu, '');
   }
 
   private resetSearchState(): void {
     this.searchTerm = '';
     this.suggestedProducts = [];
+  }
+
+  private lockBodyScroll(): void {
+    if (this.isBodyScrollLocked || !this.isMobileMenuViewport()) {
+      return;
+    }
+
+    this.lockedScrollY = window.scrollY || window.pageYOffset || 0;
+    document.documentElement.classList.add('mobile-nav-open');
+    document.body.classList.add('mobile-nav-open');
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${this.lockedScrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    this.isBodyScrollLocked = true;
+  }
+
+  private unlockBodyScroll(): void {
+    if (!this.isBodyScrollLocked) {
+      return;
+    }
+
+    document.documentElement.classList.remove('mobile-nav-open');
+    document.body.classList.remove('mobile-nav-open');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, this.lockedScrollY);
+    this.isBodyScrollLocked = false;
+  }
+
+  private isMobileMenuViewport(): boolean {
+    return window.innerWidth <= 991.98;
+  }
+
+  private isMenuExpanded(): boolean {
+    return !!this.mobileMenuElement && (
+      this.mobileMenuElement.classList.contains('show') ||
+      this.mobileMenuElement.classList.contains('collapsing')
+    );
+  }
+
+  private closeMobileMenu(): void {
+    this.unlockBodyScroll();
+
+    const bootstrapApi = (window as {
+      bootstrap?: {
+        Collapse?: {
+          getOrCreateInstance: (element: Element) => { hide: () => void };
+        };
+      };
+    }).bootstrap;
+
+    if (this.mobileMenuElement && bootstrapApi?.Collapse) {
+      bootstrapApi.Collapse.getOrCreateInstance(this.mobileMenuElement).hide();
+      return;
+    }
+
+    this.mobileMenuElement?.classList.remove('show', 'collapsing');
+    this.mobileMenuElement?.classList.add('collapse');
   }
 
   get accountLink(): string {

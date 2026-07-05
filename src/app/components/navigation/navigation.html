@@ -1,8 +1,9 @@
 <nav class="navbar navbar-expand-lg header">
-  <div class="container nav-container">
+  <div class="container nav-container" [class.mobile-search-active]="isSearchOpen">
 
     <!-- LEFT: TOGGLER -->
     <button class="navbar-toggler stylish-toggler collapsed" type="button" data-bs-toggle="collapse"
+      (click)="onMenuToggleClick($event)"
       data-bs-target="#mainNavbar" aria-label="Toggle navigation">
       <span class="toggler-line"></span>
       <span class="toggler-line"></span>
@@ -13,7 +14,7 @@
     <!-- CENTER: LOGO -->
     <a routerLink="/home" class="  order-lg-2 order-sm-2 navbar-brand d-flex  justify-content-center">
       <div class="header__heading-logo-wrapper">
-        <img src="/assets/image/siesha-logo-light-ivory.svg" alt="Siesha" class="img-fluid">
+        <img src="https://raw.githubusercontent.com/ashusharma1958/static/main/image/siesha-logo-light-ivory.svg" alt="Siesha" class="img-fluid">
       </div>
     </a>
 
@@ -64,25 +65,36 @@
         (click)="toggleSearch()"
         [attr.aria-label]="isSearchOpen ? 'Close search' : 'Search products'"
         [attr.aria-expanded]="isSearchOpen">
-        <img *ngIf="!isSearchOpen" src="/assets/image/search-icon.svg" class="img-fluid">
+        <img *ngIf="!isSearchOpen" src="https://raw.githubusercontent.com/ashusharma1958/static/main/image/search-icon.svg" class="img-fluid">
         <i *ngIf="isSearchOpen" class="bi bi-x-lg nav-search-toggle-close" aria-hidden="true"></i>
       </button>
 
-      <a [routerLink]="accountLink" class="header__icon header__icon--account link focus-inset small-hide">
-        <img src="/assets/image/icon-account.svg" class="img-fluid">
+      <a [routerLink]="accountLink" class="header__icon header__icon--account link focus-inset small-hide desktop-header-action">
+        <img src="https://raw.githubusercontent.com/ashusharma1958/static/main/image/icon-account.svg" class="img-fluid">
       </a>
 
       <a href="javascript:void(0)"
-        class="header__icon link focus-inset"
+        class="header__icon link focus-inset desktop-header-action"
         data-bs-toggle="offcanvas"
         data-bs-target="#cartOffcanvas"
         aria-controls="cartOffcanvas">
-        <img src="/assets/image/icon-cart-empty.svg" class="img-fluid">
+        <img src="https://raw.githubusercontent.com/ashusharma1958/static/main/image/icon-cart-empty.svg" class="img-fluid">
       </a>
     </div>
 
     <!-- COLLAPSIBLE MENU -->
-    <div class="collapse justify-content-start navbar-collapse order-lg-1" id="mainNavbar">
+    <div class="collapse justify-content-start navbar-collapse order-lg-1" id="mainNavbar" (click)="onMobileMenuContentClick($event)">
+      <div class="mobile-nav-utility d-lg-none">
+        <div class="mobile-nav-actions">
+          <a [routerLink]="accountLink" class="mobile-nav-action-link">Account</a>
+          <a href="javascript:void(0)"
+            class="mobile-nav-action-link"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#cartOffcanvas"
+            aria-controls="cartOffcanvas">Cart</a>
+        </div>
+      </div>
+
       <ul class="navbar-nav  mb-2 mb-lg-0 nav-left">
         <li class="nav-item">
           <a class="nav-link active" routerLink="/home">Home</a>

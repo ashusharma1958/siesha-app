@@ -12,6 +12,7 @@ import {
   ProfileOrderItemReview,
   UpsertOrderReviewRequest
 } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 import { Footer } from '../footer/footer';
 import { Navigation } from '../navigation/navigation';
 
@@ -44,6 +45,7 @@ export class ProfileComponent implements OnInit {
   constructor(
     private router: Router,
     private authService: AuthService,
+    private cartService: CartService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -60,10 +62,13 @@ export class ProfileComponent implements OnInit {
   }
 
   logout(): void {
+    this.cartService.clearCart();
+    sessionStorage.removeItem('checkout.pendingOrderPayload');
     localStorage.removeItem('auth.accessToken');
     localStorage.removeItem('auth.refreshToken');
     localStorage.removeItem('auth.idToken');
     localStorage.removeItem('auth.user');
+    localStorage.removeItem('auth.userId');
     void this.router.navigate(['/sign-in']);
   }
 
@@ -258,7 +263,7 @@ export class ProfileComponent implements OnInit {
     this.reviewErrorByKey[reviewKey] = '';
 
     if (!this.canItemBeReviewed(item)) {
-      this.reviewErrorByKey[reviewKey] = 'This item is not eligible for review yet.';
+      this.reviewErrorByKey[reviewKey] = 'You can review this item once the order is delivered.';
       return;
     }
 
@@ -491,17 +496,13 @@ export class ProfileComponent implements OnInit {
   }
 
   private resolveCanReview(value: unknown, order: ProfileOrder): boolean {
-    // Respect explicit backend lock; otherwise allow reviews for fulfilled/in-transit orders.
+    // Reviews are allowed only after delivery, while still respecting explicit backend lock.
     if (value === false) {
       return false;
     }
 
-    if (value === true) {
-      return true;
-    }
-
     const status = this.getOrderStatus(order);
-    return status === 'DELIVERED' || status === 'SHIPPED';
+    return status === 'DELIVERED';
   }
 
   private submitOrderReview(orderId: number, productId: number, payload: UpsertOrderReviewRequest, updateMode: boolean) {
@@ -577,7 +578,8 @@ export class ProfileComponent implements OnInit {
   }
 
   private getOrderStatus(order: ProfileOrder): string {
-    return String(order.status ?? '').trim().toUpperCase();
+    const orderWithOptionalStatus = order as ProfileOrder & { orderStatus?: string | null };
+    return String(order.status ?? orderWithOptionalStatus.orderStatus ?? '').trim().toUpperCase();
   }
 
   private readStoredUser(): AuthUser | null {

@@ -1,4 +1,5 @@
 <section class="shop-page container pb-3">
+  <div class="mobile-filter-overlay" [class.open]="isMobileFiltersOpen" (click)="closeMobileFilters()"></div>
 
   <!-- PAGE TITLE -->
   <div class="shop-header">
@@ -8,25 +9,32 @@
   <!-- SORT + FILTER ROW -->
   <div class="shop-toolbar">
     <!-- MOBILE FILTER BUTTON -->
-    <button class="mobile-filter-btn" id="openMobileFilter">
+    <button type="button" class="mobile-filter-btn" id="openMobileFilter" (click)="openMobileFilters()" [attr.aria-expanded]="isMobileFiltersOpen" aria-controls="mobileShopFilters">
       <i class="fa-solid fa-sliders"></i> Filter
     </button>
 
+    <div class="shop-toolbar-panel" id="mobileShopFilters" [class.mobile-open]="isMobileFiltersOpen">
+      <div class="mobile-filter-header">
+        <h6>Filters</h6>
+        <button type="button" class="mobile-filter-close" (click)="closeMobileFilters()" aria-label="Close filters">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
 
-    <!-- SORT -->
-    <div class="sort-box">
-      <label>Sort by:</label>
-      <select [(ngModel)]="sortBy" (ngModelChange)="onSortChange()">
-        <option value="featured">Featured</option>
-        <option value="best-selling">Best Selling</option>
-        <option value="price-asc">Price: Low to High</option>
-        <option value="price-desc">Price: High to Low</option>
-      </select>
-      <span class="product-count">{{ productCount }} products</span>
-    </div>
+      <!-- SORT -->
+      <div class="sort-box">
+        <label>Sort by:</label>
+        <select [(ngModel)]="sortBy" (ngModelChange)="onSortChange()">
+          <option value="featured">Featured</option>
+          <option value="best-selling">Best Selling</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+        </select>
+        <span class="product-count">{{ productCount }} products</span>
+      </div>
 
-    <!-- FILTERS -->
-    <div class="filter-box">
+      <!-- FILTERS -->
+      <div class="filter-box">
 
       <!-- PRICE FILTER -->
       <!-- PRICE FILTER -->
@@ -259,6 +267,7 @@
         </div>
       </div>
 
+      </div>
     </div>
   </div>
 

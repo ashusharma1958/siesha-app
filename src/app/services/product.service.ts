@@ -83,6 +83,8 @@ type ProductImageDto = {
   providedIn: 'root'
 })
 export class ProductService {
+  private static readonly STATIC_IMAGE_BASE_URL = 'https://raw.githubusercontent.com/ashusharma1958/static/main/image/';
+
   constructor(private http: HttpClient) {}
 
   getProducts(): Observable<Product[]> {
@@ -119,7 +121,7 @@ export class ProductService {
     return {
       id: dto.id,
       name: dto.name,
-      image: primaryImage?.imageUrl ?? dto.image ?? '',
+      image: this.resolveImageUrl(primaryImage?.imageUrl ?? dto.image ?? ''),
       images: normalizedImages,
       alt: primaryImage?.altText ?? dto.alt ?? dto.name,
       originalPrice: dto.originalPrice ?? undefined,
@@ -144,7 +146,38 @@ export class ProductService {
 
     return [...images]
       .filter((item) => !!item?.imageUrl)
+      .map((item) => ({
+        ...item,
+        imageUrl: this.resolveImageUrl(item.imageUrl)
+      }))
       .sort((first, second) => (first.displayOrder ?? 0) - (second.displayOrder ?? 0));
+  }
+
+  private resolveImageUrl(rawUrl: string | null | undefined): string {
+    const url = String(rawUrl ?? '').trim();
+    if (!url) {
+      return '';
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+
+    const normalized = url.replace(/^\/+/, '');
+
+    if (normalized.startsWith('assets/image/')) {
+      return ProductService.STATIC_IMAGE_BASE_URL + normalized.slice('assets/image/'.length);
+    }
+
+    if (normalized.startsWith('image/')) {
+      return ProductService.STATIC_IMAGE_BASE_URL + normalized.slice('image/'.length);
+    }
+
+    if (normalized.startsWith('products/') || normalized.startsWith('banners/')) {
+      return ProductService.STATIC_IMAGE_BASE_URL + normalized;
+    }
+
+    return ProductService.STATIC_IMAGE_BASE_URL + normalized;
   }
 
   private selectPrimaryImage(images: ProductImage[]): ProductImage | undefined {

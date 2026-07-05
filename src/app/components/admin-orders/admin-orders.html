@@ -35,17 +35,52 @@
     </div>
 
     <div class="toolbar">
-      <label for="statusFilter">Filter by status</label>
-      <select
-        id="statusFilter"
-        class="form-select"
-        [(ngModel)]="selectedStatus"
-        (change)="onStatusFilterChange()"
-      >
-        <option *ngFor="let option of statusOptions" [value]="option">
-          {{ option }}
-        </option>
-      </select>
+      <div class="toolbar-control">
+        <label for="statusFilter">Filter by status</label>
+        <select
+          id="statusFilter"
+          class="form-select"
+          [(ngModel)]="selectedStatus"
+          (change)="onStatusFilterChange()"
+        >
+          <option *ngFor="let option of statusOptions" [value]="option">
+            {{ option }}
+          </option>
+        </select>
+      </div>
+
+      <div class="toolbar-control toolbar-control-search">
+        <label for="orderIdSearch">Search by order ID</label>
+        <div class="search-input-group">
+          <input
+            id="orderIdSearch"
+            type="search"
+            class="form-control"
+            placeholder="e.g. ORD-100019"
+            [(ngModel)]="orderIdSearch"
+            (keydown.enter)="applyOrderIdSearch()"
+          >
+          <button
+            type="button"
+            class="btn btn-search-order"
+            (click)="applyOrderIdSearch()"
+          >
+            Search
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar-control toolbar-control-page-size">
+        <label for="pageSizeSelect">Per page</label>
+        <select
+          id="pageSizeSelect"
+          class="form-select"
+          [(ngModel)]="pageSize"
+          (change)="onPageSizeChange()"
+        >
+          <option *ngFor="let option of pageSizeOptions" [ngValue]="option">{{ option }}</option>
+        </select>
+      </div>
     </div>
 
     <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
@@ -53,7 +88,7 @@
     </div>
 
     <div class="table-wrap" *ngIf="!isLoadingOrders; else loadingState">
-      <table class="table table-striped align-middle" *ngIf="orders.length > 0; else emptyState">
+      <table class="table table-striped align-middle" *ngIf="filteredOrders.length > 0; else emptyState">
         <thead>
           <tr>
             <th>Order Number</th>
@@ -68,7 +103,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let order of orders">
+          <tr *ngFor="let order of filteredOrders">
             <td>{{ order.orderNumber }}</td>
             <td>
               <div>{{ order.customerName }}</div>
@@ -131,6 +166,33 @@
           </tr>
         </tbody>
       </table>
+
+      <div class="pagination-bar" *ngIf="totalPages > 0">
+        <div class="pagination-summary">
+          Page {{ currentPage + 1 }} of {{ totalPages }}
+          <span *ngIf="totalElements > 0">({{ totalElements }} orders)</span>
+        </div>
+
+        <div class="pagination-actions">
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            [disabled]="currentPage === 0 || isLoadingOrders"
+            (click)="goToPreviousPage()"
+          >
+            Previous
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            [disabled]="currentPage + 1 >= totalPages || isLoadingOrders"
+            (click)="goToNextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
 
     <ng-template #loadingState>
@@ -138,7 +200,7 @@
     </ng-template>
 
     <ng-template #emptyState>
-      <div class="text-center py-5">No orders found for the selected filter.</div>
+      <div class="text-center py-5">No orders found for the selected filter or order ID search.</div>
     </ng-template>
   </div>
 </section>

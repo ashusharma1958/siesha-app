@@ -48,4 +48,27 @@ export class ProductGrid implements OnInit {
   getDisplayPrice(product: Product): number | undefined {
     return product.salePrice ?? product.price ?? product.originalPrice ?? undefined;
   }
+
+  getRoundedRating(rating: number | null | undefined): number {
+    const clamped = Math.max(0, Math.min(5, rating ?? 0));
+    return Math.round(clamped);
+  }
+
+  getRatingStars(rating: number | null | undefined): string {
+    const filled = this.getRoundedRating(rating);
+    const empty = 5 - filled;
+    return `${'★'.repeat(filled)}${'☆'.repeat(empty)}`;
+  }
+
+  getReviewCount(reviewCount: number | null | undefined): number {
+    return Math.max(0, reviewCount ?? 0);
+  }
+
+  getReviewLabel(reviewCount: number | null | undefined): string {
+    return this.getReviewCount(reviewCount) < 2 ? 'review' : 'reviews';
+  }
+
+  shouldShowRating(rating: number | null | undefined, reviewCount: number | null | undefined): boolean {
+    return !(this.getRoundedRating(rating) === 0 && this.getReviewCount(reviewCount) === 0);
+  }
 }

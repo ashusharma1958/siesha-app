@@ -230,28 +230,28 @@
       </ng-container>
 
       <h5 class="section-title" *ngIf="!isAddressMode">Payment</h5>
-      <p class="text-muted small mb-3" *ngIf="!isAddressMode">All transactions are secure and encrypted.</p>
+      <p class="text-muted small mb-3" *ngIf="!isAddressMode">Online payment is temporarily disabled. You can still place your order.</p>
 
       <div class="payment-wrapper" *ngIf="!isAddressMode">
 
         <!-- SELECTED PAYMENT METHOD -->
         <div class="payment-header d-flex justify-content-between align-items-center">
           <div class="payment-title">
-            PhonePe Payment Gateway (UPI, Cards & NetBanking)
+            Payment gateway paused
           </div>
 
           <div class="payment-icons">
-            <img src="assets/image/upi.CmgCfll8.svg">
-            <img src="assets/image/visa.sxIq5Dot.svg">
-            <img src="assets/image/master.CzeoQWmc.svg">
+            <img src="https://raw.githubusercontent.com/ashusharma1958/static/main/image/upi.CmgCfll8.svg">
+            <img src="https://raw.githubusercontent.com/ashusharma1958/static/main/image/visa.sxIq5Dot.svg">
+            <img src="https://raw.githubusercontent.com/ashusharma1958/static/main/image/master.CzeoQWmc.svg">
             <span class="more-badge">+3</span>
           </div>
         </div>
 
         <!-- DESCRIPTION -->
         <div class="payment-desc">
-          You'll be redirected to PhonePe Payment Gateway (UPI, Cards & NetBanking)
-          to complete your purchase.
+          We will re-enable online payments soon. For now, orders are placed directly from checkout.
+          <div class="payment-progress" *ngIf="paymentStatusMessage">{{ paymentStatusMessage }}</div>
         </div>
 
       </div>
@@ -260,15 +260,15 @@
       <p class="save-error" *ngIf="!isAddressMode && orderError">{{ orderError }}</p>
 
       <button class="pay-btn mb-4" type="button" [disabled]="(isAddressMode && isSavingAddress) || isPlacingOrder" (click)="isAddressMode ? saveAddress() : placeOrder()">
-        {{ isAddressMode ? (isSavingAddress ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Update address' : 'Save address')) : (isPlacingOrder ? 'Placing order...' : 'Pay now') }}
+        {{ isAddressMode ? (isSavingAddress ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Update address' : 'Save address')) : (isPlacingOrder ? 'Placing order...' : 'Place order') }}
       </button>
 
       <div class="checkout-footer-links " *ngIf="!isAddressMode">
-        <a href="#">Refund policy</a>
-        <a href="#">Shipping</a>
-        <a href="#">Privacy policy</a>
-        <a href="#">Terms of service</a>
-        <a href="#">Contact</a>
+        <button type="button" class="policy-link-btn" (click)="openPolicy('refund')">Refund policy</button>
+        <button type="button" class="policy-link-btn" (click)="openPolicy('shipping')">Shipping</button>
+        <button type="button" class="policy-link-btn" (click)="openPolicy('privacy')">Privacy policy</button>
+        <button type="button" class="policy-link-btn" (click)="openPolicy('terms')">Terms of service</button>
+        <button type="button" class="policy-link-btn" (click)="openPolicy('contact')">Contact</button>
       </div>
 
     </div>
@@ -364,6 +364,30 @@
 
     </div>
 
+  </div>
+</div>
+
+<div class="policy-modal-backdrop" *ngIf="selectedPolicy" (click)="closePolicy()">
+  <div class="policy-modal" role="dialog" aria-modal="true" [attr.aria-label]="selectedPolicy.title" (click)="$event.stopPropagation()">
+    <div class="policy-modal-header">
+      <div>
+        <h2>{{ selectedPolicy.title }}</h2>
+        <p *ngIf="selectedPolicy.updatedAt" class="policy-updated-at">{{ selectedPolicy.updatedAt }}</p>
+      </div>
+      <button type="button" class="policy-close-btn" aria-label="Close policy" (click)="closePolicy()">&times;</button>
+    </div>
+
+    <div class="policy-modal-body">
+      <p *ngFor="let paragraph of selectedPolicy.intro">{{ paragraph }}</p>
+
+      <section class="policy-section" *ngFor="let section of selectedPolicy.sections">
+        <h3 *ngIf="section.heading">{{ section.heading }}</h3>
+        <p *ngFor="let paragraph of section.paragraphs">{{ paragraph }}</p>
+        <ol *ngIf="section.items?.length">
+          <li *ngFor="let item of section.items">{{ item }}</li>
+        </ol>
+      </section>
+    </div>
   </div>
 </div>
 

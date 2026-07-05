@@ -88,6 +88,17 @@ export type UpdateAdminOrderStatusRequest = {
   trackingUrl?: string;
 };
 
+export type AdminOrdersPageBody = {
+  content?: unknown;
+  number?: number;
+  size?: number;
+  totalElements?: number;
+  totalPages?: number;
+  first?: boolean;
+  last?: boolean;
+  numberOfElements?: number;
+};
+
 type ApiResponse<T> = {
   statusCode: number;
   message: string;
@@ -113,7 +124,12 @@ export class OrderService {
     );
   }
 
-  getAdminOrders(status?: string, page = 0, size = 50): Observable<ApiResponse<AdminOrder[]>> {
+  getAdminOrders(
+    status?: string,
+    page = 0,
+    size = 50,
+    search?: string
+  ): Observable<ApiResponse<AdminOrder[] | AdminOrdersPageBody>> {
     const params = new URLSearchParams();
     params.set('page', String(page));
     params.set('size', String(size));
@@ -123,7 +139,12 @@ export class OrderService {
       params.set('status', normalizedStatus);
     }
 
-    return this.http.get<ApiResponse<AdminOrder[]>>(
+    const normalizedSearch = search?.trim();
+    if (normalizedSearch) {
+      params.set('search', normalizedSearch);
+    }
+
+    return this.http.get<ApiResponse<AdminOrder[] | AdminOrdersPageBody>>(
       `${environment.apiBaseUrl}/api/admin/orders?${params.toString()}`
     );
   }

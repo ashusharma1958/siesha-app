@@ -48,7 +48,45 @@
   font-size: 15px;
 }
 
-.signup-form button {
+.password-input-wrap {
+  position: relative;
+}
+
+.password-input-wrap input {
+  width: 100%;
+  padding-right: 46px;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #8a8a8a;
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.toggle-password-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.toggle-password-btn:hover {
+  background: #f2f2f2;
+  color: #555;
+}
+
+.signup-form > button {
   margin-top: 8px;
   border: none;
   border-radius: 8px;
@@ -129,5 +167,10 @@
 
   .signup-card h1 {
     font-size: 28px;
+  }
+
+  .signup-form > button,
+  .social-btn {
+    width: 100%;
   }
 }
