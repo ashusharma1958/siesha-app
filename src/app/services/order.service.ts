@@ -10,10 +10,26 @@ export type CreateOrderRequest = {
     guest: boolean;
   };
   billingAddress: {
-    id: number | string | null;
+    label: string;
+    line1: string;
+    line2?: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    phone?: string;
+    isDefault?: boolean;
   };
   shippingAddress: {
-    id: number | string | null;
+    label: string;
+    line1: string;
+    line2?: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    phone?: string;
+    isDefault?: boolean;
     sameAsBilling: boolean;
   };
   items: {
@@ -26,8 +42,8 @@ export type CreateOrderRequest = {
   pricing: {
     subtotal: number;
     discountCode?: string | null;
-    discountPercent: number;
-    discountAmount: number;
+    discountPercent: number | null;
+    discountAmount: number | null;
     shippingCharge: number;
     taxAmount: number;
     total: number;

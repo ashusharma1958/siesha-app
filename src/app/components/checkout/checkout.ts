@@ -7,10 +7,20 @@ import { catchError, finalize, timeout } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AddAddressRequest, AuthService, ProfileAddress } from '../../services/auth.service';
 import { CreateOrderRequest, OrderService } from '../../services/order.service';
+import { PaymentService } from '../../services/payment.service';
 import { CartItem, CartService } from '../../services/cart.service';
 import { ApiVoucher, VoucherService } from '../../services/voucher.service';
 import { Footer } from '../footer/footer';
 import { Navigation } from '../navigation/navigation';
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on: (eventName: string, callback: (response: unknown) => void) => void;
+    };
+  }
+}
 
 type PolicyKey = 'refund' | 'shipping' | 'privacy' | 'terms' | 'contact';
 
@@ -478,6 +488,7 @@ export class CheckoutComponent implements OnInit {
     private authService: AuthService,
     private cartService: CartService,
     private orderService: OrderService,
+    private paymentService: PaymentService,
     private voucherService: VoucherService,
     private cdr: ChangeDetectorRef
   ) {}
@@ -894,10 +905,26 @@ export class CheckoutComponent implements OnInit {
         guest: !this.isSignedIn
       },
       billingAddress: {
-        id: (billing as ProfileAddress).id ?? null
+        label: billing.label || 'Home',
+        line1: billing.line1,
+        line2: billing.line2 ?? '',
+        city: billing.city,
+        state: billing.state,
+        postalCode: billing.postalCode,
+        country: billing.country,
+        phone: billing.phone ?? '',
+        isDefault: !!billing.isDefault
       },
       shippingAddress: {
-        id: (shippingAddr as ProfileAddress).id ?? null,
+        label: shippingAddr.label || 'Home',
+        line1: shippingAddr.line1,
+        line2: shippingAddr.line2 ?? '',
+        city: shippingAddr.city,
+        state: shippingAddr.state,
+        postalCode: shippingAddr.postalCode,
+        country: shippingAddr.country,
+        phone: shippingAddr.phone ?? '',
+        isDefault: !!shippingAddr.isDefault,
         sameAsBilling: this.shippingIsSameBilling
       },
       items: this.cartItems.map((item) => ({
@@ -910,15 +937,15 @@ export class CheckoutComponent implements OnInit {
       pricing: {
         subtotal: this.subtotal,
         discountCode: this.discountApplied ? this.discountCode.trim().toUpperCase() : null,
-        discountPercent: this.discountPercent,
-        discountAmount: this.discountAmount,
+        discountPercent: this.discountApplied ? this.discountPercent : null,
+        discountAmount: this.discountApplied ? this.discountAmount : null,
         shippingCharge,
         taxAmount,
         total: grandTotal
       },
       payment: {
         method: 'RAZORPAY',
-        status: 'SUCCESS',
+        status: 'PENDING',
         transactionId: null
       },
       orderStatus: 'PLACED',
@@ -931,7 +958,7 @@ export class CheckoutComponent implements OnInit {
     if (this.isPlacingOrder) return;
 
     this.orderError = '';
-    this.paymentStatusMessage = 'Placing your order...';
+    this.paymentStatusMessage = 'Preparing secure payment...';
 
     const payload = this.buildOrderPayload();
     if (!payload) {
@@ -939,18 +966,104 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
+    if (typeof window.Razorpay !== 'function') {
+      this.paymentStatusMessage = '';
+      this.orderError = 'Payment system is unavailable. Please refresh and try again.';
+      return;
+    }
+
+    const RazorpayCtor = window.Razorpay;
+
+    const payableAmount = Number(payload.pricing.total ?? 0);
+    if (!Number.isFinite(payableAmount) || payableAmount <= 0) {
+      this.paymentStatusMessage = '';
+      this.orderError = 'Invalid payable amount. Please review your cart and try again.';
+      return;
+    }
+
     this.isPlacingOrder = true;
-    this.orderService.createOrder(payload).pipe(
-      finalize(() => {
-        this.isPlacingOrder = false;
-      })
-    ).subscribe({
-      next: () => {
-        this.paymentStatusMessage = '';
-        this.cartService.clearCart();
-        void this.router.navigate(['/order-tracking']);
+    this.paymentService.createRazorpayOrder({ amount: payableAmount, currency: 'INR' }).subscribe({
+      next: (createOrderResponse) => {
+        const createOrderBody = createOrderResponse.body;
+        const razorpayOrderId = createOrderBody.razorpayOrderId ?? createOrderBody.orderId ?? '';
+        const keyId = createOrderBody.keyId;
+
+        if (!razorpayOrderId || !keyId) {
+          this.isPlacingOrder = false;
+          this.paymentStatusMessage = '';
+          this.orderError = 'Unable to initialize payment. Please try again.';
+          return;
+        }
+
+        this.paymentStatusMessage = 'Secure payment window opened...';
+
+        const razorpay = new RazorpayCtor({
+          key: keyId,
+          amount: createOrderBody.amount,
+          currency: createOrderBody.currency || 'INR',
+          order_id: razorpayOrderId,
+          name: 'SIESHA',
+          description: 'Order Payment',
+          handler: (handlerResponse: unknown) => {
+            const gatewayPayload = handlerResponse as {
+              razorpay_order_id?: string;
+              razorpay_payment_id?: string;
+              razorpay_signature?: string;
+            };
+
+            const receivedOrderId = gatewayPayload.razorpay_order_id ?? razorpayOrderId;
+            const paymentId = gatewayPayload.razorpay_payment_id ?? '';
+            const signature = gatewayPayload.razorpay_signature ?? '';
+
+            if (!receivedOrderId || !paymentId || !signature) {
+              this.isPlacingOrder = false;
+              this.paymentStatusMessage = '';
+              this.orderError = 'Payment confirmation is incomplete. Please contact support.';
+              return;
+            }
+
+            this.paymentStatusMessage = 'Verifying payment securely...';
+
+            this.paymentService.verifyRazorpayPayment({
+              razorpayOrderId: receivedOrderId,
+              razorpayPaymentId: paymentId,
+              razorpaySignature: signature,
+              orderRequest: payload
+            }).pipe(
+              finalize(() => {
+                this.isPlacingOrder = false;
+              })
+            ).subscribe({
+              next: () => {
+                this.paymentStatusMessage = '';
+                this.cartService.clearCart();
+                void this.router.navigate(['/order-tracking']);
+              },
+              error: () => {
+                this.paymentStatusMessage = '';
+                this.orderError = 'Payment verification failed. Please contact support if amount was deducted.';
+              }
+            });
+          },
+          modal: {
+            ondismiss: () => {
+              this.isPlacingOrder = false;
+              this.paymentStatusMessage = '';
+              this.orderError = 'Payment was cancelled. You can try again.';
+            }
+          }
+        });
+
+        razorpay.on('payment.failed', () => {
+          this.isPlacingOrder = false;
+          this.paymentStatusMessage = '';
+          this.orderError = 'Payment failed. Please try again.';
+        });
+
+        razorpay.open();
       },
       error: () => {
+        this.isPlacingOrder = false;
         this.paymentStatusMessage = '';
         this.orderError = 'Unable to place order right now. Please try again.';
       }

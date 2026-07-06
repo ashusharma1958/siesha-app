@@ -1,9 +1,8 @@
 export const environment = {
   apiBaseUrl: 'http://localhost:8080',
   paymentEndpoints: {
-    razorpayCreateOrder: '/api/payments/razorpay/order',
-    razorpayVerify: '/api/payments/razorpay/verify',
-    razorpayKeyId: ''
+    razorpayCreateOrder: '/api/payment/razorpay/create-order',
+    razorpayVerify: '/api/payment/razorpay/verify'
   },
   accountEndpoints: {
     orders: '/api/orders/me',

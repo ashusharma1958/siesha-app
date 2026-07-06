@@ -3,39 +3,44 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
+import { CreateOrderRequest } from './order.service';
 
 type ApiResponse<T> = {
   statusCode: number;
   message: string;
   body: T;
+  timestamp?: string;
 };
 
 export type CreateRazorpayOrderRequest = {
-  amount: number; // rupees
+  amount: number;
   currency: 'INR';
-  receipt: string;
-  notes?: Record<string, string | number | boolean | null>;
 };
 
 export type CreateRazorpayOrderResponseBody = {
-  orderId: string;
-  amount: number; // paise
+  razorpayOrderId?: string;
+  orderId?: string;
+  amount: number;
   currency: string;
-  keyId?: string;
-  name?: string;
-  description?: string;
-};
-
-export type VerifyRazorpayPaymentResponseBody = {
-  verified: boolean;
-  transactionId?: string;
-  message?: string;
+  keyId: string;
 };
 
 export type VerifyRazorpayPaymentRequest = {
   razorpayOrderId: string;
   razorpayPaymentId: string;
   razorpaySignature: string;
+  orderRequest: CreateOrderRequest;
+};
+
+export type VerifyRazorpayPaymentResponseBody = {
+  id?: number | string;
+  orderNumber?: string;
+  status?: string;
+  payment?: {
+    method?: string;
+    status?: string;
+    transactionId?: string;
+  };
 };
 
 @Injectable({
@@ -44,13 +49,9 @@ export type VerifyRazorpayPaymentRequest = {
 export class PaymentService {
   constructor(private http: HttpClient) {}
 
-  createRazorpayOrder(
-    payload: CreateRazorpayOrderRequest
-  ): Observable<ApiResponse<CreateRazorpayOrderResponseBody>> {
+  createRazorpayOrder(payload: CreateRazorpayOrderRequest): Observable<ApiResponse<CreateRazorpayOrderResponseBody>> {
     const endpoints = (environment.paymentEndpoints as Record<string, string | undefined> | undefined);
-    const endpoint =
-      endpoints?.['razorpayCreateOrder'] ??
-      '/api/payments/razorpay/order';
+    const endpoint = endpoints?.['razorpayCreateOrder'] ?? '/api/payment/razorpay/create-order';
 
     return this.http.post<ApiResponse<CreateRazorpayOrderResponseBody>>(
       `${environment.apiBaseUrl}${endpoint}`,
@@ -60,9 +61,7 @@ export class PaymentService {
 
   verifyRazorpayPayment(payload: VerifyRazorpayPaymentRequest): Observable<ApiResponse<VerifyRazorpayPaymentResponseBody>> {
     const endpoints = (environment.paymentEndpoints as Record<string, string | undefined> | undefined);
-    const endpoint =
-      endpoints?.['razorpayVerify'] ??
-      '/api/payments/razorpay/verify';
+    const endpoint = endpoints?.['razorpayVerify'] ?? '/api/payment/razorpay/verify';
 
     return this.http.post<ApiResponse<VerifyRazorpayPaymentResponseBody>>(
       `${environment.apiBaseUrl}${endpoint}`,
