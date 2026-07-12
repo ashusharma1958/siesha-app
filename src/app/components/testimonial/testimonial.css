@@ -9,3 +9,50 @@
 	font-size: 14px;
 	margin-top: 4px;
 }
+
+.testimonial-swiper {
+	position: relative;
+	width: 100%;
+}
+
+.testimonial-swiper .swiper {
+	width: 100%;
+	padding: 10px 4px 60px;
+}
+
+.testimonial-swiper .swiper-slide {
+	height: auto;
+	display: flex;
+}
+
+.testimonial-swiper .testimonial-card {
+	width: 100%;
+}
+
+.testimonial-swiper .bottom-controls {
+	position: absolute;
+	bottom: 10px;
+	left: 0;
+	right: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 18px;
+}
+
+.testimonial-swiper .custom-prev,
+.testimonial-swiper .custom-next {
+	background: none;
+	border: none;
+	font-size: 22px;
+	line-height: 1;
+	color: #999;
+	cursor: pointer;
+	padding: 6px 10px;
+	transition: color 0.3s;
+}
+
+.testimonial-swiper .custom-prev:hover,
+.testimonial-swiper .custom-next:hover {
+	color: #000;
+}

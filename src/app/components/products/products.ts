@@ -58,45 +58,52 @@ export class Products implements OnInit, AfterViewInit {
       return;
     }
 
-    setTimeout(() => {
-      if (!this.swiperContainer) {
-        return;
-      }
-
-      if (this.swiper) {
-        this.swiper.destroy(true, true);
-        this.swiper = undefined;
-      }
-
-      this.swiper = new Swiper(this.swiperContainer.nativeElement, {
-        modules: [Navigation, Pagination, Autoplay],
-        slidesPerView: 1,
-        spaceBetween: 20,
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true,
-        },
-        autoplay: {
-          delay: 3000,
-          disableOnInteraction: false,
-        },
-        loop: true,
-        breakpoints: {
-          640: {
-            slidesPerView: 2,
-            spaceBetween: 20,
-          },
-          768: {
-            slidesPerView: 3,
-            spaceBetween: 30,
-          },
-          1024: {
-            slidesPerView: 4,
-            spaceBetween: 40,
-          },
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!this.swiperContainer) {
+          return;
         }
+
+        if (this.swiper) {
+          this.swiper.destroy(true, true);
+          this.swiper = undefined;
+        }
+
+        this.swiper = new Swiper(this.swiperContainer.nativeElement, {
+          modules: [Navigation, Pagination, Autoplay],
+          observer: true,
+          observeParents: true,
+          observeSlideChildren: true,
+          slidesPerView: 2,
+          spaceBetween: 12,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          autoplay: {
+            delay: 3000,
+            disableOnInteraction: false,
+          },
+          loop: true,
+          breakpoints: {
+            640: {
+              slidesPerView: 3,
+              spaceBetween: 20,
+            },
+            768: {
+              slidesPerView: 3,
+              spaceBetween: 30,
+            },
+            1024: {
+              slidesPerView: 4,
+              spaceBetween: 40,
+            },
+          }
+        });
+
+        this.swiper.update();
       });
-    }, 0);
+    });
   }
 
   onSlideChange() {

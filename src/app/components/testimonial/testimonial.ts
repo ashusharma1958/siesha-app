@@ -1,6 +1,15 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { catchError, forkJoin, of } from 'rxjs';
+
+// Import Swiper and modules
+import Swiper from 'swiper';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 import { ProductReview } from '../../data/products.data';
 import { ProductService } from '../../services/product.service';
@@ -16,9 +25,13 @@ type TestimonialReview = ProductReview & {
   templateUrl: './testimonial.html',
   styleUrl: './testimonial.css',
 })
-export class Testimonial implements OnInit {
+export class Testimonial implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('swiperContainer', { static: false }) swiperContainer: any;
+
   isLoading = true;
   reviews: TestimonialReview[] = [];
+  viewReady = false;
+  swiper: Swiper | undefined;
 
   constructor(
     private productService: ProductService,
@@ -27,6 +40,79 @@ export class Testimonial implements OnInit {
 
   ngOnInit(): void {
     this.loadAllReviews();
+  }
+
+  ngAfterViewInit(): void {
+    this.viewReady = true;
+    this.initSwiperIfReady();
+  }
+
+  ngOnDestroy(): void {
+    if (this.swiper) {
+      this.swiper.destroy(true, true);
+      this.swiper = undefined;
+    }
+  }
+
+  private initSwiperIfReady(): void {
+    if (!this.viewReady || !this.swiperContainer || this.reviews.length === 0) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!this.swiperContainer) {
+          return;
+        }
+
+        if (this.swiper) {
+          this.swiper.destroy(true, true);
+          this.swiper = undefined;
+        }
+
+        this.swiper = new Swiper(this.swiperContainer.nativeElement, {
+          modules: [Navigation, Pagination, Autoplay],
+          observer: true,
+          observeParents: true,
+          observeSlideChildren: true,
+          slidesPerView: 1,
+          spaceBetween: 16,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          autoplay: {
+            delay: 4000,
+            disableOnInteraction: false,
+          },
+          loop: true,
+          breakpoints: {
+            768: {
+              slidesPerView: 3,
+              spaceBetween: 24,
+            },
+            1024: {
+              slidesPerView: 3,
+              spaceBetween: 30,
+            },
+          }
+        });
+
+        this.swiper.update();
+      });
+    });
+  }
+
+  prevSlide(): void {
+    if (this.swiper) {
+      this.swiper.slidePrev();
+    }
+  }
+
+  nextSlide(): void {
+    if (this.swiper) {
+      this.swiper.slideNext();
+    }
   }
 
   trackByReview(index: number, review: TestimonialReview): string {
@@ -69,6 +155,7 @@ export class Testimonial implements OnInit {
 
             this.isLoading = false;
             this.cdr.detectChanges();
+            this.initSwiperIfReady();
           },
           error: () => {
             this.reviews = [];

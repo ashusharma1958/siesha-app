@@ -79,31 +79,38 @@ export class Hero implements OnInit, AfterViewInit {
       return;
     }
 
-    setTimeout(() => {
-      if (!this.swiperContainer) {
-        return;
-      }
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!this.swiperContainer) {
+          return;
+        }
 
-      if (this.swiper) {
-        this.swiper.destroy(true, true);
-        this.swiper = undefined;
-      }
+        if (this.swiper) {
+          this.swiper.destroy(true, true);
+          this.swiper = undefined;
+        }
 
-      this.swiper = new Swiper(this.swiperContainer.nativeElement, {
-        modules: [Pagination, Autoplay],
-        slidesPerView: 1,
-        spaceBetween: 0,
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true,
-        },
-        autoplay: {
-          delay: 2500,
-          disableOnInteraction: false,
-        },
-        loop: this.slides.length > 1,
+        this.swiper = new Swiper(this.swiperContainer.nativeElement, {
+          modules: [Pagination, Autoplay],
+          observer: true,
+          observeParents: true,
+          observeSlideChildren: true,
+          slidesPerView: 1,
+          spaceBetween: 0,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          autoplay: {
+            delay: 2500,
+            disableOnInteraction: false,
+          },
+          loop: this.slides.length > 1,
+        });
+
+        this.swiper.update();
       });
-    }, 0);
+    });
   }
 
   trackBySlide(index: number, slide: any): number {

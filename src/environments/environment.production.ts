@@ -1,6 +1,6 @@
 export const environment = {
-  // Set this to your production backend URL, for example: https://api.siesha.com
-  apiBaseUrl: 'https://api.your-domain.com',
+  // Use nginx reverse proxy on same origin
+  apiBaseUrl: '',
   paymentEndpoints: {
     razorpayCreateOrder: '/api/payments/razorpay/order',
     razorpayVerify: '/api/payments/razorpay/verify',
@@ -11,6 +11,6 @@ export const environment = {
     addresses: '/api/addresses/me'
   },
   socialAuthUrls: {
-    google: 'https://api.your-domain.com/auth/google'
+    google: '/auth/google'
   }
 };
