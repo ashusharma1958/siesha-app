@@ -159,6 +159,17 @@ export class Navigation implements OnInit, AfterViewInit, OnDestroy {
     this.isSearchOpen = false;
   }
 
+  onMobileAccountClick(event: Event): void {
+    event.preventDefault();
+
+    if (!this.isMobileMenuViewport()) {
+      return;
+    }
+
+    this.closeMobileMenu();
+    void this.router.navigateByUrl(this.accountLink);
+  }
+
   get shouldShowSuggestions(): boolean {
     return this.normalizeSearchValue(this.searchTerm).length >= 3;
   }

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -34,7 +34,8 @@ export class SignInComponent {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private cartService: CartService
+    private cartService: CartService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   socialSignIn(provider: SocialProvider): void {
@@ -53,7 +54,7 @@ export class SignInComponent {
     const returnTo = this.normalizeReturnToPath(this.route.snapshot.queryParamMap.get('returnTo'));
     const state = btoa(JSON.stringify({ returnTo }));
 
-    const redirectUrl = new URL(providerUrl);
+    const redirectUrl = new URL(providerUrl, window.location.origin);
     redirectUrl.searchParams.set('redirect_uri', callbackUrl);
     redirectUrl.searchParams.set('state', state);
 
@@ -90,7 +91,12 @@ export class SignInComponent {
 
     this.authService
       .signIn(this.signInData)
-      .pipe(finalize(() => (this.isSubmitting = false)))
+      .pipe(
+        finalize(() => {
+          this.isSubmitting = false;
+          this.cdr.markForCheck();
+        })
+      )
       .subscribe({
         next: (response) => {
           const previousEmail = this.readStoredUserEmail();
@@ -122,6 +128,7 @@ export class SignInComponent {
         },
         error: (errorResponse: HttpErrorResponse) => {
           this.feedbackMessage = this.resolveSignInError(errorResponse);
+          this.cdr.markForCheck();
         }
       });
   }

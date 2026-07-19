@@ -86,7 +86,7 @@
     <div class="collapse justify-content-start navbar-collapse order-lg-1" id="mainNavbar" (click)="onMobileMenuContentClick($event)">
       <div class="mobile-nav-utility d-lg-none">
         <div class="mobile-nav-actions">
-          <a [routerLink]="accountLink" class="mobile-nav-action-link">Account</a>
+          <a href="javascript:void(0)" (click)="onMobileAccountClick($event)" class="mobile-nav-action-link">Account</a>
           <a href="javascript:void(0)"
             class="mobile-nav-action-link"
             data-bs-toggle="offcanvas"

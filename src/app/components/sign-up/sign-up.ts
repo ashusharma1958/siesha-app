@@ -51,10 +51,10 @@ export class SignUpComponent {
     }
 
     const callbackUrl = `${window.location.origin}/auth/callback`;
-    const separator = providerUrl.includes('?') ? '&' : '?';
-    const redirectUrl = `${providerUrl}${separator}redirect_uri=${encodeURIComponent(callbackUrl)}`;
+    const redirectUrl = new URL(providerUrl, window.location.origin);
+    redirectUrl.searchParams.set('redirect_uri', callbackUrl);
 
-    window.location.href = redirectUrl;
+    window.location.href = redirectUrl.toString();
   }
 
   onSubmit(form: NgForm): void {

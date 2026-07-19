@@ -85,7 +85,9 @@
 
     .navbar-nav .nav-link {
       font-size: 14px;
-      margin-right: 18px;
+      margin-right: 12px;
+      white-space: nowrap;
+      line-height: 1.2;
     }
 
 
@@ -101,7 +103,7 @@
       align-items: center;
       grid-template-areas: "navigation heading icons";
       grid-template-columns: 1fr auto 1fr;
-      column-gap: 2rem;
+      column-gap: 1rem;
     }
 
     .navbar-toggler {
@@ -133,8 +135,15 @@
       color: #EEE9DD
     }
 
+    .nav-left {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 2px;
+    }
+
     .nav-left a {
-      margin-right: 18px;
+      margin-right: 0;
       font-size: 14px;
     }
 
@@ -256,6 +265,7 @@
         margin-right: 0;
         font-size: 18px;
         line-height: 1.35;
+        white-space: normal;
         color: #0a2c1c !important;
       }
 
@@ -1241,6 +1251,14 @@
       color: #fff;
       width: 70px;
       outline: none;
+    }
+
+    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+      input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),
+      textarea,
+      select {
+        font-size: 16px !important;
+      }
     }
 
     .to {
