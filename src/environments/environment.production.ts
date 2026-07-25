@@ -2,8 +2,8 @@ export const environment = {
   // Use nginx reverse proxy on same origin
   apiBaseUrl: '',
   paymentEndpoints: {
-    razorpayCreateOrder: '/api/payments/razorpay/order',
-    razorpayVerify: '/api/payments/razorpay/verify',
+    razorpayCreateOrder: '/api/payment/razorpay/create-order',
+    razorpayVerify: '/api/payment/razorpay/verify',
     razorpayKeyId: ''
   },
   accountEndpoints: {

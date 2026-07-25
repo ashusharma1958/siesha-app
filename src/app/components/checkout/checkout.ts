@@ -1004,6 +1004,28 @@ export class CheckoutComponent implements OnInit {
           order_id: razorpayOrderId,
           name: 'SIESHA',
           description: 'Order Payment',
+          method: {
+            upi: true,
+            card: true,
+            netbanking: true,
+            wallet: true,
+            emi: true,
+            paylater: true
+          },
+          config: {
+            display: {
+              blocks: {
+                upi: {
+                  name: 'Pay by UPI',
+                  instruments: [{ method: 'upi' }]
+                }
+              },
+              sequence: ['block.upi'],
+              preferences: {
+                show_default_blocks: true
+              }
+            }
+          },
           handler: (handlerResponse: unknown) => {
             const gatewayPayload = handlerResponse as {
               razorpay_order_id?: string;
