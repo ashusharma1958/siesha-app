@@ -398,6 +398,16 @@ export class CheckoutComponent implements OnInit {
   paymentStatusMessage = '';
   orderError = '';
 
+  private resetOrderFlowState(message?: string): void {
+    this.isPlacingOrder = false;
+    this.paymentStatusMessage = '';
+    if (message !== undefined) {
+      this.orderError = message;
+    }
+    // Razorpay callbacks run outside Angular's zone; force a UI update
+    this.cdr.detectChanges();
+  }
+
   get cartItems(): CartItem[] {
     return this.cartService.items;
   }
@@ -414,8 +424,16 @@ export class CheckoutComponent implements OnInit {
     return this.subtotal - this.discountAmount;
   }
 
-  get eligibleVouchers(): ApiVoucher[] {
-    return this.availableVouchers.filter((voucher) => this.isVoucherEligible(voucher));
+  get activeVouchers(): ApiVoucher[] {
+    return this.availableVouchers;
+  }
+
+  isVoucherEligibleByCart(voucher: ApiVoucher): boolean {
+    return this.subtotal >= Number(voucher.minimumCartValue ?? 0);
+  }
+
+  voucherShortfall(voucher: ApiVoucher): number {
+    return Math.ceil(Number(voucher.minimumCartValue ?? 0) - this.subtotal);
   }
 
   get selectedPolicy(): CheckoutPolicy | null {
@@ -884,11 +902,10 @@ export class CheckoutComponent implements OnInit {
       return null;
     }
 
-    const TAX_RATE = 0.09;
     const shippingCharge = 0;
     const discountedSubtotal = this.total;
-    const taxAmount = Math.round(discountedSubtotal * TAX_RATE * 100) / 100;
-    const grandTotal = Math.round((discountedSubtotal + taxAmount + shippingCharge) * 100) / 100;
+    const taxAmount = 0;
+    const grandTotal = Math.round((discountedSubtotal + shippingCharge) * 100) / 100;
     const specialInstructions = this.cartService.specialInstructions.trim();
 
     if (specialInstructions.length > 500) {
@@ -975,14 +992,16 @@ export class CheckoutComponent implements OnInit {
     const RazorpayCtor = window.Razorpay;
 
     const payableAmount = Number(payload.pricing.total ?? 0);
-    if (!Number.isFinite(payableAmount) || payableAmount <= 0) {
+    const payableAmountInPaise = Math.round(payableAmount * 100);
+
+    if (!Number.isFinite(payableAmountInPaise) || payableAmountInPaise < 100) {
       this.paymentStatusMessage = '';
-      this.orderError = 'Invalid payable amount. Please review your cart and try again.';
+      this.orderError = 'Minimum payable amount is ₹1.00. Please review your cart and try again.';
       return;
     }
 
     this.isPlacingOrder = true;
-    this.paymentService.createRazorpayOrder({ amount: payableAmount, currency: 'INR' }).subscribe({
+    this.paymentService.createRazorpayOrder({ amount: payableAmountInPaise, currency: 'INR' }).subscribe({
       next: (createOrderResponse) => {
         const createOrderBody = createOrderResponse.body;
         const razorpayOrderId = createOrderBody.razorpayOrderId ?? createOrderBody.orderId ?? '';
@@ -1038,9 +1057,7 @@ export class CheckoutComponent implements OnInit {
             const signature = gatewayPayload.razorpay_signature ?? '';
 
             if (!receivedOrderId || !paymentId || !signature) {
-              this.isPlacingOrder = false;
-              this.paymentStatusMessage = '';
-              this.orderError = 'Payment confirmation is incomplete. Please contact support.';
+              this.resetOrderFlowState('Payment confirmation is incomplete. Please contact support.');
               return;
             }
 
@@ -1057,37 +1074,34 @@ export class CheckoutComponent implements OnInit {
               })
             ).subscribe({
               next: () => {
-                this.paymentStatusMessage = '';
+                this.resetOrderFlowState();
                 this.cartService.clearCart();
                 void this.router.navigate(['/order-tracking']);
               },
               error: () => {
-                this.paymentStatusMessage = '';
-                this.orderError = 'Payment verification failed. Please contact support if amount was deducted.';
+                this.resetOrderFlowState('Payment verification failed. Please contact support if amount was deducted.');
               }
             });
           },
           modal: {
             ondismiss: () => {
-              this.isPlacingOrder = false;
-              this.paymentStatusMessage = '';
-              this.orderError = 'Payment was cancelled. You can try again.';
+              this.resetOrderFlowState('Payment was cancelled. You can try again.');
             }
           }
         });
 
         razorpay.on('payment.failed', () => {
-          this.isPlacingOrder = false;
-          this.paymentStatusMessage = '';
-          this.orderError = 'Payment failed. Please try again.';
+this.resetOrderFlowState('Payment failed. Please try again.');
         });
 
-        razorpay.open();
+        try {
+          razorpay.open();
+        } catch (openError) {
+          this.resetOrderFlowState('Unable to open payment window. Please try again.');
+        }
       },
       error: () => {
-        this.isPlacingOrder = false;
-        this.paymentStatusMessage = '';
-        this.orderError = 'Unable to place order right now. Please try again.';
+        this.resetOrderFlowState('Unable to place order right now. Please try again.');
       }
     });
   }

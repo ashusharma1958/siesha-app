@@ -29,6 +29,7 @@ type AuthUser = {
   styleUrls: ['./profile.css']
 })
 export class ProfileComponent implements OnInit {
+  private static readonly STATIC_IMAGE_BASE_URL = 'https://raw.githubusercontent.com/ashusharma1958/static/main/image/';
   user: AuthUser | null = null;
   orders: ProfileOrder[] = [];
   addresses: ProfileAddress[] = [];
@@ -326,11 +327,38 @@ export class ProfileComponent implements OnInit {
     if (item.productImage && typeof item.productImage === 'string') {
       const trimmed = item.productImage.trim();
       if (trimmed) {
-        return trimmed;
+        return this.resolveImageUrl(trimmed);
       }
     }
     // Return a subtle placeholder/fallback
     return 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23e8e8e8%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22%23999%22 font-size=%2212%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22%3ENo Image%3C/text%3E%3C/svg%3E';
+  }
+
+  private resolveImageUrl(rawUrl: string | null | undefined): string {
+    const url = String(rawUrl ?? '').trim();
+    if (!url) {
+      return '';
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      return url;
+    }
+
+    const normalized = url.replace(/^\/+/, '');
+
+    if (normalized.startsWith('assets/image/')) {
+      return ProfileComponent.STATIC_IMAGE_BASE_URL + normalized.slice('assets/image/'.length);
+    }
+
+    if (normalized.startsWith('image/')) {
+      return ProfileComponent.STATIC_IMAGE_BASE_URL + normalized.slice('image/'.length);
+    }
+
+    if (normalized.startsWith('products/') || normalized.startsWith('banners/')) {
+      return ProfileComponent.STATIC_IMAGE_BASE_URL + normalized;
+    }
+
+    return ProfileComponent.STATIC_IMAGE_BASE_URL + normalized;
   }
 
   formatItemAmount(value: number | string | undefined): string {

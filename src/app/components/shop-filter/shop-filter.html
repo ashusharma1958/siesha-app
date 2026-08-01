@@ -35,6 +35,9 @@
 
       <!-- FILTERS -->
       <div class="filter-box">
+        <div class="filter-actions">
+          <button type="button" class="clear-all-global-btn" (click)="clearAllFilters()">Clear All</button>
+        </div>
 
       <!-- PRICE FILTER -->
       <!-- PRICE FILTER -->
@@ -50,9 +53,17 @@
         <div class="price-dropdown" id="priceDropdown" [style.display]="openDropdown === 'price' ? 'block' : 'none'">
 
           <!-- RANGE -->
-          <div class="range-wrapper">
-            <input type="range" id="minRange" min="0" max="11000" step="100" [(ngModel)]="minPrice" (change)="onPriceChange()">
-            <input type="range" id="maxRange" min="0" max="11000" step="100" [(ngModel)]="maxPrice" (change)="onPriceChange()">
+          <div class="range-wrapper" #rangeWrapper>
+            <div class="range-track-bg"></div>
+            <div class="range-track-fill" [ngStyle]="trackFillStyle"></div>
+            <div class="thumb"
+                 [style.left]="minThumbLeft"
+                 (mousedown)="thumbDragStart('min', $event)"
+                 (touchstart)="thumbDragStart('min', $event)"></div>
+            <div class="thumb"
+                 [style.left]="maxThumbLeft"
+                 (mousedown)="thumbDragStart('max', $event)"
+                 (touchstart)="thumbDragStart('max', $event)"></div>
           </div>
 
           <!-- INPUTS -->
@@ -90,11 +101,12 @@
               <input type="checkbox" [checked]="isFragranceSelected('Floral')" (change)="toggleFragrance('Floral', $any($event.target).checked)">
               Floral
             </label>
-            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Floral')" (click)="toggleSubPanel('Floral', $event)"></i>
           </div>
-          <div class="sub-panel">
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Floral')">
             <span>Mogra</span>
             <span>Rose</span>
+            <span>Bloom Gift set</span>
             <span>Rose & Vanilla</span>
           </div>
 
@@ -104,11 +116,10 @@
               <input type="checkbox" [checked]="isFragranceSelected('Fresh & Herbal')" (change)="toggleFragrance('Fresh & Herbal', $any($event.target).checked)">
               Fresh & Herbal
             </label>
-            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Fresh & Herbal')" (click)="toggleSubPanel('Fresh & Herbal', $event)"></i>
           </div>
-          <div class="sub-panel">
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Fresh & Herbal')">
             <span>Lavender</span>
-            <span>Lavender Rosemary Sage</span>
           </div>
 
           <!-- Warm & Woody -->
@@ -117,11 +128,10 @@
               <input type="checkbox" [checked]="isFragranceSelected('Warm & Woody')" (change)="toggleFragrance('Warm & Woody', $any($event.target).checked)">
               Warm & Woody
             </label>
-            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Warm & Woody')" (click)="toggleSubPanel('Warm & Woody', $event)"></i>
           </div>
-          <div class="sub-panel">
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Warm & Woody')">
             <span>Sandalwood</span>
-            <span>Oud</span>
           </div>
 
           <!-- Gourmand -->
@@ -130,10 +140,9 @@
               <input type="checkbox" [checked]="isFragranceSelected('Gourmand')" (change)="toggleFragrance('Gourmand', $any($event.target).checked)">
               Gourmand
             </label>
-            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Gourmand')" (click)="toggleSubPanel('Gourmand', $event)"></i>
           </div>
-          <div class="sub-panel">
-            <span>Coffee</span>
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Gourmand')">
             <span>Vanilla</span>
           </div>
 
@@ -143,9 +152,9 @@
               <input type="checkbox" [checked]="isFragranceSelected('Aquatic & Clean')" (change)="toggleFragrance('Aquatic & Clean', $any($event.target).checked)">
               Aquatic & Clean
             </label>
-            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Aquatic & Clean')" (click)="toggleSubPanel('Aquatic & Clean', $event)"></i>
           </div>
-          <div class="sub-panel">
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Aquatic & Clean')">
             <span>Aqua</span>
             <span>Blue Sapphire</span>
           </div>
@@ -156,6 +165,12 @@
               <input type="checkbox" [checked]="isFragranceSelected('Fruity')" (change)="toggleFragrance('Fruity', $any($event.target).checked)">
               Fruity
             </label>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Fruity')" (click)="toggleSubPanel('Fruity', $event)"></i>
+          </div>
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Fruity')">
+            <span>Grapefruit</span>
+            <span>Orange</span>
+            <span>Bergamot & Nectarine</span>
           </div>
 
         </div>
@@ -179,12 +194,12 @@
               <input type="checkbox" [checked]="isRitualSelected('Calm & Wind Down')" (change)="toggleRitual('Calm & Wind Down', $any($event.target).checked)">
               Calm & Wind Down
             </label>
-            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Calm & Wind Down')" (click)="toggleSubPanel('Calm & Wind Down', $event)"></i>
           </div>
-          <div class="sub-panel">
-            <span>Lavender</span>
-            <span>Lavender Rosemary Sage</span>
-            <span>Sandalwood</span>
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Calm & Wind Down')">
+            <span>Bergamot & Nectarine</span>
+            <span>Mogra</span>
+            <span>Vanilla</span>
           </div>
 
           <!-- Fresh Start -->
@@ -193,12 +208,14 @@
               <input type="checkbox" [checked]="isRitualSelected('Fresh Start')" (change)="toggleRitual('Fresh Start', $any($event.target).checked)">
               Fresh Start
             </label>
-            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Fresh Start')" (click)="toggleSubPanel('Fresh Start', $event)"></i>
           </div>
-          <div class="sub-panel">
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Fresh Start')">
+            <span>Orange</span>
+            <span>Grapefruit</span>
+            <span>Bergamot & Nectarine</span>
             <span>Aqua</span>
             <span>Blue Sapphire</span>
-            <span>Mogra</span>
           </div>
 
           <!-- Romance & Softness -->
@@ -207,12 +224,12 @@
               <input type="checkbox" [checked]="isRitualSelected('Romance & Softness')" (change)="toggleRitual('Romance & Softness', $any($event.target).checked)">
               Romance & Softness
             </label>
-            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Romance & Softness')" (click)="toggleSubPanel('Romance & Softness', $event)"></i>
           </div>
-          <div class="sub-panel">
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Romance & Softness')">
             <span>Rose</span>
             <span>Rose & Vanilla</span>
-            <span>Vanilla</span>
+            <span>Mogra</span>
           </div>
 
           <!-- Focus & Grounding -->
@@ -221,12 +238,13 @@
               <input type="checkbox" [checked]="isRitualSelected('Focus & Grounding')" (change)="toggleRitual('Focus & Grounding', $any($event.target).checked)">
               Focus & Grounding
             </label>
-            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Focus & Grounding')" (click)="toggleSubPanel('Focus & Grounding', $event)"></i>
           </div>
-          <div class="sub-panel">
-            <span>Oud</span>
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Focus & Grounding')">
             <span>Sandalwood</span>
-            <span>Coffee</span>
+            <span>Grapefruit</span>
+            <span>Aqua</span>
+            <span>Blue Sapphire</span>
           </div>
 
           <!-- Cozy Evenings -->
@@ -235,12 +253,12 @@
               <input type="checkbox" [checked]="isRitualSelected('Cozy Evenings')" (change)="toggleRitual('Cozy Evenings', $any($event.target).checked)">
               Cozy Evenings
             </label>
-            <i class="fa-solid fa-chevron-right sub-arrow"></i>
+            <i class="fa-solid fa-chevron-right sub-arrow" [class.rotate]="isSubPanelOpen('Cozy Evenings')" (click)="toggleSubPanel('Cozy Evenings', $event)"></i>
           </div>
-          <div class="sub-panel">
-            <span>Coffee</span>
+          <div class="sub-panel" [class.open]="isSubPanelOpen('Cozy Evenings')">
             <span>Vanilla</span>
             <span>Rose & Vanilla</span>
+            <span>Sandalwood</span>
           </div>
 
         </div>

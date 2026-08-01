@@ -13,6 +13,7 @@ type ApiResponse<T> = {
 };
 
 export type CreateRazorpayOrderRequest = {
+  // Amount in the smallest currency unit (paise for INR)
   amount: number;
   currency: 'INR';
 };

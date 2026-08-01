@@ -6,6 +6,26 @@
 	flex: 1 1 auto;
 }
 
+.filter-actions {
+	display: inline-flex;
+	align-items: center;
+}
+
+.clear-all-global-btn {
+	background: #fff;
+	border: 1px solid #c3c2c2;
+	padding: 8px 16px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.clear-all-global-btn:hover {
+	background: #f7f7f7;
+}
+
 .mobile-filter-overlay,
 .mobile-filter-header {
 	display: none;
@@ -177,4 +197,101 @@
 	body.shop-filters-open {
 		overflow: hidden;
 	}
+}
+
+/* PRICE SLIDER FIX */
+.price-dropdown {
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 0;
+	width: 280px;
+	background: #fffff9;
+	padding: 18px;
+	border-radius: 10px;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+	z-index: 999;
+}
+
+.price-dropdown .range-wrapper {
+	position: relative;
+	height: 34px;
+	margin-bottom: 18px;
+}
+
+.price-dropdown .range-track-bg {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background: #ddd;
+	border-radius: 999px;
+	transform: translateY(-50%);
+	z-index: 0;
+}
+
+.price-dropdown .range-track-fill {
+	position: absolute;
+	top: 50%;
+	height: 4px;
+	background: #0a2c1c;
+	border-radius: 999px;
+	transform: translateY(-50%);
+	z-index: 1;
+}
+
+.price-dropdown .thumb {
+	position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 22px;
+	height: 22px;
+	background: #000;
+	border-radius: 50%;
+	cursor: grab;
+	z-index: 3;
+	border: 3px solid #fff;
+	box-shadow: 0 0 0 2px #000, 0 3px 12px rgba(0, 0, 0, 0.55);
+	user-select: none;
+	-webkit-user-select: none;
+	touch-action: none;
+}
+
+.price-dropdown .thumb:active {
+	cursor: grabbing;
+	transform: translate(-50%, -50%) scale(1.15);
+}
+
+.price-dropdown .price-inputs {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.price-dropdown .price-box {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	padding: 6px 8px;
+	background: #fff;
+	font-size: 13px;
+	flex: 1;
+}
+
+.price-dropdown .price-box input {
+	border: none;
+	outline: none;
+	width: 100%;
+	min-width: 0;
+	background: transparent;
+	font-size: 13px;
+	color: #111;
+}
+
+.price-dropdown .to {
+	font-size: 13px;
+	color: #666;
+	white-space: nowrap;
 }

@@ -34,8 +34,8 @@ export class Faq implements AfterViewInit {
 
         // Toggle current item
         item.classList.toggle('active');
-        icon.classList.toggle('fa-plus', !isOpen);
-        icon.classList.toggle('fa-minus', isOpen);
+        icon.classList.toggle('fa-plus', isOpen);
+        icon.classList.toggle('fa-minus', !isOpen);
       });
     });
   }

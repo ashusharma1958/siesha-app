@@ -9,7 +9,6 @@
         <div class="swiper-slide" *ngFor="let product of products; trackBy: trackByProduct">
           <a class="product-card" [routerLink]="['/product', product.id]">
             <div class="product-img">
-              <span class="sale" *ngIf="product.salePrice">Sale</span>
               <img [src]="product.image" [alt]="product.alt || product.name">
             </div>
             <h6>{{ product.name }}</h6>

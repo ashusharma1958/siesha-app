@@ -237,6 +237,14 @@
       }
 
       /* Mobile styles */
+      /* Keep header visible when body is fixed-position locked */
+      html.mobile-nav-open .header {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+
       .navbar-collapse {
         position: fixed;
         top: 100px;
@@ -245,8 +253,7 @@
         width: 100%;
         min-height: calc(100vh - 100px);
         padding: 18px 0 28px;
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(6px);
+        background: #fffef8;
         z-index: 99990;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
@@ -1215,7 +1222,8 @@
       appearance: none;
       pointer-events: none;
       height: 3px;
-      background: #ddd;
+      background: transparent;
+      z-index: 2;
     }
 
     .range-wrapper input::-webkit-slider-thumb {
@@ -1226,6 +1234,8 @@
       background: #fff;
       border-radius: 50%;
       cursor: pointer;
+      position: relative;
+      z-index: 3;
     }
 
     /* INPUTS */
@@ -1592,31 +1602,26 @@
       width: 100%;
       height: 4px;
       appearance: none;
-      background: #ddd;
+      background: transparent;
       border-radius: 4px;
-      pointer-events: auto;
-      /* ✅ VERY IMPORTANT */
+      pointer-events: none;
       z-index: 2;
     }
 
     /* SLIDER THUMB */
     .range-wrapper input[type="range"]::-webkit-slider-thumb,
-    .m-filter-panel input[type="range"]::-webkit-slider-thumb {
+    .m-filter-panel input[type="range"]::-webkit-slider-thumb,
+    .range-wrapper input[type="range"]::-moz-range-thumb,
+    .m-filter-panel input[type="range"]::-moz-range-thumb {
       appearance: none;
       width: 18px;
       height: 18px;
       background: #111;
       border-radius: 50%;
       cursor: pointer;
-    }
-
-    .range-wrapper input[type="range"]::-moz-range-thumb,
-    .m-filter-panel input[type="range"]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      background: #111;
-      border-radius: 50%;
-      cursor: pointer;
+      pointer-events: auto;
+      position: relative;
+      z-index: 4;
     }
 
     .price-box input,
@@ -1652,16 +1657,6 @@
     }
 
     /* FIX DUAL RANGE OVERLAP */
-    #minRange,
-    #mMinRange {
-      z-index: 3;
-    }
-
-    #maxRange,
-    #mMaxRange {
-      z-index: 2;
-    }
-
     .range-wrapper {
       touch-action: none;
     }
@@ -1737,32 +1732,41 @@
 
     /* ===== FINAL FIX FOR DUAL RANGE ===== */
 
-    .range-wrapper {
+    .range-wrapper,
+    .m-filter-panel .range-wrapper {
       position: relative;
       height: 30px;
     }
 
     /* COMMON RANGE */
-    .range-wrapper input[type="range"] {
+    .range-wrapper input[type="range"],
+    .m-filter-panel input[type="range"] {
       position: absolute;
       left: 0;
       top: 50%;
       transform: translateY(-50%);
       width: 100%;
-      pointer-events: auto;
+      pointer-events: none;
       appearance: none;
       background: transparent;
+      z-index: 2;
     }
 
     /* TRACK */
-    .range-wrapper input[type="range"]::-webkit-slider-runnable-track {
+    .range-wrapper input[type="range"]::-webkit-slider-runnable-track,
+    .range-wrapper input[type="range"]::-moz-range-track,
+    .m-filter-panel input[type="range"]::-webkit-slider-runnable-track,
+    .m-filter-panel input[type="range"]::-moz-range-track {
       height: 4px;
       background: #ddd;
       border-radius: 4px;
     }
 
     /* THUMB */
-    .range-wrapper input[type="range"]::-webkit-slider-thumb {
+    .range-wrapper input[type="range"]::-webkit-slider-thumb,
+    .range-wrapper input[type="range"]::-moz-range-thumb,
+    .m-filter-panel input[type="range"]::-webkit-slider-thumb,
+    .m-filter-panel input[type="range"]::-moz-range-thumb {
       appearance: none;
       width: 18px;
       height: 18px;
@@ -1770,16 +1774,33 @@
       border-radius: 50%;
       cursor: pointer;
       position: relative;
-      z-index: 3;
+      z-index: 4;
+      pointer-events: auto;
+    }
+
+    #minRange::-webkit-slider-thumb,
+    #minRange::-moz-range-thumb,
+    #mMinRange::-webkit-slider-thumb,
+    #mMinRange::-moz-range-thumb {
+      z-index: 6;
+    }
+
+    #maxRange::-webkit-slider-thumb,
+    #maxRange::-moz-range-thumb,
+    #mMaxRange::-webkit-slider-thumb,
+    #mMaxRange::-moz-range-thumb {
+      z-index: 5;
     }
 
     /* IMPORTANT PART */
-    #minRange {
-      z-index: 4;
+    #minRange,
+    #mMinRange {
+      z-index: 6;
     }
 
-    #maxRange {
-      z-index: 3;
+    #maxRange,
+    #mMaxRange {
+      z-index: 5;
     }
 
 
@@ -1853,7 +1874,7 @@
         }
 
         .faq-item.active .faq-answer {
-            max-height: 300px; /* Adjust based on content height */
+            max-height: 2000px;
             padding-bottom: 41px;
         }
 

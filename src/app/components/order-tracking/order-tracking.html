@@ -34,14 +34,18 @@
 
       <div class="row g-4 align-items-start">
 
-        <div class="col-md-4 text-left">
-          <img [src]="tracking.productImage || 'https://raw.githubusercontent.com/ashusharma1958/static/main/image/cart-item.png'" class="product-img mb-3" alt="Tracked product image">
-          <div class="status-badge">{{ formatStatus(tracking.currentStatus) }}</div>
-        </div>
-
-        <div class="col-md-4">
+        <div class="col-md-6">
           <div class="product-box">
-            <h6 class="mb-3">{{ tracking.productName }}</h6>
+            <div class="d-flex gap-3 align-items-start mb-4">
+              <img
+                [src]="tracking.productImage || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2290%22 height=%2290%22%3E%3Crect fill=%22%23e8e8e8%22 width=%2290%22 height=%2290%22/%3E%3C/svg%3E'"
+                class="product-stamp"
+                alt="Product image">
+              <div>
+                <h6 class="mb-2">{{ tracking.productName }}</h6>
+                <div class="status-badge">{{ formatStatus(tracking.currentStatus) }}</div>
+              </div>
+            </div>
             <p><strong>Order ID:</strong> {{ tracking.orderNumber }}</p>
             <p><strong>Quantity:</strong> {{ tracking.quantity }}</p>
             <p><strong>Total Paid:</strong> {{ formatCurrency(tracking.totalPaid) }}</p>
@@ -52,8 +56,8 @@
           </div>
         </div>
 
-        <div class="col-md-4">
-          <div class="order-tracking-wrap ms-5">
+        <div class="col-md-6">
+          <div class="order-tracking-wrap">
             <h6 class="mb-3">Order Tracking</h6>
             <div class="timeline">
 

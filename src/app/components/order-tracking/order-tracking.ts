@@ -103,6 +103,18 @@ export class OrderTrackingComponent implements OnInit {
     return !step.completed && !step.pending;
   }
 
+  private static readonly STATIC_IMAGE_BASE_URL = 'https://raw.githubusercontent.com/ashusharma1958/static/main/image/';
+
+  private resolveImageUrl(rawUrl: string | null | undefined): string | null {
+    const url = String(rawUrl ?? '').trim();
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+    const normalized = url.replace(/^\/+/, '');
+    if (normalized.startsWith('assets/image/')) return OrderTrackingComponent.STATIC_IMAGE_BASE_URL + normalized.slice('assets/image/'.length);
+    if (normalized.startsWith('image/')) return OrderTrackingComponent.STATIC_IMAGE_BASE_URL + normalized.slice('image/'.length);
+    return OrderTrackingComponent.STATIC_IMAGE_BASE_URL + normalized;
+  }
+
   private extractTrackingInfo(response: unknown): TrackOrderResponse | null {
     const parsed = this.parseValue(response);
     if (!parsed || typeof parsed !== 'object') {
@@ -136,7 +148,7 @@ export class OrderTrackingComponent implements OnInit {
     const result: TrackOrderResponse = {
       orderNumber: String(candidate['orderNumber'] ?? this.orderNumber),
       productName: String(candidate['productName'] ?? 'Product'),
-      productImage: candidate['productImage'] == null ? null : String(candidate['productImage']),
+      productImage: this.resolveImageUrl(candidate['productImage'] == null ? null : String(candidate['productImage'])),
       quantity: Number(candidate['quantity'] ?? 0),
       totalPaid: Number(candidate['totalPaid'] ?? 0),
       deliveryAddress: String(candidate['deliveryAddress'] ?? '-'),
