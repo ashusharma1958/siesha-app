@@ -330,6 +330,16 @@ nav.navbar {
 	}
 }
 
+.nav-backdrop {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 99989;
+	background: rgba(0, 0, 0, 0.45);
+	touch-action: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
 @media (max-width: 480px) {
 	.mobile-nav-utility {
 		padding-left: 16px;

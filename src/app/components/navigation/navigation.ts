@@ -25,6 +25,38 @@ export class Navigation implements OnInit, AfterViewInit, OnDestroy {
   private mobileMenuElement: HTMLElement | null = null;
   private lockedScrollY = 0;
   private isBodyScrollLocked = false;
+  private readonly onLockedTouchMove = (event: TouchEvent) => {
+    if (!this.isBodyScrollLocked) {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('#mainNavbar') || target?.closest('.header')) {
+      return;
+    }
+
+    event.preventDefault();
+  };
+
+  private readonly onLockedTouchStart = (event: TouchEvent) => {
+    if (!this.isBodyScrollLocked) {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+    // allow touches inside the menu, on the toggler/header, and on the backdrop
+    if (
+      target?.closest('#mainNavbar') ||
+      target?.closest('.navbar-toggler') ||
+      target?.closest('.header') ||
+      target?.closest('.nav-backdrop')
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+  };
+
   private readonly onMenuShow = () => this.lockBodyScroll();
   private readonly onMenuHide = () => this.unlockBodyScroll();
   private readonly onMenuHidden = () => this.unlockBodyScroll();
@@ -76,19 +108,11 @@ export class Navigation implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const trigger = event.currentTarget as HTMLElement | null;
-    const isExpanded = trigger?.getAttribute('aria-expanded') === 'true';
-
-    if (isExpanded) {
+    if (this.isBodyScrollLocked) {
       this.unlockBodyScroll();
-      return;
+    } else {
+      this.lockBodyScroll();
     }
-
-    window.setTimeout(() => {
-      if (this.isMenuExpanded()) {
-        this.lockBodyScroll();
-      }
-    }, 40);
   }
 
   onMobileMenuContentClick(event: Event): void {
@@ -245,19 +269,29 @@ export class Navigation implements OnInit, AfterViewInit, OnDestroy {
     this.suggestedProducts = [];
   }
 
+  get isMenuOpen(): boolean {
+    return this.isBodyScrollLocked;
+  }
+
   private lockBodyScroll(): void {
     if (this.isBodyScrollLocked || !this.isMobileMenuViewport()) {
       return;
     }
 
     this.lockedScrollY = window.scrollY || window.pageYOffset || 0;
+
+    // CSS class drives most rules; inline styles act as an unsurpassable fallback
     document.documentElement.classList.add('mobile-nav-open');
     document.body.classList.add('mobile-nav-open');
+    document.documentElement.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.top = `-${this.lockedScrollY}px`;
     document.body.style.left = '0';
     document.body.style.right = '0';
     document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('touchstart', this.onLockedTouchStart, { passive: false });
+    document.addEventListener('touchmove', this.onLockedTouchMove, { passive: false });
     this.isBodyScrollLocked = true;
   }
 
@@ -268,11 +302,15 @@ export class Navigation implements OnInit, AfterViewInit, OnDestroy {
 
     document.documentElement.classList.remove('mobile-nav-open');
     document.body.classList.remove('mobile-nav-open');
+    document.documentElement.style.overflow = '';
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.left = '';
     document.body.style.right = '';
     document.body.style.width = '';
+    document.body.style.overflow = '';
+    document.removeEventListener('touchstart', this.onLockedTouchStart);
+    document.removeEventListener('touchmove', this.onLockedTouchMove);
     window.scrollTo(0, this.lockedScrollY);
     this.isBodyScrollLocked = false;
   }
@@ -288,7 +326,7 @@ export class Navigation implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  private closeMobileMenu(): void {
+  closeMobileMenu(): void {
     this.unlockBodyScroll();
 
     const bootstrapApi = (window as {

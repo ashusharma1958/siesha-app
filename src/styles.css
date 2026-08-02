@@ -19,6 +19,24 @@
     body.mobile-nav-open {
       overflow: hidden;
       overscroll-behavior: none;
+      touch-action: none;
+      height: 100%;
+    }
+
+    body.mobile-nav-open {
+      position: fixed;
+      left: 0;
+      right: 0;
+      width: 100%;
+    }
+
+    /* backdrop shown via DOM class – not via Angular *ngIf so change detection timing is irrelevant */
+    html.mobile-nav-open .nav-backdrop {
+      display: block;
+    }
+
+    html.mobile-nav-open .navbar-collapse {
+      touch-action: pan-y;
     }
 
     /* ================== TOP BAR ================== */
@@ -60,6 +78,8 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      position: relative;
+      z-index: 99995;
     }
 
     .stylish-toggler .toggler-line {
@@ -71,6 +91,10 @@
     }
 
     /* OPEN STATE → CROSS */
+    .stylish-toggler:not(.collapsed) .toggler-line {
+      background-color: #0a2c1c;
+    }
+
     .stylish-toggler:not(.collapsed) .toggler-line:nth-child(1) {
       transform: translateY(11px) rotate(45deg);
     }
@@ -247,12 +271,12 @@
 
       .navbar-collapse {
         position: fixed;
-        top: 100px;
+        top: 0;
         left: 0;
         right: 0;
         width: 100%;
-        min-height: calc(100vh - 100px);
-        padding: 18px 0 28px;
+        min-height: 100vh;
+        padding: 100px 0 28px;
         background: #fffef8;
         z-index: 99990;
         overflow-y: auto;

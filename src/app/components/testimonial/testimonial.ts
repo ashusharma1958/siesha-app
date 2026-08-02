@@ -33,6 +33,50 @@ export class Testimonial implements OnInit, AfterViewInit, OnDestroy {
   viewReady = false;
   swiper: Swiper | undefined;
 
+  // Shown until real user reviews exceed 4; then actual reviews take over.
+  private readonly fallbackReviews: TestimonialReview[] = [
+    {
+      id: -1,
+      productId: -1,
+      productName: 'Dhyana',
+      author: 'Mdeepali',
+      rating: 5,
+      title: 'In love with Siesha',
+      content: 'I\u2019m absolutely in love with Siesha! Tried all their scented candles\u2014my favourite has to be Sandalwood. Good product at a good price.',
+      date: '2026-07-30'
+    },
+    {
+      id: -2,
+      productId: -2,
+      productName: 'Vara and Dhyana',
+      author: 'Harshit Maroo',
+      rating: 5,
+      title: 'Smells amazing',
+      content: 'Your candles smell amazing\u2014so soothing and natural. Loved both the Mogra and Sandalwood. Will definitely shop again!',
+      date: '2026-07-29'
+    },
+    {
+      id: -3,
+      productId: -3,
+      productName: 'Nirvaan',
+      author: 'Anshika Mittal',
+      rating: 5,
+      title: 'Felt like home',
+      content: 'Came home after the weekend. That cozy scent of Aqua candle instantly made it feel like home again.',
+      date: '2026-07-28'
+    },
+    {
+      id: -4,
+      productId: -4,
+      productName: 'Bloom Gift Set',
+      author: 'Peehu Gupta',
+      rating: 5,
+      title: 'Absolutely obsessed',
+      content: 'Absolutely obsessed with my Siesha candles! Velvet Rose is floral and romantic, Aqua is fresh and airy, Vanilla Dusk is warm and creamy, and Sandalwood is beautifully grounding. The fragrance lingers perfectly\u2014never too strong, just right.',
+      date: '2026-07-27'
+    }
+  ];
+
   constructor(
     private productService: ProductService,
     private cdr: ChangeDetectorRef
@@ -123,9 +167,10 @@ export class Testimonial implements OnInit, AfterViewInit, OnDestroy {
     this.productService.getProducts().subscribe({
       next: (products) => {
         if (!products.length) {
-          this.reviews = [];
+          this.reviews = this.fallbackReviews;
           this.isLoading = false;
           this.cdr.detectChanges();
+          this.initSwiperIfReady();
           return;
         }
 
@@ -137,7 +182,7 @@ export class Testimonial implements OnInit, AfterViewInit, OnDestroy {
 
         forkJoin(reviewRequests).subscribe({
           next: (reviewsPerProduct) => {
-            this.reviews = reviewsPerProduct
+            const realReviews = reviewsPerProduct
               .flatMap((productReviews, index) => {
                 const product = products[index];
                 return productReviews.map((review) => ({
@@ -146,6 +191,7 @@ export class Testimonial implements OnInit, AfterViewInit, OnDestroy {
                   productName: product.name
                 }));
               })
+              .filter((review) => review.rating > 3)
               .sort((a, b) => {
                 // Sort by latest date first when available.
                 const aTime = a.date ? Date.parse(a.date) : 0;
@@ -153,21 +199,26 @@ export class Testimonial implements OnInit, AfterViewInit, OnDestroy {
                 return bTime - aTime;
               });
 
+            // Use real reviews only once they exceed 4; otherwise show fallbacks.
+            this.reviews = realReviews.length > 4 ? realReviews : this.fallbackReviews;
+
             this.isLoading = false;
             this.cdr.detectChanges();
             this.initSwiperIfReady();
           },
           error: () => {
-            this.reviews = [];
+            this.reviews = this.fallbackReviews;
             this.isLoading = false;
             this.cdr.detectChanges();
+            this.initSwiperIfReady();
           }
         });
       },
       error: () => {
-        this.reviews = [];
+        this.reviews = this.fallbackReviews;
         this.isLoading = false;
         this.cdr.detectChanges();
+        this.initSwiperIfReady();
       }
     });
   }
