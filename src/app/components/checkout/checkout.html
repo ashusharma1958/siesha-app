@@ -81,7 +81,9 @@
                        maxlength="50" pattern="[A-Za-z ]+">
               </div>
               <div class="col-md-4 mb-3">
-                <select class="form-select" [(ngModel)]="addressForm.state"><option>Delhi</option></select>
+                <select class="form-select" [(ngModel)]="addressForm.state">
+                  <option *ngFor="let st of indianStates" [value]="st">{{ st }}</option>
+                </select>
               </div>
               <div class="col-md-4 mb-3">
                 <input class="form-control" placeholder="PIN code"
@@ -90,6 +92,8 @@
                        (keydown)="restrictPostalCodeInput($event)"
                        (paste)="onPostalCodePaste($event)"
                        inputmode="numeric" maxlength="6" pattern="[0-9]{6}">
+                <small class="text-muted" *ngIf="pincodeLookupLoading">Looking up city &amp; state…</small>
+                <small class="text-danger" *ngIf="pincodeLookupError">{{ pincodeLookupError }}</small>
               </div>
             </div>
 
@@ -137,7 +141,9 @@
                    maxlength="50" pattern="[A-Za-z +]">
           </div>
           <div class="col-md-4 mb-3">
-            <select class="form-select" [(ngModel)]="addressForm.state"><option>Delhi</option></select>
+            <select class="form-select" [(ngModel)]="addressForm.state">
+              <option *ngFor="let st of indianStates" [value]="st">{{ st }}</option>
+            </select>
           </div>
           <div class="col-md-4 mb-3">
             <input class="form-control" placeholder="PIN code"
@@ -146,6 +152,8 @@
                    (keydown)="restrictPostalCodeInput($event)"
                    (paste)="onPostalCodePaste($event)"
                    inputmode="numeric" maxlength="6" pattern="[0-9]{6}">
+            <small class="text-muted" *ngIf="pincodeLookupLoading">Looking up city &amp; state…</small>
+            <small class="text-danger" *ngIf="pincodeLookupError">{{ pincodeLookupError }}</small>
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +24,17 @@ declare global {
 }
 
 type PolicyKey = 'refund' | 'shipping' | 'privacy' | 'terms' | 'contact';
+
+type PincodePostOffice = {
+  Name: string;
+  District: string;
+  State: string;
+};
+
+type PincodeApiEntry = {
+  Status: string;
+  PostOffice: PincodePostOffice[] | null;
+};
 
 type PolicySection = {
   heading?: string;
@@ -500,6 +512,19 @@ export class CheckoutComponent implements OnInit {
     phone: ''
   };
 
+  pincodeLookupLoading = false;
+  pincodeLookupError = '';
+  indianStates: string[] = [
+    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
+    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
+    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
+    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+    'Andaman and Nicobar Islands', 'Chandigarh',
+    'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Jammu and Kashmir',
+    'Ladakh', 'Lakshadweep', 'Puducherry'
+  ];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -508,6 +533,7 @@ export class CheckoutComponent implements OnInit {
     private orderService: OrderService,
     private paymentService: PaymentService,
     private voucherService: VoucherService,
+    private http: HttpClient,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -787,7 +813,49 @@ export class CheckoutComponent implements OnInit {
   }
 
   onPostalCodeChange(value: string): void {
-    this.addressForm.postalCode = value.replace(/\D/g, '').slice(0, 6);
+    const pin = value.replace(/\D/g, '').slice(0, 6);
+    this.addressForm.postalCode = pin;
+    this.pincodeLookupError = '';
+
+    if (pin.length === 6) {
+      this.lookupPincode(pin);
+    }
+  }
+
+  private lookupPincode(pin: string): void {
+    this.pincodeLookupLoading = true;
+    this.pincodeLookupError = '';
+
+    this.http
+      .get<PincodeApiEntry[]>(`https://api.postalpincode.in/pincode/${pin}`)
+      .pipe(
+        timeout(8000),
+        catchError(() => of(null)),
+        finalize(() => {
+          this.pincodeLookupLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe((response) => {
+        const entry = response?.[0];
+        const office = entry?.PostOffice?.[0];
+
+        if (!entry || entry.Status !== 'Success' || !office) {
+          this.pincodeLookupError = 'Could not find details for this PIN code.';
+          return;
+        }
+
+        if (office.District) {
+          this.addressForm.city = office.District;
+        }
+
+        if (office.State) {
+          if (!this.indianStates.includes(office.State)) {
+            this.indianStates = [...this.indianStates, office.State];
+          }
+          this.addressForm.state = office.State;
+        }
+      });
   }
 
   restrictPostalCodeInput(event: KeyboardEvent): void {
@@ -805,7 +873,13 @@ export class CheckoutComponent implements OnInit {
   onPostalCodePaste(event: ClipboardEvent): void {
     event.preventDefault();
     const clipboardText = event.clipboardData?.getData('text') ?? '';
-    this.addressForm.postalCode = clipboardText.replace(/\D/g, '').slice(0, 6);
+    const pin = clipboardText.replace(/\D/g, '').slice(0, 6);
+    this.addressForm.postalCode = pin;
+    this.pincodeLookupError = '';
+
+    if (pin.length === 6) {
+      this.lookupPincode(pin);
+    }
   }
 
   restrictPhoneInput(event: KeyboardEvent): void {
