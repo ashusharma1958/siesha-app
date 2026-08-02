@@ -794,6 +794,12 @@ export class CheckoutComponent implements OnInit {
     this.addressForm.city = value.replace(/[^a-zA-Z ]/g, '').slice(0, 50);
   }
 
+  onStateChange(value: string): void {
+    this.addressForm.state = value;
+    this.addressForm.city = '';
+    this.addressForm.postalCode = '';
+  }
+
   restrictCityInput(event: KeyboardEvent): void {
     const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'];
 

@@ -81,7 +81,7 @@
                        maxlength="50" pattern="[A-Za-z ]+">
               </div>
               <div class="col-md-4 mb-3">
-                <select class="form-select" [(ngModel)]="addressForm.state">
+                <select class="form-select" [(ngModel)]="addressForm.state" (ngModelChange)="onStateChange($event)">
                   <option *ngFor="let st of indianStates" [value]="st">{{ st }}</option>
                 </select>
               </div>
@@ -141,7 +141,7 @@
                    maxlength="50" pattern="[A-Za-z +]">
           </div>
           <div class="col-md-4 mb-3">
-            <select class="form-select" [(ngModel)]="addressForm.state">
+            <select class="form-select" [(ngModel)]="addressForm.state" (ngModelChange)="onStateChange($event)">
               <option *ngFor="let st of indianStates" [value]="st">{{ st }}</option>
             </select>
           </div>
