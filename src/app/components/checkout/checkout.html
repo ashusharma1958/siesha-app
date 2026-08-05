@@ -119,13 +119,23 @@
       <!-- GUEST or ADDRESS-MODE: standard delivery form -->
       <ng-container *ngIf="!isSignedIn || isAddressMode">
 
+        <div class="mb-3" *ngIf="!isSignedIn && !isAddressMode">
+          <input class="form-control" type="email" placeholder="Email address"
+                 [(ngModel)]="guestEmail" autocomplete="email" required>
+          <small class="text-muted">Your order confirmation will be sent here.</small>
+        </div>
+
         <select class="form-select mb-3" [(ngModel)]="addressForm.country">
           <option>India</option>
         </select>
 
         <div class="row">
-          <div class="col-md-6 mb-3"><input class="form-control" placeholder="First name"></div>
-          <div class="col-md-6 mb-3"><input class="form-control" placeholder="Last name"></div>
+          <div class="col-md-6 mb-3"><input class="form-control" placeholder="First name"
+                 [ngModel]="guestFirstName" (ngModelChange)="guestFirstName = sanitizeName($event)"
+                 (keydown)="restrictCityInput($event)" maxlength="50"></div>
+          <div class="col-md-6 mb-3"><input class="form-control" placeholder="Last name"
+                 [ngModel]="guestLastName" (ngModelChange)="guestLastName = sanitizeName($event)"
+                 (keydown)="restrictCityInput($event)" maxlength="50"></div>
         </div>
 
         <input class="form-control mb-3" placeholder="Address" [(ngModel)]="addressForm.line1">
@@ -221,8 +231,12 @@
           <ng-container *ngIf="!isSignedIn">
             <select class="form-select mb-3" [(ngModel)]="shippingForm.country"><option>India</option></select>
             <div class="row">
-              <div class="col-md-6 mb-3"><input class="form-control" placeholder="First name" [(ngModel)]="shippingForm.firstName"></div>
-              <div class="col-md-6 mb-3"><input class="form-control" placeholder="Last name" [(ngModel)]="shippingForm.lastName"></div>
+              <div class="col-md-6 mb-3"><input class="form-control" placeholder="First name"
+                     [ngModel]="shippingForm.firstName" (ngModelChange)="shippingForm.firstName = sanitizeName($event)"
+                     (keydown)="restrictCityInput($event)" maxlength="50"></div>
+              <div class="col-md-6 mb-3"><input class="form-control" placeholder="Last name"
+                     [ngModel]="shippingForm.lastName" (ngModelChange)="shippingForm.lastName = sanitizeName($event)"
+                     (keydown)="restrictCityInput($event)" maxlength="50"></div>
             </div>
             <input class="form-control mb-3" placeholder="Address" [(ngModel)]="shippingForm.line1">
             <input class="form-control mb-3" placeholder="Apartment, suite, etc. (optional)" [(ngModel)]="shippingForm.line2">
@@ -231,7 +245,10 @@
               <div class="col-md-4 mb-3"><select class="form-select" [(ngModel)]="shippingForm.state"><option>Delhi</option></select></div>
               <div class="col-md-4 mb-3"><input class="form-control" placeholder="PIN code" [(ngModel)]="shippingForm.postalCode" inputmode="numeric" maxlength="6"></div>
             </div>
-            <input class="form-control mb-3" placeholder="Phone" [(ngModel)]="shippingForm.phone" type="tel" inputmode="numeric" maxlength="10">
+            <input class="form-control mb-3" placeholder="Phone"
+                   [ngModel]="shippingForm.phone" (ngModelChange)="onShippingPhoneChange($event)"
+                   (keydown)="restrictPhoneInput($event)"
+                   type="tel" inputmode="numeric" maxlength="10" pattern="[0-9]{10}">
           </ng-container>
 
         </ng-container>

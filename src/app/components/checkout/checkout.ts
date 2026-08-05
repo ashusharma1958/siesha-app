@@ -386,6 +386,9 @@ export class CheckoutComponent implements OnInit {
 
   shippingIsSameBilling = true;
   selectedShippingAddressId: number | string | null = null;
+  guestEmail = '';
+  guestFirstName = '';
+  guestLastName = '';
   shippingForm = {
     firstName: '',
     lastName: '',
@@ -794,6 +797,14 @@ export class CheckoutComponent implements OnInit {
     this.addressForm.city = value.replace(/[^a-zA-Z ]/g, '').slice(0, 50);
   }
 
+  sanitizeName(value: string): string {
+    return value.replace(/[^a-zA-Z ]/g, '').slice(0, 50);
+  }
+
+  onShippingPhoneChange(value: string): void {
+    this.shippingForm.phone = value.replace(/\D/g, '').slice(0, 10);
+  }
+
   onStateChange(value: string): void {
     this.addressForm.state = value;
     this.addressForm.city = '';
@@ -996,10 +1007,49 @@ export class CheckoutComponent implements OnInit {
     const rawUserId = localStorage.getItem('auth.userId');
     const parsedUserId = rawUserId && /^\d+$/.test(rawUserId) ? Number(rawUserId) : null;
 
+    let guestEmail: string | null = null;
+    let guestName: string | null = null;
+    if (!this.isSignedIn) {
+      guestEmail = this.guestEmail.trim();
+      if (!guestEmail) {
+        this.orderError = 'Please enter your email address to continue as a guest.';
+        return null;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
+        this.orderError = 'Please enter a valid email address.';
+        return null;
+      }
+      const firstName = this.guestFirstName.trim();
+      const lastName = this.guestLastName.trim();
+      if (!firstName || !lastName) {
+        this.orderError = 'Please enter your first and last name.';
+        return null;
+      }
+      if (!/^[A-Za-z ]+$/.test(firstName) || !/^[A-Za-z ]+$/.test(lastName)) {
+        this.orderError = 'Name can contain letters and spaces only.';
+        return null;
+      }
+      const billingPhone = (billing.phone ?? '').trim();
+      if (!/^[6-9]\d{9}$/.test(billingPhone)) {
+        this.orderError = 'Please enter a valid 10-digit phone number.';
+        return null;
+      }
+      if (!this.shippingIsSameBilling) {
+        const shippingPhone = (this.shippingForm.phone ?? '').trim();
+        if (!/^[6-9]\d{9}$/.test(shippingPhone)) {
+          this.orderError = 'Please enter a valid 10-digit shipping phone number.';
+          return null;
+        }
+      }
+      guestName = `${firstName} ${lastName}`.trim();
+    }
+
     return {
       customer: {
         userId: parsedUserId,
-        guest: !this.isSignedIn
+        guest: !this.isSignedIn,
+        email: guestEmail,
+        name: guestName
       },
       billingAddress: {
         label: billing.label || 'Home',

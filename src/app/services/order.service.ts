@@ -8,6 +8,8 @@ export type CreateOrderRequest = {
   customer: {
     userId: number | null;
     guest: boolean;
+    email?: string | null;
+    name?: string | null;
   };
   billingAddress: {
     label: string;

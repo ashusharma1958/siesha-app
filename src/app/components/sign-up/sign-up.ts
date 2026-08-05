@@ -57,6 +57,10 @@ export class SignUpComponent {
     window.location.href = redirectUrl.toString();
   }
 
+  sanitizeName(value: string): string {
+    return value.replace(/[^a-zA-Z ]/g, '').slice(0, 100);
+  }
+
   onSubmit(form: NgForm): void {
     if (this.isSubmitting) {
       return;
@@ -69,6 +73,13 @@ export class SignUpComponent {
     if (this.signUpData.password !== this.signUpData.confirmPassword) {
       this.feedbackType = 'error';
       this.feedbackMessage = 'Password and confirm password must match.';
+      return;
+    }
+
+    const trimmedName = this.signUpData.fullName.trim();
+    if (!/^[A-Za-z ]+$/.test(trimmedName)) {
+      this.feedbackType = 'error';
+      this.feedbackMessage = 'Name can contain letters and spaces only.';
       return;
     }
 

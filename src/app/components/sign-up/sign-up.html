@@ -9,7 +9,7 @@
       <form class="signup-form" #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" novalidate>
         <label>
           <span>Full name</span>
-          <input type="text" name="fullName" placeholder="Enter your full name" [(ngModel)]="signUpData.fullName" required minlength="2">
+          <input type="text" name="fullName" placeholder="Enter your full name" [ngModel]="signUpData.fullName" (ngModelChange)="signUpData.fullName = sanitizeName($event)" required minlength="2" pattern="[A-Za-z ]+">
         </label>
 
         <label>
