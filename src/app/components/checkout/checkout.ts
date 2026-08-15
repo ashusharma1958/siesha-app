@@ -4,13 +4,14 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, finalize, timeout } from 'rxjs/operators';
+import { catchError, finalize, retry, timeout } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AddAddressRequest, AuthService, ProfileAddress } from '../../services/auth.service';
 import { CreateOrderRequest, OrderService } from '../../services/order.service';
 import { PaymentService } from '../../services/payment.service';
 import { CartItem, CartService } from '../../services/cart.service';
 import { ApiVoucher, VoucherService } from '../../services/voucher.service';
+import { environment } from '../../../environments/environment';
 import { Footer } from '../footer/footer';
 import { Navigation } from '../navigation/navigation';
 
@@ -33,6 +34,7 @@ type PincodePostOffice = {
 
 type PincodeApiEntry = {
   Status: string;
+  Message?: string;
   PostOffice: PincodePostOffice[] | null;
 };
 
@@ -400,6 +402,9 @@ export class CheckoutComponent implements OnInit {
     country: 'India',
     phone: ''
   };
+  shippingPincodeLookupLoading = false;
+  shippingPincodeLookupError = '';
+  private shippingPincodeLookupRequestId = 0;
 
   discountCode = '';
   discountPercent = 0;
@@ -532,6 +537,7 @@ export class CheckoutComponent implements OnInit {
 
   pincodeLookupLoading = false;
   pincodeLookupError = '';
+  private pincodeLookupRequestId = 0;
   indianStates: string[] = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
     'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
@@ -622,6 +628,12 @@ export class CheckoutComponent implements OnInit {
 
   toggleNewAddressForm(): void {
     this.showNewAddressForm = !this.showNewAddressForm;
+
+    // Reset inline lookup state whenever form is toggled to avoid stale loaders/errors.
+    this.pincodeLookupRequestId++;
+    this.pincodeLookupLoading = false;
+    this.pincodeLookupError = '';
+
     if (this.showNewAddressForm) {
       this.addressForm = {
         label: 'Home',
@@ -687,6 +699,9 @@ export class CheckoutComponent implements OnInit {
       next: () => {
         this.isSavingInlineAddress = false;
         this.showNewAddressForm = false;
+        this.pincodeLookupRequestId++;
+        this.pincodeLookupLoading = false;
+        this.pincodeLookupError = '';
         this.loadSavedAddresses();
       },
       error: () => {
@@ -820,6 +835,23 @@ export class CheckoutComponent implements OnInit {
     this.shippingForm.phone = value.replace(/\D/g, '').slice(0, 10);
   }
 
+  onShippingCityChange(value: string): void {
+    this.shippingForm.city = value.replace(/[^a-zA-Z ]/g, '').slice(0, 50);
+  }
+
+  onShippingCityPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    const clipboardText = event.clipboardData?.getData('text') ?? '';
+    this.shippingForm.city = clipboardText.replace(/[^a-zA-Z ]/g, '').slice(0, 50);
+  }
+
+  onShippingStateChange(value: string): void {
+    this.shippingForm.state = value;
+    this.shippingForm.city = '';
+    this.shippingForm.postalCode = '';
+    this.shippingPincodeLookupError = '';
+  }
+
   onStateChange(value: string): void {
     this.addressForm.state = value;
     this.addressForm.city = '';
@@ -855,25 +887,36 @@ export class CheckoutComponent implements OnInit {
   }
 
   private lookupPincode(pin: string): void {
+    const requestId = ++this.pincodeLookupRequestId;
     this.pincodeLookupLoading = true;
     this.pincodeLookupError = '';
 
     this.http
-      .get<PincodeApiEntry[]>(`https://api.postalpincode.in/pincode/${pin}`)
+      .get<PincodeApiEntry[]>(`${environment.apiBaseUrl}/api/pincode/${pin}`)
       .pipe(
         timeout(8000),
+        retry({ count: 2, delay: 1000 }),
         catchError(() => of(null)),
         finalize(() => {
-          this.pincodeLookupLoading = false;
-          this.cdr.detectChanges();
+          if (requestId === this.pincodeLookupRequestId) {
+            this.pincodeLookupLoading = false;
+            this.cdr.detectChanges();
+          }
         })
       )
       .subscribe((response) => {
+        if (requestId !== this.pincodeLookupRequestId || this.addressForm.postalCode !== pin) {
+          return;
+        }
+
         const entry = response?.[0];
         const office = entry?.PostOffice?.[0];
 
         if (!entry || entry.Status !== 'Success' || !office) {
-          this.pincodeLookupError = 'Could not find details for this PIN code.';
+          const notFound = entry?.Message?.toLowerCase().includes('no records');
+          this.pincodeLookupError = notFound
+            ? 'Could not find details for this PIN code.'
+            : 'PIN lookup is temporarily unavailable. Please enter city and state manually.';
           return;
         }
 
@@ -912,6 +955,75 @@ export class CheckoutComponent implements OnInit {
     if (pin.length === 6) {
       this.lookupPincode(pin);
     }
+  }
+
+  onShippingPostalCodeChange(value: string): void {
+    const pin = value.replace(/\D/g, '').slice(0, 6);
+    this.shippingForm.postalCode = pin;
+    this.shippingPincodeLookupError = '';
+
+    if (pin.length === 6) {
+      this.lookupShippingPincode(pin);
+    }
+  }
+
+  onShippingPostalCodePaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    const clipboardText = event.clipboardData?.getData('text') ?? '';
+    const pin = clipboardText.replace(/\D/g, '').slice(0, 6);
+    this.shippingForm.postalCode = pin;
+    this.shippingPincodeLookupError = '';
+
+    if (pin.length === 6) {
+      this.lookupShippingPincode(pin);
+    }
+  }
+
+  private lookupShippingPincode(pin: string): void {
+    const requestId = ++this.shippingPincodeLookupRequestId;
+    this.shippingPincodeLookupLoading = true;
+    this.shippingPincodeLookupError = '';
+
+    this.http
+      .get<PincodeApiEntry[]>(`${environment.apiBaseUrl}/api/pincode/${pin}`)
+      .pipe(
+        timeout(8000),
+        retry({ count: 2, delay: 1000 }),
+        catchError(() => of(null)),
+        finalize(() => {
+          if (requestId === this.shippingPincodeLookupRequestId) {
+            this.shippingPincodeLookupLoading = false;
+            this.cdr.detectChanges();
+          }
+        })
+      )
+      .subscribe((response) => {
+        if (requestId !== this.shippingPincodeLookupRequestId || this.shippingForm.postalCode !== pin) {
+          return;
+        }
+
+        const entry = response?.[0];
+        const office = entry?.PostOffice?.[0];
+
+        if (!entry || entry.Status !== 'Success' || !office) {
+          const notFound = entry?.Message?.toLowerCase().includes('no records');
+          this.shippingPincodeLookupError = notFound
+            ? 'Could not find details for this PIN code.'
+            : 'PIN lookup is temporarily unavailable. Please enter city and state manually.';
+          return;
+        }
+
+        if (office.District) {
+          this.shippingForm.city = office.District;
+        }
+
+        if (office.State) {
+          if (!this.indianStates.includes(office.State)) {
+            this.indianStates = [...this.indianStates, office.State];
+          }
+          this.shippingForm.state = office.State;
+        }
+      });
   }
 
   restrictPhoneInput(event: KeyboardEvent): void {
@@ -1053,6 +1165,22 @@ export class CheckoutComponent implements OnInit {
         const shippingPhone = (this.shippingForm.phone ?? '').trim();
         if (!/^[6-9]\d{9}$/.test(shippingPhone)) {
           this.orderError = 'Please enter a valid 10-digit shipping phone number.';
+          return null;
+        }
+
+        const shippingLine1 = (this.shippingForm.line1 ?? '').trim();
+        const shippingCity = (this.shippingForm.city ?? '').trim();
+        const shippingState = (this.shippingForm.state ?? '').trim();
+        const shippingPostalCode = (this.shippingForm.postalCode ?? '').trim().replace(/\D/g, '');
+        const shippingCountry = (this.shippingForm.country ?? '').trim();
+
+        if (!shippingLine1 || !shippingCity || !shippingState || !shippingPostalCode || !shippingCountry) {
+          this.orderError = 'Please complete all required shipping address fields.';
+          return null;
+        }
+
+        if (!/^\d{6}$/.test(shippingPostalCode)) {
+          this.orderError = 'Please enter a valid 6-digit shipping PIN code.';
           return null;
         }
       }

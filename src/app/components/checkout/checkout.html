@@ -241,9 +241,29 @@
             <input class="form-control mb-3" placeholder="Address" [(ngModel)]="shippingForm.line1">
             <input class="form-control mb-3" placeholder="Apartment, suite, etc. (optional)" [(ngModel)]="shippingForm.line2">
             <div class="row">
-              <div class="col-md-4 mb-3"><input class="form-control" placeholder="City" [(ngModel)]="shippingForm.city"></div>
-              <div class="col-md-4 mb-3"><select class="form-select" [(ngModel)]="shippingForm.state"><option>Delhi</option></select></div>
-              <div class="col-md-4 mb-3"><input class="form-control" placeholder="PIN code" [(ngModel)]="shippingForm.postalCode" inputmode="numeric" maxlength="6"></div>
+              <div class="col-md-4 mb-3">
+                <input class="form-control" placeholder="City"
+                       [(ngModel)]="shippingForm.city"
+                       (ngModelChange)="onShippingCityChange($event)"
+                       (keydown)="restrictCityInput($event)"
+                       (paste)="onShippingCityPaste($event)"
+                       maxlength="50" pattern="[A-Za-z ]+">
+              </div>
+              <div class="col-md-4 mb-3">
+                <select class="form-select" [(ngModel)]="shippingForm.state" (ngModelChange)="onShippingStateChange($event)">
+                  <option *ngFor="let st of indianStates" [value]="st">{{ st }}</option>
+                </select>
+              </div>
+              <div class="col-md-4 mb-3">
+                <input class="form-control" placeholder="PIN code"
+                       [(ngModel)]="shippingForm.postalCode"
+                       (ngModelChange)="onShippingPostalCodeChange($event)"
+                       (keydown)="restrictPostalCodeInput($event)"
+                       (paste)="onShippingPostalCodePaste($event)"
+                       inputmode="numeric" maxlength="6" pattern="[0-9]{6}">
+                <small class="text-muted" *ngIf="shippingPincodeLookupLoading">Looking up city &amp; state…</small>
+                <small class="text-danger" *ngIf="shippingPincodeLookupError">{{ shippingPincodeLookupError }}</small>
+              </div>
             </div>
             <input class="form-control mb-3" placeholder="Phone"
                    [ngModel]="shippingForm.phone" (ngModelChange)="onShippingPhoneChange($event)"
