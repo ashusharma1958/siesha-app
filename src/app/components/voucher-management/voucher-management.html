@@ -85,6 +85,18 @@
               [disabled]="isUpdating"
             >
           </div>
+          <div class="form-group">
+            <label for="newType">Voucher Type</label>
+            <select
+              id="newType"
+              class="form-control"
+              [(ngModel)]="newVoucher.type"
+              [disabled]="isUpdating"
+            >
+              <option value="PUBLIC">Public (shown at checkout)</option>
+              <option value="INFLUENCER">Influencer (hidden, code-only)</option>
+            </select>
+          </div>
         </div>
         <div class="form-actions">
           <button
@@ -114,6 +126,7 @@
             <th>Voucher Code</th>
             <th>Percentage Discount</th>
             <th>Minimum Cart Value</th>
+            <th>Type</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
@@ -162,6 +175,23 @@
                 (ngModelChange)="editingVoucher!.minimumCartValue = $event"
                 [disabled]="isUpdating"
               >
+            </td>
+            <td class="voucher-type">
+              <div *ngIf="editingId !== voucher.id">
+                <span class="badge rounded-pill" [class]="'type-' + voucher.type.toLowerCase()">
+                  {{ voucher.type === 'INFLUENCER' ? 'Influencer' : 'Public' }}
+                </span>
+              </div>
+              <select
+                *ngIf="editingId === voucher.id"
+                class="form-control form-control-sm"
+                [ngModel]="editingVoucher?.type"
+                (ngModelChange)="editingVoucher!.type = $event"
+                [disabled]="isUpdating"
+              >
+                <option value="PUBLIC">Public</option>
+                <option value="INFLUENCER">Influencer</option>
+              </select>
             </td>
             <td>
               <span class="badge rounded-pill" [class]="'status-' + voucher.status.toLowerCase()">

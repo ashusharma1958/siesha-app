@@ -4,11 +4,14 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 
+export type VoucherType = 'PUBLIC' | 'INFLUENCER';
+
 export type ApiVoucher = {
   id: number | string;
   code: string;
   discountPercentage: number;
   minimumCartValue: number;
+  type?: VoucherType;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -23,6 +26,7 @@ export type CreateVoucherRequest = {
   code: string;
   discountPercentage: number;
   minimumCartValue: number;
+  type?: VoucherType;
   isActive: boolean;
 };
 
@@ -34,6 +38,10 @@ export class VoucherService {
 
   getVouchers(): Observable<ApiVoucher[]> {
     return this.http.get<ApiVoucher[]>(`${environment.apiBaseUrl}/api/vouchers`);
+  }
+
+  getAdminVouchers(): Observable<ApiVoucher[]> {
+    return this.http.get<ApiVoucher[]>(`${environment.apiBaseUrl}/api/vouchers/admin/all`);
   }
 
   getVoucherByCode(code: string): Observable<ApiVoucher> {

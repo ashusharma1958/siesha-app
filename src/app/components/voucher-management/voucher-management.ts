@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Navigation } from '../navigation/navigation';
 import { Footer } from '../footer/footer';
-import { ApiVoucher, VoucherService } from '../../services/voucher.service';
+import { ApiVoucher, VoucherService, VoucherType } from '../../services/voucher.service';
 
 interface Voucher {
   id: string | number;
   code: string;
   percentageDiscount: number;
   minimumCartValue: number;
+  type: VoucherType;
   status: 'active' | 'inactive';
 }
 
@@ -50,6 +51,7 @@ export class VoucherManagementComponent implements OnInit {
     code: '',
     percentageDiscount: 5,
     minimumCartValue: 0,
+    type: 'PUBLIC',
     status: 'active'
   };
 
@@ -156,6 +158,7 @@ export class VoucherManagementComponent implements OnInit {
       code: '',
       percentageDiscount: 5,
       minimumCartValue: 0,
+      type: 'PUBLIC',
       status: 'active'
     };
   }
@@ -167,6 +170,7 @@ export class VoucherManagementComponent implements OnInit {
       code: '',
       percentageDiscount: 5,
       minimumCartValue: 0,
+      type: 'PUBLIC',
       status: 'active'
     };
   }
@@ -199,6 +203,7 @@ export class VoucherManagementComponent implements OnInit {
           code: '',
           percentageDiscount: 5,
           minimumCartValue: 0,
+          type: 'PUBLIC',
           status: 'active'
         };
         this.isUpdating = false;
@@ -218,7 +223,7 @@ export class VoucherManagementComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.voucherService.getVouchers().subscribe({
+    this.voucherService.getAdminVouchers().subscribe({
       next: (response) => {
         const vouchers = this.extractVoucherList(response);
         this.vouchers = vouchers.map((item) => this.toUiVoucher(item));
@@ -265,6 +270,7 @@ export class VoucherManagementComponent implements OnInit {
       code: voucher.code,
       percentageDiscount: Number(voucher.discountPercentage ?? 0),
       minimumCartValue: Number(voucher.minimumCartValue ?? 0),
+      type: voucher.type === 'INFLUENCER' ? 'INFLUENCER' : 'PUBLIC',
       status: normalizedActive ? 'active' : 'inactive'
     };
   }
@@ -343,12 +349,14 @@ export class VoucherManagementComponent implements OnInit {
     code: string;
     discountPercentage: number;
     minimumCartValue: number;
+    type: VoucherType;
     isActive: boolean;
   } {
     return {
       code: this.normalizeVoucherCode(voucher.code),
       discountPercentage: Number(voucher.percentageDiscount),
       minimumCartValue: Number(voucher.minimumCartValue),
+      type: voucher.type === 'INFLUENCER' ? 'INFLUENCER' : 'PUBLIC',
       isActive: voucher.status === 'active'
     };
   }

@@ -478,24 +478,39 @@ export class CheckoutComponent implements OnInit {
       (voucher) => this.normalizeVoucherCode(voucher.code) === code
     );
 
-    if (!matchedVoucher) {
-      this.discountError = 'Invalid discount code.';
+    if (matchedVoucher) {
+      this.applyVoucher(matchedVoucher);
       return;
     }
 
-    if (!this.isVoucherActive(matchedVoucher)) {
+    // Not in the public list (e.g. an influencer code shared privately) — validate via API.
+    this.voucherService.getVoucherByCode(code).pipe(
+      timeout(8000),
+      catchError(() => of(null))
+    ).subscribe((voucher) => {
+      if (!voucher) {
+        this.discountError = 'Invalid discount code.';
+      } else {
+        this.applyVoucher(voucher);
+      }
+      this.cdr.markForCheck();
+    });
+  }
+
+  private applyVoucher(voucher: ApiVoucher): void {
+    if (!this.isVoucherActive(voucher)) {
       this.discountError = 'This discount code is inactive.';
       return;
     }
 
-    const minimumCartValue = Number(matchedVoucher.minimumCartValue ?? 0);
+    const minimumCartValue = Number(voucher.minimumCartValue ?? 0);
     if (this.subtotal < minimumCartValue) {
       this.discountError = `This code requires a minimum cart value of ₹${minimumCartValue.toFixed(2)}.`;
       return;
     }
 
-    this.discountPercent = Number(matchedVoucher.discountPercentage ?? 0);
-    this.discountCode = matchedVoucher.code;
+    this.discountPercent = Number(voucher.discountPercentage ?? 0);
+    this.discountCode = voucher.code;
     this.discountApplied = true;
   }
 
