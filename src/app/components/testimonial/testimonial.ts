@@ -74,6 +74,26 @@ export class Testimonial implements OnInit, AfterViewInit, OnDestroy {
       title: 'Absolutely obsessed',
       content: 'Absolutely obsessed with my Siesha candles! Velvet Rose is floral and romantic, Aqua is fresh and airy, Vanilla Dusk is warm and creamy, and Sandalwood is beautifully grounding. The fragrance lingers perfectly\u2014never too strong, just right.',
       date: '2026-07-27'
+    },
+    {
+      id: -5,
+      productId: -5,
+      productName: 'Citrus Sundaze',
+      author: 'Riya',
+      rating: 5,
+      title: 'Pretty amazing',
+      content: ' Really love this one. It has that fresh, slightly citrusy smell that makes the whole room feel clean and peaceful.',
+      date: '2026-08-11'
+    },
+    {
+      id: -6,
+      productId: 1,
+      productName: 'Zesty Daydream',
+      author: 'Yuvika ',
+      rating: 5,
+      title: 'Soothing and refreshing',
+      content: 'I light this in the morning and the fragrance makes the room feel fresh and energetic. One of my favourites.',
+      date: '2026-05-06'
     }
   ];
 

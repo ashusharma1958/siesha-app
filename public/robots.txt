@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Block private / non-indexable routes
+Disallow: /checkout
+Disallow: /profile
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /auth/callback
+Disallow: /admin/
+
+Sitemap: https://siesha.in/sitemap.xml
